@@ -7,9 +7,10 @@ import java.util.Random;
 import java.util.function.Predicate;
 
 import utils.Vector2f;
-import entities.Entity;
-import entities.Pellet;
-import entities.Protozoa;
+import biology.Brain;
+import biology.Entity;
+import biology.Pellet;
+import biology.Protozoa;
 
 public class Tank 
 {
@@ -32,10 +33,11 @@ public class Tank
 		int pellets = 30;
 		Random r = new Random();
 		for(int i = 0; i < creatures; i++){
-			this.entities.add(new Protozoa(
+			Protozoa p = new Protozoa(Brain.RANDOM, 25);
+			p.setPos(new Vector2f(
 					r.nextInt((int) bounds.getX()), 
-					r.nextInt((int) bounds.getY()), 
-					25));
+					r.nextInt((int) bounds.getY())));
+			this.entities.add(p);
 		}
 		for(int i = creatures; i <  creatures + pellets; i++){
 			this.entities.add(new Pellet(

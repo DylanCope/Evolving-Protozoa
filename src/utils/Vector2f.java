@@ -42,6 +42,12 @@ public class Vector2f {
 		return new Vector2f(-getY(), getX());
 	}
 	
+	public Vector2f rotate(double angle) {
+		double c = Math.cos(angle);
+		double s = Math.sin(angle);
+		return new Vector2f(x*c - y*s, x*s + y*c);
+	}
+	
 	public Vector2f unit() {
 		double len = length();
 		return new Vector2f(getX() / len, getY() / len);

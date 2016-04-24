@@ -1,4 +1,4 @@
-package entities;
+package biology;
 
 import java.awt.Color;
 import java.util.Collection;

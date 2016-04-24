@@ -1,4 +1,4 @@
-package entities;
+package biology;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -10,12 +10,6 @@ import utils.Vector2f;
 public class Protozoa extends Entity 
 {
 	
-	public class RetinaCell {
-		double angle;
-		Entity entity;
-		Color color = new Color(10, 10, 10);
-	}
-	
 	double thinkTime = 0;
 	double maxThinkTime;
 	double health = 1;
@@ -24,24 +18,23 @@ public class Protozoa extends Entity
 	
 	double fov = Math.toRadians(90);
 	int retinaSize = 61;
-	RetinaCell retina[] = new RetinaCell[retinaSize];
+//	RetinaCell retina[] = new RetinaCell[retinaSize];
+	Retina retina;
+	Brain brain;
 	Color healthyColor = new Color(50, 50, 80);
 	
-	public Protozoa(double x, double y, int radius)
+	public Protozoa(Brain brain, int radius)
 	{
 		setColor(healthyColor);
-		setPos(new Vector2f(x, y));
+		this.brain = brain;
+		retina = new Retina(61);
+		setPos(new Vector2f(0, 0));
 		setVel(new Vector2f(0, 0));
 		getVel().setX(r.nextInt(maxVel)-maxVel/2);
 		getVel().setY(r.nextInt(maxVel)-maxVel/2);
 		this.setRadius(radius);
 		
-		maxThinkTime = (r.nextInt(10)/10.0)+1;
-		
-		for(int i = 0; i < retina.length; i++) {
-			retina[i] = new RetinaCell();
-			retina[i].angle  = fov * (retinaSize - 2*i) / (2*retinaSize);
-		}
+		maxThinkTime = 0.2;
 	}
 	
 	
@@ -51,10 +44,11 @@ public class Protozoa extends Entity
 		double rx = dr.dot(getVel().unit());
 		double ry = dr.dot(getVel().perp().unit());
 		
-		for (RetinaCell cell : retina) {
+		for (Retina.Cell cell : retina) {
 			double y = rx*Math.tan(cell.angle);
 			
 			boolean inView = Math.abs(y - ry) <= e.getRadius() && rx < 0;
+			
 			boolean isBlocked = false;
 			if (cell.entity != null) 
 				isBlocked = dr.length() < cell.entity.getPos().sub(getPos()).length();
@@ -91,16 +85,19 @@ public class Protozoa extends Entity
 	public void update(double delta, Collection<Entity> entities)
 	{
 		thinkTime += delta;
-		if(thinkTime >= maxThinkTime){
+		if(thinkTime >= maxThinkTime)
+		{
 			thinkTime = 0;
-			nextVelocity();
-			setHealth(health * 0.98);
+			setVel(getVel().rotate(brain.turn(this)));
+			move(getVel().mul(delta * brain.speed(this)), entities);
 			setDead(health < 0.1);
 		}
+		setHealth(health * (1 - delta / 40.0));
 		
 		move(getVel().mul(delta), entities);
 		
-		for (RetinaCell cell : retina) {
+		for (Retina.Cell cell : retina) 
+		{
 			cell.color = Color.WHITE;
 			cell.entity = null;
 		}
@@ -131,7 +128,7 @@ public class Protozoa extends Entity
 		
 		double r0 = 1;
 		double r1 = 0.8;
-		for (RetinaCell cell : retina)
+		for (Retina.Cell cell : retina)
 		{
 			double x = Math.cos(cell.angle + getVel().angle());
 			double y = Math.sin(cell.angle + getVel().angle());

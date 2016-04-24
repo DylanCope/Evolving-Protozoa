@@ -17,8 +17,9 @@ public class Retina implements Iterable<Retina.Cell>
 	private Collection<Cell> cells;
 	private double fov = Math.toRadians(90);
 	
-	public Retina(int n) 
+	public Retina() 
 	{
+		int n = 60;
 		cells = new ArrayList<Cell>();
 		for(int i = 0; i < n; i++) {
 			Cell cell = new Cell();

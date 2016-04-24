@@ -29,22 +29,27 @@ public class Tank
 	
 	public void placeRandomly(Collection<Entity> entities)
 	{
-		int creatures = 20;
-		int pellets = 30;
 		Random r = new Random();
-		for(int i = 0; i < creatures; i++){
-			Protozoa p = new Protozoa(Brain.RANDOM, 25);
-			p.setPos(new Vector2f(
+		int maxIterations = entities.size()*entities.size();
+		for (Entity e1 : entities) {
+			
+			boolean notColliding = true;
+			for (int i = 0; i < maxIterations && notColliding; i++) {
+				e1.setPos(new Vector2f(
 					r.nextInt((int) bounds.getX()), 
 					r.nextInt((int) bounds.getY())));
-			this.entities.add(p);
+				notColliding = true;
+				for (Entity e2 : entities)
+					if (!e1.equals(e2))
+						notColliding &= e1.isCollidingWith(e2);
+				
+				if (i == maxIterations - 1)
+					System.out.println("failed");
+			}
+			
+			this.entities.add(e1);
 		}
-		for(int i = creatures; i <  creatures + pellets; i++){
-			this.entities.add(new Pellet(
-					r.nextInt((int) bounds.getX()), 
-					r.nextInt((int) bounds.getY()), 
-					5));
-		}
+
 	}
 	
 	public void update(double delta) 

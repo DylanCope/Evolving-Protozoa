@@ -27,7 +27,7 @@ public class Protozoa extends Entity
 	{
 		setColor(healthyColor);
 		this.brain = brain;
-		retina = new Retina(61);
+		retina = new Retina();
 		setPos(new Vector2f(0, 0));
 		setVel(new Vector2f(0, 0));
 		getVel().setX(r.nextInt(maxVel)-maxVel/2);
@@ -120,7 +120,7 @@ public class Protozoa extends Entity
 	
 	public void render(Graphics g)
 	{
-		g.setColor(getColor());
+		g.setColor(getColor().brighter());
 		g.fillOval(
 				(int)(getPos().x()-getRadius()), 
 				(int)(getPos().y()-getRadius()), 

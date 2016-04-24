@@ -5,10 +5,16 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
+import java.util.ArrayList;
+import java.util.Random;
 
 import utils.KeyInput;
 import utils.Vector2f;
 import utils.Window;
+import biology.Brain;
+import biology.Entity;
+import biology.Pellet;
+import biology.Protozoa;
 
 public class Main extends Canvas implements Runnable
 {
@@ -37,7 +43,21 @@ public class Main extends Canvas implements Runnable
 		new Window(WIDTH, HEIGHT, "Evolving Protozoa", this);
 		
 		tank = new Tank(new Vector2f(WIDTH, HEIGHT));
-		tank.placeRandomly(null);
+
+		int creatures = 20;
+		int pellets = 50;
+		
+		ArrayList<Entity> entities = new ArrayList<Entity>();
+		Random r = new Random();
+		for(int i = 0; i < creatures; i++){
+			Protozoa p = new Protozoa(Brain.RANDOM, 15);
+			p.setPos(new Vector2f(r.nextInt(WIDTH), r.nextInt(HEIGHT)));
+			entities.add(p);
+		}
+		for(int i = creatures; i <  creatures + pellets; i++){
+			entities.add(new Pellet(r.nextInt(WIDTH), r.nextInt(HEIGHT), 5));
+		}
+		tank.placeRandomly(entities);
 	}
 	
 	private void tick(double delta)
@@ -46,6 +66,7 @@ public class Main extends Canvas implements Runnable
 		tank.update(delta);
 	}
 	
+	double t = 0;
 	private void render()
 	{
 		BufferStrategy bs = this.getBufferStrategy();
@@ -58,7 +79,13 @@ public class Main extends Canvas implements Runnable
 		
 		Graphics g = bs.getDrawGraphics();
 		
-		g.setColor(new Color(140, 230, 110));
+//		g.setColor(new Color(140, 230, 110));
+//		g.setColor(Color.black);
+		t += 0.001;
+		g.setColor(new Color(
+				10 + (int)(5*Math.cos(t)), 
+				50 + (int)(30*Math.sin(t)), 
+				30 + (int)(15*Math.cos(t + 1))));
 		g.fillRect(0, 0, WIDTH, HEIGHT);
 		
 		tank.render(g);

@@ -13,12 +13,11 @@ public class Protozoa extends Entity
 	double thinkTime = 0;
 	double maxThinkTime;
 	double health = 1;
+	double maxVel = 50;
+	double fitness = 0;
+	double timeAlive = 0;
+
 	Random r = new Random();
-	int maxVel = 300;
-	
-	double fov = Math.toRadians(90);
-	int retinaSize = 61;
-//	RetinaCell retina[] = new RetinaCell[retinaSize];
 	Retina retina;
 	Brain brain;
 	Color healthyColor = new Color(50, 50, 80);
@@ -29,9 +28,10 @@ public class Protozoa extends Entity
 		this.brain = brain;
 		retina = new Retina();
 		setPos(new Vector2f(0, 0));
-		setVel(new Vector2f(0, 0));
-		getVel().setX(r.nextInt(maxVel)-maxVel/2);
-		getVel().setY(r.nextInt(maxVel)-maxVel/2);
+		Vector2f v = new Vector2f(1, 0)
+			.rotate(r.nextDouble()*2*Math.PI)
+			.mul(maxVel);
+		setVel(v);
 		this.setRadius(radius);
 		
 		maxThinkTime = 0.2;
@@ -62,6 +62,7 @@ public class Protozoa extends Entity
 	
 	public void eat(Entity e) 
 	{
+		fitness += e.getNutrition();
 		setHealth(health + e.getNutrition());
 		e.setDead(true);
 	}
@@ -85,6 +86,7 @@ public class Protozoa extends Entity
 	public void update(double delta, Collection<Entity> entities)
 	{
 		thinkTime += delta;
+		timeAlive += delta;
 		if(thinkTime >= maxThinkTime)
 		{
 			thinkTime = 0;
@@ -110,12 +112,6 @@ public class Protozoa extends Entity
 			if (!e.equals(this))
 				see(e);
 		}
-	}
-	
-	public void nextVelocity() 
-	{
-		getVel().setX(r.nextInt(maxVel)-maxVel/2);
-		getVel().setY(r.nextInt(maxVel)-maxVel/2);	
 	}
 	
 	public void render(Graphics g)
@@ -152,6 +148,13 @@ public class Protozoa extends Entity
 	@Override
 	public boolean isEdible() {
 		return health < 0.4;
+	}
+
+	@Override
+	public void setDead(boolean dead) {
+		super.setDead(dead);
+		if (dead)
+			System.out.println("(" + fitness + ", " + timeAlive + "),");
 	}
 	
 }

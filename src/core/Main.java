@@ -39,25 +39,26 @@ public class Main extends Canvas implements Runnable
 		Dimension d = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 		WIDTH = (int) d.getWidth();
 		HEIGHT = (int) d.getHeight();
-
-		new Window(WIDTH, HEIGHT, "Evolving Protozoa", this);
 		
 		tank = new Tank(new Vector2f(WIDTH, HEIGHT));
 
-		int creatures = 20;
-		int pellets = 50;
+		int creatures = 30;
+		int pellets = 120;
 		
 		ArrayList<Entity> entities = new ArrayList<Entity>();
 		Random r = new Random();
-		for(int i = 0; i < creatures; i++){
-			Protozoa p = new Protozoa(Brain.RANDOM, 15);
-			p.setPos(new Vector2f(r.nextInt(WIDTH), r.nextInt(HEIGHT)));
+		
+		for(int i = 0; i < creatures; i++) {
+			Protozoa p = new Protozoa(Brain.RANDOM, 7);
 			entities.add(p);
 		}
-		for(int i = creatures; i <  creatures + pellets; i++){
-			entities.add(new Pellet(r.nextInt(WIDTH), r.nextInt(HEIGHT), 5));
+		for(int i = creatures; i <  creatures + pellets; i++) {
+			entities.add(new Pellet(r.nextInt(WIDTH), r.nextInt(HEIGHT), 3));
 		}
+		
 		tank.placeRandomly(entities);
+
+		new Window(WIDTH, HEIGHT, "Evolving Protozoa", this);
 	}
 	
 	private void tick(double delta)
@@ -119,7 +120,7 @@ public class Main extends Canvas implements Runnable
 		this.requestFocus();
 		
 		long lastTime = System.nanoTime();
-		double amountOfTicks = 120.0;
+		double amountOfTicks = 60.0;
 		double ns = 1000000000 / amountOfTicks;
 		double delta = 0;
 		long timer = System.currentTimeMillis();

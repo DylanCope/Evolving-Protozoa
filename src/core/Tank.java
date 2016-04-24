@@ -7,10 +7,7 @@ import java.util.Random;
 import java.util.function.Predicate;
 
 import utils.Vector2f;
-import biology.Brain;
 import biology.Entity;
-import biology.Pellet;
-import biology.Protozoa;
 
 public class Tank 
 {
@@ -30,18 +27,19 @@ public class Tank
 	public void placeRandomly(Collection<Entity> entities)
 	{
 		Random r = new Random();
-		int maxIterations = entities.size()*entities.size();
-		for (Entity e1 : entities) {
-			
-			boolean notColliding = true;
-			for (int i = 0; i < maxIterations && notColliding; i++) {
+		int maxIterations = 100;
+		for (Entity e1 : entities) 
+		{	
+			boolean colliding = true;
+			for (int i = 0; i < maxIterations && colliding; i++) 
+			{
 				e1.setPos(new Vector2f(
 					r.nextInt((int) bounds.getX()), 
 					r.nextInt((int) bounds.getY())));
-				notColliding = true;
+				colliding = true;
 				for (Entity e2 : entities)
 					if (!e1.equals(e2))
-						notColliding &= e1.isCollidingWith(e2);
+						colliding &= e1.isCollidingWith(e2);
 				
 				if (i == maxIterations - 1)
 					System.out.println("failed");

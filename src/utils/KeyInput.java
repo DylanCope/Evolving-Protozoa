@@ -3,7 +3,8 @@ package utils;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-public class KeyInput extends KeyAdapter{
+public class KeyInput extends KeyAdapter
+{
 
 	double a = 180;
 	private boolean[] keys = new boolean[200];

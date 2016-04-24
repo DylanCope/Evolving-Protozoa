@@ -1,0 +1,160 @@
+package entities;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.util.Collection;
+import java.util.Random;
+
+import utils.Vector2f;
+
+public class Protozoa extends Entity 
+{
+	
+	public class RetinaCell {
+		double angle;
+		Entity entity;
+		Color color = new Color(10, 10, 10);
+	}
+	
+	double thinkTime = 0;
+	double maxThinkTime;
+	double health = 1;
+	Random r = new Random();
+	int maxVel = 300;
+	
+	double fov = Math.toRadians(90);
+	int retinaSize = 61;
+	RetinaCell retina[] = new RetinaCell[retinaSize];
+	Color healthyColor = new Color(50, 50, 80);
+	
+	public Protozoa(double x, double y, int radius)
+	{
+		setColor(healthyColor);
+		setPos(new Vector2f(x, y));
+		setVel(new Vector2f(0, 0));
+		getVel().setX(r.nextInt(maxVel)-maxVel/2);
+		getVel().setY(r.nextInt(maxVel)-maxVel/2);
+		this.setRadius(radius);
+		
+		maxThinkTime = (r.nextInt(10)/10.0)+1;
+		
+		for(int i = 0; i < retina.length; i++) {
+			retina[i] = new RetinaCell();
+			retina[i].angle  = fov * (retinaSize - 2*i) / (2*retinaSize);
+		}
+	}
+	
+	
+	public void see(Entity e)
+	{
+		Vector2f dr = getPos().sub(e.getPos());
+		double rx = dr.dot(getVel().unit());
+		double ry = dr.dot(getVel().perp().unit());
+		
+		for (RetinaCell cell : retina) {
+			double y = rx*Math.tan(cell.angle);
+			
+			boolean inView = Math.abs(y - ry) <= e.getRadius() && rx < 0;
+			boolean isBlocked = false;
+			if (cell.entity != null) 
+				isBlocked = dr.length() < cell.entity.getPos().sub(getPos()).length();
+			
+			if (inView && !isBlocked) {
+				cell.entity = e;
+				cell.color = e.getColor();
+			}
+		}
+	}
+	
+	public void eat(Entity e) 
+	{
+		setHealth(health + e.getNutrition());
+		e.setDead(true);
+	}
+	
+	public void setHealth(double h)
+	{
+		health = h;
+		if (health > 1) 
+			health = 1;
+		int r = healthyColor.getRed();
+		r += (int) ((1 - health)*(255 - r));
+		setColor(new Color(r, getColor().getGreen(), getColor().getBlue()));
+	}
+	
+	public double getHealth() 
+	{
+		return health;
+	}
+	
+	@Override
+	public void update(double delta, Collection<Entity> entities)
+	{
+		thinkTime += delta;
+		if(thinkTime >= maxThinkTime){
+			thinkTime = 0;
+			nextVelocity();
+			setHealth(health * 0.98);
+			setDead(health < 0.1);
+		}
+		
+		move(getVel().mul(delta), entities);
+		
+		for (RetinaCell cell : retina) {
+			cell.color = Color.WHITE;
+			cell.entity = null;
+		}
+		
+		for (Entity e : entities) 
+		{
+			if (inEatingRange(e) && e.isEdible())
+				eat(e);
+			
+			if (!e.equals(this))
+				see(e);
+		}
+	}
+	
+	public void nextVelocity() 
+	{
+		getVel().setX(r.nextInt(maxVel)-maxVel/2);
+		getVel().setY(r.nextInt(maxVel)-maxVel/2);	
+	}
+	
+	public void render(Graphics g)
+	{
+		g.setColor(getColor());
+		g.fillOval(
+				(int)(getPos().x()-getRadius()), 
+				(int)(getPos().y()-getRadius()), 
+				2*getRadius(), 2*getRadius());
+		
+		double r0 = 1;
+		double r1 = 0.8;
+		for (RetinaCell cell : retina)
+		{
+			double x = Math.cos(cell.angle + getVel().angle());
+			double y = Math.sin(cell.angle + getVel().angle());
+			double len = Math.sqrt(x*x + y*y);
+			double r2 = r1 + 0.5*(1 - r1)*(1 + Math.cos(2*Math.PI*cell.angle));
+			g.setColor(cell.color);
+			g.drawLine(
+					(int)(getPos().getX() + (x*getRadius()*r0)/len), 
+					(int)(getPos().getY() + (y*getRadius()*r0)/len), 
+					(int)(getPos().getX() + (x*getRadius()*r2)/len),
+					(int)(getPos().getY() + (y*getRadius()*r2)/len)
+					);
+		}
+	}
+	
+	@Override
+	public double getNutrition() {
+		return 0.8 * health;
+	}
+
+	@Override
+	public boolean isEdible() {
+		return health < 0.4;
+	}
+	
+}

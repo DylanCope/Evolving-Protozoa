@@ -26,7 +26,8 @@ public class Protozoa extends Entity
 		this.brain = brain;
 		retina = new Retina();
 		setPos(new Vector2f(0, 0));
-		setVel(new Vector2f(maxVel, 0));
+		double t = 2*Math.PI*r.nextDouble();
+		setVel(new Vector2f(maxVel * Math.cos(t), maxVel * Math.sin(t)));
 		setVel(getVel().rotate(brain.turn(this)));
 		setVel(getVel().setLength(brain.speed(this)));
 		this.setRadius(radius);
@@ -154,7 +155,7 @@ public class Protozoa extends Entity
 	
 	@Override
 	public double getNutrition() {
-		return 4 * health * radius;
+		return 20 * health * radius;
 	}
 
 	@Override

@@ -2,17 +2,39 @@ package utils;
 
 import java.awt.Canvas;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
+import javax.swing.Timer;
 
-import core.Main;
+import core.Controller;
+import core.Renderer;
+import core.Simulation;
 
-public class Window extends Canvas
+public class Window extends Canvas implements Runnable, ActionListener
 {
 
 	private static final long serialVersionUID = -2111860594941368902L;
+	private Input input;
+	private Renderer renderer;
+	private Simulation simulation;
+	private Controller controller;
+	private Graphics2D graphics;
+	private int width, height;
+
+	public static final float refreshDelay = 1000 / 30f;
+	private final Timer timer = new Timer((int) refreshDelay, this);
 	
-	public Window(int width, int height, String title, Main main){
+	public Window(String title, Simulation simulation)
+	{
+		Dimension d = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+		width = (int) d.getWidth();
+		height = (int) d.getHeight();
+		this.simulation = simulation;
+		renderer = new Renderer(simulation, this);
+
 		JFrame frame = new JFrame(title);
 		frame.setPreferredSize(new Dimension(width, height));
 		frame.setMaximumSize(new Dimension(width, height));
@@ -23,9 +45,47 @@ public class Window extends Canvas
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
-		frame.add(main);
+		frame.add(renderer);
 		frame.setVisible(true);
-		main.start();
+		
+		input = new Input();
+		controller = new Controller(input);
+		
+		renderer.addKeyListener(input);
+		renderer.addMouseListener(input);
+		renderer.addMouseMotionListener(input);
+		renderer.addMouseWheelListener(input);
+		renderer.addFocusListener(input);
+		
 	}
 
+	@Override
+	public void run() 
+	{
+		timer.start();
+	}
+	
+	@Override
+	public void actionPerformed(ActionEvent event)
+	{
+		controller.update(simulation, renderer);
+		renderer.render();
+		timer.restart();
+	}
+	
+	public Input getInput() {
+		return input;
+	}
+	
+	public Graphics2D getGraphics() {
+		return graphics;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+	
+	public int getHeight() {
+		return height;
+	}
 }

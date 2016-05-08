@@ -7,14 +7,19 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 public class Input implements KeyListener, FocusListener,
-				MouseListener, MouseMotionListener {
-	
-	private Vector2f position = new Vector2f(0, 0);
-	private boolean[] keys = new boolean[65536];
-	private boolean[] mouseButtons = new boolean[4];
+				MouseListener, MouseMotionListener, MouseWheelListener 
+{	
+	private Vector2f position 		= new Vector2f(0, 0);
+	private Vector2f mouseDelta		= new Vector2f(0, 0);
+	private boolean[] keys 			= new boolean[65536];
+	private boolean[] mouseButtons 	= new boolean[4];
 	private boolean[] mouseJustDown = new boolean[4];
+	
+	private int mouseWheelRotation = 0;
 	
 	public boolean getKey(int key) {
 		return keys[key];
@@ -40,16 +45,22 @@ public class Input implements KeyListener, FocusListener,
 	
 	public boolean isLeftMouseJustPressed()  { return mouseButtonJustDown(1); }
 	public boolean isRightMouseJustPressed() { return mouseButtonJustDown(0); }
-	public boolean isLeftMousePressed()  { return getMouse(1); }
-	public boolean isRightMousePressed() { return getMouse(0); }
+	public boolean isLeftMousePressed()  	 { return getMouse(1); 			  }
+	public boolean isRightMousePressed() 	 { return getMouse(0); 			  }
 	
 	public Vector2f getMousePosition() {
 		return position;
 	}
+	
+	public Vector2f getMouseDelta() {
+		return mouseDelta;
+	}
 
 	@Override
 	public void mouseDragged(MouseEvent event) {
-		position = new Vector2f(event.getX(), event.getY());
+		Vector2f pos = new Vector2f(event.getX(), event.getY());
+		mouseDelta = pos.sub(position);
+		position = pos;
 	}
 
 	@Override
@@ -129,6 +140,15 @@ public class Input implements KeyListener, FocusListener,
 	@Override
 	public void keyTyped(KeyEvent event) {
 		
+	}
+
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent arg0) {
+		mouseWheelRotation += arg0.getWheelRotation();
+	}
+	
+	public int getMouseWheelRotation() {
+		return mouseWheelRotation;
 	}
 	
 	

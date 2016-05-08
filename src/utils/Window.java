@@ -12,6 +12,7 @@ import javax.swing.Timer;
 import core.Controller;
 import core.Renderer;
 import core.Simulation;
+import core.Application;
 
 public class Window extends Canvas implements Runnable, ActionListener
 {
@@ -24,8 +25,7 @@ public class Window extends Canvas implements Runnable, ActionListener
 	private Graphics2D graphics;
 	private int width, height;
 
-	public static final float refreshDelay = 1000 / 30f;
-	private final Timer timer = new Timer((int) refreshDelay, this);
+	private final Timer timer = new Timer((int) Application.refreshDelay, this);
 	
 	public Window(String title, Simulation simulation)
 	{

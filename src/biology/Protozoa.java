@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Collection;
 
+import core.Simulation;
 import neuro.Genome;
 import utils.Vector2f;
 
@@ -26,7 +27,7 @@ public class Protozoa extends Entity
 		this.brain = brain;
 		retina = new Retina();
 		setPos(new Vector2f(0, 0));
-		double t = 2*Math.PI*r.nextDouble();
+		double t = 2 * Math.PI * Simulation.RANDOM.nextDouble();
 		setVel(new Vector2f(maxVel * Math.cos(t), maxVel * Math.sin(t)));
 		setVel(getVel().rotate(brain.turn(this)));
 		setVel(getVel().setLength(brain.speed(this)));
@@ -67,8 +68,8 @@ public class Protozoa extends Entity
 	
 	public void fight(Protozoa p)
 	{
-		double attack1 = 2*health   + 3*getRadius()/10.0   + 2*r.nextDouble();
-		double attack2 = 2*p.health + 3*p.getRadius()/10.0 + 2*r.nextDouble();
+		double attack1 = 2*health   + 3*getRadius()/10.0   + 2*Simulation.RANDOM.nextDouble();
+		double attack2 = 2*p.health + 3*p.getRadius()/10.0 + 2*Simulation.RANDOM.nextDouble();
 		if (attack1 > 1.3*attack2)
 			eat(p);
 		else if (1.3*attack1 < attack2)

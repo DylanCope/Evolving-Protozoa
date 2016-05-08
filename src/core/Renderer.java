@@ -1,10 +1,12 @@
 package core;
 
+import java.awt.BasicStroke;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.image.BufferStrategy;
 import java.util.Collection;
 
@@ -34,12 +36,11 @@ public class Renderer extends Canvas
 		
 		tankRenderRadius = window.getHeight() / 2.0;
 		tankRenderCoords = new Vector2f(window.getWidth()*0.5, window.getHeight()*0.5);
-//		aspect = (double) screenHeight / (double) screenWidth;
 		zoom = 0.9;
 		pan = new Vector2f(0, 0);
 	}
 	
-	public void protozoa(Graphics g, Protozoa p)
+	public void protozoa(Graphics2D g, Protozoa p)
 	{
 		Vector2f pos = toRenderSpace(p.getPos());
 		double len = pos.length();
@@ -50,6 +51,9 @@ public class Renderer extends Canvas
 			alpha = 1;
 		
 		double r = toRenderSpace(p.getRadius());
+		double r0 = 0.95;
+		double r1 = 0.8;
+		
 		Color c = p.getColor();
 		g.setColor(new Color(
 				c.getRed(), 
@@ -63,19 +67,17 @@ public class Renderer extends Canvas
 				(int)(2*r), 
 				(int)(2*r));
 		
-		double r0 = 1;
-		double r1 = 0.8;
+		
 		for (Retina.Cell cell : p.getRetina())
 		{
 			double x = Math.cos(cell.angle + p.getVel().angle());
 			double y = Math.sin(cell.angle + p.getVel().angle());
 			len = Math.sqrt(x*x + y*y);
 			double r2 = r1;// + 0.5*(1 - r1)*(1 + Math.cos(2*Math.PI*cell.angle));
-			c = cell.color;
 			g.setColor(new Color(
-					c.getRed(), 
-					c.getBlue(), 
-					c.getGreen(), 
+					cell.color.getRed(), 
+					cell.color.getBlue(), 
+					cell.color.getGreen(), 
 					(int) (255*alpha)));
 			g.drawLine(
 					(int)(pos.getX() + (x*r*r0)/len), 
@@ -84,9 +86,19 @@ public class Renderer extends Canvas
 					(int)(pos.getY() + (y*r*r2)/len)
 					);
 		}
+		
+		g.setColor(c.darker());
+		Stroke s = g.getStroke();
+		g.setStroke(new BasicStroke((int) (0.7*zoom)));
+		g.drawOval(
+				(int)(pos.getX() - r), 
+				(int)(pos.getY() - r), 
+				(int)(2*r), 
+				(int)(2*r));
+		g.setStroke(s);
 	}
 	
-	public void pellet(Graphics g, Pellet p)
+	public void pellet(Graphics2D g, Pellet p)
 	{
 		Vector2f pos = toRenderSpace(p.getPos());
 		double r = toRenderSpace(p.getRadius());
@@ -96,9 +108,19 @@ public class Renderer extends Canvas
 				(int)(pos.getY() - r), 
 				(int)(2*r), 
 				(int)(2*r));
+		
+		g.setColor(p.getColor().darker());
+		Stroke s = g.getStroke();
+		g.setStroke(new BasicStroke((int) (0.7*zoom)));
+		g.drawOval(
+				(int)(pos.getX() - r), 
+				(int)(pos.getY() - r), 
+				(int)(2*r), 
+				(int)(2*r));
+		g.setStroke(s);
 	}
 	
-	public void entities(Graphics g, Collection<Entity> entities)
+	public void entities(Graphics2D g, Collection<Entity> entities)
 	{
 		for (Entity e : entities) {
 			if (e instanceof Protozoa)
@@ -162,7 +184,7 @@ public class Renderer extends Canvas
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		t += 0.001;
 		Color backgroundColour = new Color(
-				10 + (int)(5*Math.cos(t)), 
+				10 + (int)(5 *Math.cos(t)), 
 				50 + (int)(30*Math.sin(t)), 
 				30 + (int)(15*Math.cos(t + 1)));
 		graphics.setColor(backgroundColour);

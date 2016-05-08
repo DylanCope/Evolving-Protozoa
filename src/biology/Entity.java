@@ -3,7 +3,6 @@ package biology;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Collection;
-import java.util.Random;
 
 import utils.Vector2f;
 
@@ -13,13 +12,12 @@ public abstract class Entity
 	protected Vector2f pos, vel;
 	protected double radius;
 	protected Color colour, healthyColour;
-	protected Random r = new Random();
 	
 	protected double thinkTime = 0;
 	protected double maxThinkTime;
 	protected double timeAlive = 0;
 	protected double health = 1;
-	protected int maxVel = 10;
+	protected int maxVel;
 	
 	protected boolean dead = false;
 	protected double nutrition;
@@ -39,7 +37,7 @@ public abstract class Entity
 	public boolean isCollidingWith(Entity other)
 	{
 		double dist = getPos().sub(other.getPos()).length();
-		return dist <= getRadius() + other.getRadius();
+		return dist < getRadius() + other.getRadius();
 	}
 	
 	public void handleCollision(Entity other)
@@ -59,9 +57,16 @@ public abstract class Entity
 	{
 		setPos(getPos().add(dr));
 		
-		for (Entity e : entities) {
-			if (!e.equals(this) && isCollidingWith(e)) {
-				setPos(getPos().add(dr.mul(-1)));
+		for (Entity e : entities) 
+		{
+			Vector2f dx = getPos().sub(e.getPos());
+			if (!e.equals(this) && isCollidingWith(e)) 
+			{
+				if (e.getVel().length()*e.getRadius() > getVel().length()*getRadius())
+					setPos(e.getPos().add(dx.setLength(e.getRadius() + getRadius())));
+				else
+					e.setPos(getPos().sub(dx.setLength(e.getRadius() + getRadius())));
+
 				return false;
 			}
 		}
@@ -88,7 +93,6 @@ public abstract class Entity
 				(int)(health * r), 
 				(int)(health * g), 
 				(int)(health * b));
-//		System.out.println(colour);
 	}
 	
 	public double getHealth() 

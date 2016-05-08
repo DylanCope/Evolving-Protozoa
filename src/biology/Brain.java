@@ -1,7 +1,6 @@
 package biology;
 
-import java.util.Random;
-
+import core.Simulation;
 
 public interface Brain 
 {
@@ -12,28 +11,27 @@ public interface Brain
 	public double energyConsumption();
 	
 	public static final Brain RANDOM = new Brain() {
-		Random r = new Random();
-
+		
 		@Override
 		public double turn(Protozoa p) {
-			double x = 2*r.nextDouble() - 1;
+			double x = 2*Simulation.RANDOM.nextDouble() - 1;
 			double t = Math.toRadians(35);
 			return t*x;
 		}
 
 		@Override
 		public double speed(Protozoa p) {
-			return r.nextDouble() / 10.0;
+			return Simulation.RANDOM.nextDouble() / 10.0;
 		}
 
 		@Override
 		public boolean attack(Protozoa p) {
-			return r.nextBoolean();
+			return Simulation.RANDOM.nextBoolean();
 		}
 
 		@Override
 		public boolean mate(Protozoa p) {
-			return r.nextBoolean();
+			return Simulation.RANDOM.nextBoolean();
 		}
 
 		@Override

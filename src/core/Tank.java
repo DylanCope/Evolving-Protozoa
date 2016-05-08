@@ -3,7 +3,6 @@ package core;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Random;
 import java.util.function.Predicate;
 
 import utils.Vector2f;
@@ -13,7 +12,6 @@ public class Tank
 {
 	private ArrayList<Entity> entities;
 	private double radius = 1;
-	private Random r = new Random();
 	
 	public Tank() 
 	{
@@ -22,10 +20,11 @@ public class Tank
 	
 	public void addEntity(Entity e) {
 		double rad = radius - 2*e.getRadius();
-		double t = 2*Math.PI*r.nextDouble();
+		double t = 2 * Math.PI * Simulation.RANDOM.nextDouble();
+		double r = Simulation.RANDOM.nextDouble();
 		e.setPos(new Vector2f(
-					rad * r.nextDouble() * Math.cos(t),
-					rad * r.nextDouble() * Math.sin(t)
+					rad * r * Math.cos(t),
+					rad * r * Math.sin(t)
 				));
 		entities.add(e);
 	}

@@ -10,18 +10,19 @@ import utils.Vector2f;
 public abstract class Entity 
 {
 
-	private Vector2f pos, vel;
-	private int radius;
-	private Color color;
-	Random random = new Random();
+	protected Vector2f pos, vel;
+	protected double radius;
+	protected Color colour, healthyColour;
+	protected Random r = new Random();
 	
-	double thinkTime = 0;
-	double maxThinkTime;
-	double health = 1;
-	int maxVel = 100;
+	protected double thinkTime = 0;
+	protected double maxThinkTime;
+	protected double timeAlive = 0;
+	protected double health = 1;
+	protected int maxVel = 10;
 	
-	private boolean dead = false;
-	private double nutrition;
+	protected boolean dead = false;
+	protected double nutrition;
 	
 	public abstract void update(double delta, Collection<Entity> entities);
 	
@@ -29,10 +30,10 @@ public abstract class Entity
 	{
 		g.setColor(getColor());
 		g.fillOval(
-				(int)(getPos().getX() - getRadius()), 
-				(int)(getPos().getY() - getRadius()), 
-				getRadius()*2, 
-				getRadius()*2);
+				(int)(getPos().getX() - radius), 
+				(int)(getPos().getY() - radius), 
+				(int)(2*radius), 
+				(int)(2*radius));
 	}
 	
 	public boolean isCollidingWith(Entity other)
@@ -41,7 +42,12 @@ public abstract class Entity
 		return dist <= getRadius() + other.getRadius();
 	}
 	
-	public boolean inEatingRange(Entity other)
+	public void handleCollision(Entity other)
+	{
+		setVel(vel.setDir(pos.sub(other.pos)));
+	}
+	
+	public boolean inInteractionRange(Entity other)
 	{
 		double dist = getPos().sub(other.getPos()).length();
 		return 0.9*dist <= getRadius() + other.getRadius();
@@ -63,12 +69,33 @@ public abstract class Entity
 		return true;
 	}
 	
-	public void nextVelocity() 
+	public void setHealth(double h)
 	{
-		getVel().setX(random.nextInt(maxVel) - maxVel/2);
-		getVel().setY(random.nextInt(maxVel) - maxVel/2);	
+		health = h;
+		if (health > 1) 
+			health = 1;
+		
+		if (health < 0.1) {
+			setDead(true);
+			return;
+		}
+		
+		int r = healthyColour.getRed();
+		int g = healthyColour.getGreen();
+		int b = healthyColour.getBlue();
+		
+		colour = new Color(
+				(int)(health * r), 
+				(int)(health * g), 
+				(int)(health * b));
+//		System.out.println(colour);
 	}
-
+	
+	public double getHealth() 
+	{
+		return health;
+	}
+	
 	public Vector2f getPos() {
 		return pos;
 	}
@@ -77,11 +104,11 @@ public abstract class Entity
 		this.pos = pos;
 	}
 
-	public int getRadius() {
+	public double getRadius() {
 		return radius;
 	}
 
-	public void setRadius(int radius) {
+	public void setRadius(double radius) {
 		this.radius = radius;
 	}
 
@@ -102,11 +129,11 @@ public abstract class Entity
 	}
 
 	public Color getColor() {
-		return color;
+		return colour;
 	}
 
 	public void setColor(Color color) {
-		this.color = color;
+		this.colour = color;
 	}
 
 	public double getNutrition() {

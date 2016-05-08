@@ -1,8 +1,11 @@
 package neuro;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class Genome 
 {
@@ -10,30 +13,40 @@ public class Genome
 	
 	public enum NeuronType { SENSOR, HIDDEN, OUTPUT };
 	
-	public class NeuronGene 
+	public class NeuronGene implements Comparable<NeuronGene>
 	{
 		int id;
 		NeuronType type;
+		
+		@Override
+		public int compareTo(NeuronGene o) {
+			return id - o.id;
+		}
 	}
 	
-	public class SynapseGene 
+	public class SynapseGene implements Comparable<SynapseGene>
 	{
 		int innovation;
 		NeuronGene in, out;
 		double weight;
 		boolean disabled;
+		
+		@Override
+		public int compareTo(SynapseGene g) {
+			return innovation - g.innovation;
+		}
 	}
 	
-	private ArrayList<NeuronGene> neurons;
-	private ArrayList<SynapseGene> synapses;
+	private Set<NeuronGene> neurons;
+	private SortedSet<SynapseGene> synapses;
 	private Random random;
 	private double mutationChance = 0.05;
 	private double fitness;
 	
 	public Genome()
-	{
-		neurons = new ArrayList<NeuronGene>();
-		synapses = new ArrayList<SynapseGene>();
+	{	
+		neurons = new HashSet<NeuronGene>();
+		synapses = new TreeSet<SynapseGene>();
 		random = new Random();
 	}
 	
@@ -88,8 +101,7 @@ public class Genome
 						return next;
 					}
 				};
-			}
-	
+			}	
 		};
 	}
 	
@@ -112,31 +124,42 @@ public class Genome
 	public Genome crossover(Genome other) 
 	{
 		Genome G = new Genome();
-		int max = Math.max(other.synapses.size(), synapses.size());
-		int min = Math.min(other.synapses.size(), synapses.size());
-		Genome moreFit;
-		if (fitness > other.fitness)
-			moreFit = this;
-		else moreFit = other;
+
+		G.synapses = new TreeSet<SynapseGene>();
 		
-		for (int i = 0; i < min; i++) {
-			int i1 = synapses.get(i).innovation;
-			int i2 = other.synapses.get(i).innovation;
-			if (i1 == i2)
-				G.addSynapse(moreFit.synapses.get(i));
-			else if (i1 > i2)
-				G.addSynapse(synapses.get(i));
-			else
-				G.addSynapse(other.synapses.get(i));
+		if (other.fitness > fitness) {
+			G.synapses.addAll(other.synapses);
+			G.synapses.addAll(synapses);
 		}
-		
-		for (int i = min; i < max; i++) {
-			if (max == synapses.size()) {
-			}
+		else {
+			G.synapses.addAll(synapses);
+			G.synapses.addAll(other.synapses);
+		}
+
+		G.neurons = new HashSet<NeuronGene>();
+		for (SynapseGene s : G.synapses) {
+			G.neurons.add(s.in);
+			G.neurons.add(s.out);
 		}
 		
 		return G;
 	}
+	
+	public int getInnovation() {
+		int i = 0;
+		for (SynapseGene synapse : synapses)
+			if (synapse.innovation > i)
+				i = synapse.innovation;
+		return i;		
+	}
+	
+	public double distance(Genome other) 
+	{
+//		int excess = 0;
+//		int disjoint = 0;
+		return 0;
+	}
+	
 	
 	public void addNeuron(NeuronGene n) {
 		neurons.add(n);
@@ -145,5 +168,4 @@ public class Genome
 	public void addSynapse(SynapseGene s) {
 		synapses.add(s);
 	}
-	
 }

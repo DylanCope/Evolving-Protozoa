@@ -8,21 +8,22 @@ import utils.Vector2f;
 public class Pellet extends Entity 
 {
 	
-	public Pellet(int x, int y, int radius)
+	public Pellet(double radius)
 	{
-		super();
 		this.setRadius(radius);
-		setPos(new Vector2f(x, y));
 		setVel(new Vector2f(0, 0));
-		setColor(new Color(150 + random.nextInt(105), 10+random.nextInt(100), 10+random.nextInt(100)));
-		setNutrition(0.25);
+		healthyColour = new Color(150 + r.nextInt(105), 10+r.nextInt(100), 10+r.nextInt(100));
+		setColor(healthyColour);
+		setNutrition(0.25 * radius);
 		maxVel = 50;
-		nextVelocity();
 	}
 
 	@Override
 	public void update(double delta, Collection<Entity> entities) 
 	{	
+		if (isDead())
+			return;
+		
 		move(getVel().mul(delta), entities);
 	}
 
@@ -31,4 +32,9 @@ public class Pellet extends Entity
 		return true;
 	}
 	
+	@Override
+	public double getNutrition() {
+		return 10 * radius;
+	}
+
 }

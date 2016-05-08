@@ -7,9 +7,12 @@ public interface Brain
 {
 	public double turn(Protozoa p);
 	public double speed(Protozoa p);
+	public boolean attack(Protozoa p);
+	public boolean mate(Protozoa p);
+	public double energyConsumption();
 	
-	static final Random r = new Random();
 	public static final Brain RANDOM = new Brain() {
+		Random r = new Random();
 
 		@Override
 		public double turn(Protozoa p) {
@@ -20,7 +23,22 @@ public interface Brain
 
 		@Override
 		public double speed(Protozoa p) {
-			return r.nextDouble();
+			return r.nextDouble() / 10.0;
+		}
+
+		@Override
+		public boolean attack(Protozoa p) {
+			return r.nextBoolean();
+		}
+
+		@Override
+		public boolean mate(Protozoa p) {
+			return r.nextBoolean();
+		}
+
+		@Override
+		public double energyConsumption() {
+			return 0;
 		}
 		
 	};

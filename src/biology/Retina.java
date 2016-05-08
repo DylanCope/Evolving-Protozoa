@@ -9,9 +9,9 @@ import java.util.Iterator;
 public class Retina implements Iterable<Retina.Cell> 
 {
 	public class Cell {
-		double angle;
-		Entity entity;
-		Color color = new Color(10, 10, 10);
+		public double angle;
+		public Entity entity;
+		public Color color = new Color(10, 10, 10);
 	}
 	
 	private Collection<Cell> cells;
@@ -21,7 +21,7 @@ public class Retina implements Iterable<Retina.Cell>
 	{
 		int n = 60;
 		cells = new ArrayList<Cell>();
-		for(int i = 0; i < n; i++) {
+		for (int i = 0; i < n; i++) {
 			Cell cell = new Cell();
 			cell.angle  = fov * (n - 2*i) / (2*n);
 			cells.add(cell);

@@ -18,8 +18,13 @@ public class Vector2f {
 		return getY();
 	}
 	
+	public double len2()
+	{
+		return x*x + y*y;
+	}
+	
 	public double length(){
-		return Math.sqrt(getX()*getX() + getY()*getY());
+		return Math.sqrt(x*x + y*y);
 	}
 	
 	public Vector2f add(Vector2f b){
@@ -50,6 +55,8 @@ public class Vector2f {
 	
 	public Vector2f unit() {
 		double len = length();
+		if (len == 0)
+			return new Vector2f(0, 0);
 		return new Vector2f(getX() / len, getY() / len);
 	}
 	
@@ -71,5 +78,20 @@ public class Vector2f {
 
 	public void setY(double y) {
 		this.y = y;
+	}
+
+	public Vector2f setLength(double len) {
+		Vector2f u = unit();
+		return u.mul(len);
+	}
+	
+	public Vector2f setDir(Vector2f other)
+	{
+		return other.setLength(length());
+	}
+	
+	public String toString()
+	{
+		return "(" + x + ", " + y + ")";
 	}
 }

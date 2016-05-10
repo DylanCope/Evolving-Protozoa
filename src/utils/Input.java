@@ -13,8 +13,8 @@ import java.awt.event.MouseWheelListener;
 public class Input implements KeyListener, FocusListener,
 				MouseListener, MouseMotionListener, MouseWheelListener 
 {	
-	private Vector2f position 		= new Vector2f(0, 0);
-	private Vector2f mouseDelta		= new Vector2f(0, 0);
+	private Vector2 position 		= new Vector2(0, 0);
+	private Vector2 mouseDelta		= new Vector2(0, 0);
 	private boolean[] keys 			= new boolean[65536];
 	private boolean[] mouseButtons 	= new boolean[4];
 	private boolean[] mouseJustDown = new boolean[4];
@@ -48,24 +48,24 @@ public class Input implements KeyListener, FocusListener,
 	public boolean isLeftMousePressed()  	 { return getMouse(1); 			  }
 	public boolean isRightMousePressed() 	 { return getMouse(0); 			  }
 	
-	public Vector2f getMousePosition() {
+	public Vector2 getMousePosition() {
 		return position;
 	}
 	
-	public Vector2f getMouseDelta() {
+	public Vector2 getMouseDelta() {
 		return mouseDelta;
 	}
 
 	@Override
 	public void mouseDragged(MouseEvent event) {
-		Vector2f pos = new Vector2f(event.getX(), event.getY());
+		Vector2 pos = new Vector2(event.getX(), event.getY());
 		mouseDelta = pos.sub(position);
 		position = pos;
 	}
 
 	@Override
 	public void mouseMoved(MouseEvent event) {
-		position = new Vector2f(event.getX(), event.getY());
+		position = new Vector2(event.getX(), event.getY());
 	}
 
 	@Override
@@ -118,8 +118,9 @@ public class Input implements KeyListener, FocusListener,
 	}
 
 	@Override
-	public void keyPressed(KeyEvent event) {
-		
+	public void keyPressed(KeyEvent event) 
+	{
+
 		int key = event.getKeyCode();
 		
 		if (0 < key && key < keys.length)
@@ -128,8 +129,8 @@ public class Input implements KeyListener, FocusListener,
 	}
 
 	@Override
-	public void keyReleased(KeyEvent event) {
-		
+	public void keyReleased(KeyEvent event) 
+	{	
 		int key = event.getKeyCode();
 		
 		if (0 < key && key < keys.length)
@@ -139,7 +140,7 @@ public class Input implements KeyListener, FocusListener,
 
 	@Override
 	public void keyTyped(KeyEvent event) {
-		
+
 	}
 
 	@Override

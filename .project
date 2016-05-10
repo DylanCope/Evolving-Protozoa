@@ -14,4 +14,11 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>resources/fonts/bubble_sharp.ttf</name>
+			<type>1</type>
+			<locationURI>PARENT-2-PROJECT_LOC/AppData/Local/Temp/Rar$DRa0.815/bubble_sharp.ttf</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

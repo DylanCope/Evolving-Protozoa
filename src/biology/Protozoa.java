@@ -4,9 +4,9 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Collection;
 
-import core.Simulation;
 import neuro.Genome;
-import utils.Vector2f;
+import utils.Vector2;
+import core.Simulation;
 
 public class Protozoa extends Entity 
 {
@@ -26,9 +26,11 @@ public class Protozoa extends Entity
 		setColor(healthyColour);
 		this.brain = brain;
 		retina = new Retina();
-		setPos(new Vector2f(0, 0));
+		setPos(new Vector2(0, 0));
 		double t = 2 * Math.PI * Simulation.RANDOM.nextDouble();
-		setVel(new Vector2f(maxVel * Math.cos(t), maxVel * Math.sin(t)));
+		setVel(new Vector2(
+				maxVel * Math.cos(t), 
+				maxVel * Math.sin(t)));
 		setVel(getVel().rotate(brain.turn(this)));
 		setVel(getVel().setLength(brain.speed(this)));
 		this.setRadius(radius);
@@ -39,18 +41,19 @@ public class Protozoa extends Entity
 	
 	public void see(Entity e)
 	{
-		Vector2f dr = getPos().sub(e.getPos());
+		Vector2 dr = getPos().sub(e.getPos());
 		double rx = dr.dot(getVel().unit());
 		double ry = dr.dot(getVel().perp().unit());
 		
-		for (Retina.Cell cell : retina) {
+		for (Retina.Cell cell : retina) 
+		{
 			double y = rx*Math.tan(cell.angle);
 			
 			boolean inView = Math.abs(y - ry) <= e.getRadius() && rx < 0;
 			
 			boolean isBlocked = false;
 			if (cell.entity != null) 
-				isBlocked = dr.length() < cell.entity.getPos().sub(getPos()).length();
+				isBlocked = dr.len2() > cell.entity.getPos().sub(getPos()).len2();
 			
 			if (inView && !isBlocked) {
 				cell.entity = e;
@@ -107,7 +110,7 @@ public class Protozoa extends Entity
 			if (inInteractionRange(e)) 
 			{
 				if (e instanceof Protozoa){
-					if (attack)
+//					if (attack)
 						fight((Protozoa) e);
 //					else if (mate)
 //						mate((Protozoa) e);

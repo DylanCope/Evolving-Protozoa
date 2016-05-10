@@ -4,12 +4,12 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Collection;
 
-import utils.Vector2f;
+import utils.Vector2;
 
 public abstract class Entity 
 {
 
-	protected Vector2f pos, vel;
+	protected Vector2 pos, vel;
 	protected double radius;
 	protected Color colour, healthyColour;
 	
@@ -36,7 +36,7 @@ public abstract class Entity
 	
 	public boolean isCollidingWith(Entity other)
 	{
-		double dist = getPos().sub(other.getPos()).length();
+		double dist = getPos().sub(other.getPos()).len();
 		return dist < getRadius() + other.getRadius();
 	}
 	
@@ -47,22 +47,22 @@ public abstract class Entity
 	
 	public boolean inInteractionRange(Entity other)
 	{
-		double dist = getPos().sub(other.getPos()).length();
+		double dist = getPos().sub(other.getPos()).len();
 		return 0.9*dist <= getRadius() + other.getRadius();
 	}
 	
 	public abstract boolean isEdible();
 	
-	public boolean move(Vector2f dr, Collection<Entity> entities)
+	public boolean move(Vector2 dr, Collection<Entity> entities)
 	{
 		setPos(getPos().add(dr));
 		
 		for (Entity e : entities) 
 		{
-			Vector2f dx = getPos().sub(e.getPos());
+			Vector2 dx = getPos().sub(e.getPos());
 			if (!e.equals(this) && isCollidingWith(e)) 
 			{
-				if (e.getVel().length()*e.getRadius() > getVel().length()*getRadius())
+				if (e.getVel().len()*e.getRadius() > getVel().len()*getRadius())
 					setPos(e.getPos().add(dx.setLength(e.getRadius() + getRadius())));
 				else
 					e.setPos(getPos().sub(dx.setLength(e.getRadius() + getRadius())));
@@ -100,11 +100,11 @@ public abstract class Entity
 		return health;
 	}
 	
-	public Vector2f getPos() {
+	public Vector2 getPos() {
 		return pos;
 	}
 
-	public void setPos(Vector2f pos) {
+	public void setPos(Vector2 pos) {
 		this.pos = pos;
 	}
 
@@ -124,11 +124,11 @@ public abstract class Entity
 		this.dead = dead;
 	}
 
-	public Vector2f getVel() {
+	public Vector2 getVel() {
 		return vel;
 	}
 
-	public void setVel(Vector2f vel) {
+	public void setVel(Vector2 vel) {
 		this.vel = vel;
 	}
 

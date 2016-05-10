@@ -6,7 +6,7 @@ import java.util.Random;
 
 import javax.swing.Timer;
 
-import utils.Vector2f;
+import utils.Vector2;
 import biology.Brain;
 import biology.Pellet;
 import biology.Protozoa;
@@ -26,8 +26,8 @@ public class Simulation implements Runnable, ActionListener
 		
 		tank = new Tank();
 
-		int creatures = 80;
-		int pellets = 160;
+		int creatures = 60;
+		int pellets = 100;
 		
 		for (int i = 0; i < creatures; i++) {
 			double radius = (RANDOM.nextInt(5) + 5) / 500.0;
@@ -41,7 +41,7 @@ public class Simulation implements Runnable, ActionListener
 		}
 
 		for (Entity e : tank.getEntities())
-			e.move(new Vector2f(0, 0), tank.getEntities());
+			e.move(new Vector2(0, 0), tank.getEntities());
 		
 		simulate = true;
 

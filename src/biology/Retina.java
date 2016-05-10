@@ -32,5 +32,13 @@ public class Retina implements Iterable<Retina.Cell>
 	public Iterator<Cell> iterator() {
 		return cells.iterator();
 	}
+
+	public double getCellAngle() {
+		return fov / (double) cells.size();
+	}
+	
+	public double getFov() {
+		return fov;
+	}
 	
 }

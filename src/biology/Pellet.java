@@ -3,8 +3,8 @@ package biology;
 import java.awt.Color;
 import java.util.Collection;
 
+import utils.Vector2;
 import core.Simulation;
-import utils.Vector2f;
 
 public class Pellet extends Entity 
 {
@@ -12,7 +12,7 @@ public class Pellet extends Entity
 	public Pellet(double radius)
 	{
 		this.setRadius(radius);
-		setVel(new Vector2f(
+		setVel(new Vector2(
 				(0.5 - Simulation.RANDOM.nextDouble()) / 30.0,
 				(0.5 - Simulation.RANDOM.nextDouble()) / 30.0));
 		healthyColour = new Color(

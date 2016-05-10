@@ -56,7 +56,6 @@ public class Window extends Canvas implements Runnable, ActionListener
 		renderer.addMouseMotionListener(input);
 		renderer.addMouseWheelListener(input);
 		renderer.addFocusListener(input);
-		
 	}
 
 	@Override
@@ -87,5 +86,9 @@ public class Window extends Canvas implements Runnable, ActionListener
 	
 	public int getHeight() {
 		return height;
+	}
+
+	public Vector2 getDimensions() {
+		return new Vector2(width, height);
 	}
 }

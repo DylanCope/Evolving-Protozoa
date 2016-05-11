@@ -37,7 +37,7 @@ public class Simulation implements Runnable, ActionListener
 		tank = new Tank();
 
 		int creatures = 60;
-		int pellets = 100;
+		int pellets = 300;
 		
 		for (int i = 0; i < creatures; i++) 
 		{

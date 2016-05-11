@@ -11,9 +11,10 @@ import core.Simulation;
 public class Protozoa extends Entity 
 {
 	private static final long serialVersionUID = 2314292760446370751L;
+	public transient int id = Simulation.RANDOM.nextInt();
 	double maxVel = 100;
 	double fitness = 0;
-
+	
 	Genome genome;
 	private Retina retina;
 	Brain brain;

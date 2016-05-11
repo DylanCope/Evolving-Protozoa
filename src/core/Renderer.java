@@ -5,6 +5,7 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.image.BufferStrategy;
@@ -19,6 +20,8 @@ import biology.Retina;
 public class Renderer extends Canvas
 {	
 	private static final long serialVersionUID = 1L;
+	
+	double time = 0;
 	private Vector2 tankRenderCoords;
 	private double tankRenderRadius;
 	private Vector2 pan;
@@ -50,8 +53,9 @@ public class Renderer extends Canvas
 	public void retina(Graphics2D g, Protozoa p)
 	{
 		Vector2 pos = toRenderSpace(p.getPos());
-		Color c = p.getColor();
 		double r = toRenderSpace(p.getRadius());
+		
+		Color c = p.getColor();
 
 		double dt 	= p.getRetina().getCellAngle();
 		double fov 	= p.getRetina().getFov();
@@ -106,6 +110,15 @@ public class Renderer extends Canvas
 		Vector2 pos = toRenderSpace(p.getPos());
 		double r = toRenderSpace(p.getRadius());
 		
+		if (pos.getX() + r > window.getWidth())
+			return;
+		if (pos.getX() - r < 0)
+			return;
+		if (pos.getY() + r > window.getHeight())
+			return;
+		if (pos.getY() - r < 0)
+			return;
+		
 		Color c = p.getColor();
 		g.setColor(c);
 		
@@ -117,6 +130,21 @@ public class Renderer extends Canvas
 		
 		if (zoom > 1.3)
 			retina(g, p);
+		
+		Polygon nucleus = new Polygon();
+		double dt = 2*Math.PI / (16.0);
+		double t0 = p.getVel().angle();
+		for (double t = 0; t < 2*Math.PI; t += dt)
+		{
+			double percent = ((t*t*p.id) % (1/7.0)) + (2/5.0);
+			double radius = toRenderSpace(percent * p.getRadius()); 
+			int x = (int) (radius * (0.1 + Math.cos(t + t0)) + pos.getX());
+			int y = (int) (radius * (-0.1 + Math.sin(t + t0)) + pos.getY());
+			nucleus.addPoint(x, y);
+		}
+		Color b = c.brighter();
+		g.setColor(new Color(b.getRed(), b.getGreen(), b.getBlue(), 50));
+		g.fillPolygon(nucleus);
 		
 		g.setColor(c.darker());
 		Stroke s = g.getStroke();
@@ -133,6 +161,17 @@ public class Renderer extends Canvas
 	{
 		Vector2 pos = toRenderSpace(p.getPos());
 		double r = toRenderSpace(p.getRadius());
+
+		
+		if (pos.getX() + r > window.getWidth())
+			return;
+		if (pos.getX() - r < 0)
+			return;
+		if (pos.getY() + r > window.getHeight())
+			return;
+		if (pos.getY() - r < 0)
+			return;
+		
 		g.setColor(p.getColor());
 		g.fillOval(
 				(int)(pos.getX() - r), 
@@ -200,7 +239,19 @@ public class Renderer extends Canvas
 		g.fillPolygon(xPoints, yPoints, nPoints);
 	}
 	
-	double t = 0;
+	public void background(Graphics2D graphics)
+	{
+		zoom = targetZoom;
+		time += 0.1;
+		Color backgroundColour = new Color(
+				10 + (int)(5 *Math.cos(time/100.0)), 
+				50 + (int)(30*Math.sin(time/100.0)), 
+				30 + (int)(15*Math.cos(time/100.0 + 1)));
+		graphics.setColor(backgroundColour);
+
+		graphics.fillRect(0, 0, window.getWidth(), window.getHeight());
+	}
+	
 	public void render()
 	{
 		BufferStrategy bs = this.getBufferStrategy();
@@ -218,16 +269,7 @@ public class Renderer extends Canvas
 //			rotate = rotate + (- 0.5*Math.PI - track.getVel().angle() - rotate) * 0.05;
 		}
 		
-		zoom = targetZoom;
-		t += 0.001;
-		Color backgroundColour = new Color(
-				10 + (int)(5 *Math.cos(t)), 
-				50 + (int)(30*Math.sin(t)), 
-				30 + (int)(15*Math.cos(t + 1)));
-		graphics.setColor(backgroundColour);
-
-		graphics.fillRect(0, 0, window.getWidth(), window.getHeight());
-		
+		background(graphics);
 		entities(graphics, simulation.getTank());
 		maskTank(graphics, tankRenderCoords, tankRenderRadius, 200);
 		maskTank(graphics, toRenderSpace(new Vector2(0, 0)), tankRenderRadius*zoom, 255);

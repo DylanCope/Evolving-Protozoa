@@ -6,9 +6,10 @@ import java.util.Collection;
 import utils.Vector2;
 import core.Simulation;
 
-public class Pellet extends Entity 
+public class Pellet extends Entity
 {
-	
+	private static final long serialVersionUID = -5482090072120647315L;
+
 	public Pellet(double radius)
 	{
 		this.setRadius(radius);

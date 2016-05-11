@@ -8,9 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.image.BufferStrategy;
-import java.util.Collection;
 
-import utils.TextObject;
 import utils.Vector2;
 import utils.Window;
 import biology.Entity;
@@ -26,8 +24,7 @@ public class Renderer extends Canvas
 	private Vector2 pan;
 	private double zoom, targetZoom, initialZoom = 2, rotate = 0;
 	private Entity track;
-	
-	private TextObject title, pelletText, protozoaText;
+	private UI ui;
 	
 	private Simulation simulation;
 	private Window window;
@@ -43,23 +40,8 @@ public class Renderer extends Canvas
 		
 		zoom = 1;
 		targetZoom = 1;
-		title = new TextObject("Microbial Evolution", 
-				"bubble sharp", 
-				window.getHeight() / 20, 
-				new Vector2(10, window.getHeight() / 20));
-		title.setColor(Color.WHITE);
-
-		pelletText = new TextObject("Number of pellets: ", 
-				"bubble sharp", 
-				window.getHeight() / 30, 
-				new Vector2(10, 3*window.getHeight() / 20));
-		pelletText.setColor(Color.WHITE.darker());
-
-		protozoaText = new TextObject("Number of protozoa: ", 
-				"bubble sharp", 
-				window.getHeight() / 30, 
-				new Vector2(10, 4.1*window.getHeight() / 20));
-		protozoaText.setColor(Color.WHITE.darker());
+		
+		ui = new UI(window, simulation);
 		
 		requestFocus();
 		setFocusable(true);
@@ -169,9 +151,9 @@ public class Renderer extends Canvas
 		g.setStroke(s);
 	}
 	
-	public void entities(Graphics2D g, Collection<Entity> entities)
+	public void entities(Graphics2D g, Tank tank)
 	{
-		for (Entity e : entities) {
+		for (Entity e : tank) {
 			if (e instanceof Protozoa)
 				protozoa(g, (Protozoa) e);
 			else if (e instanceof Pellet)
@@ -246,15 +228,11 @@ public class Renderer extends Canvas
 
 		graphics.fillRect(0, 0, window.getWidth(), window.getHeight());
 		
-		entities(graphics, simulation.getTank().getEntities());
+		entities(graphics, simulation.getTank());
 		maskTank(graphics, tankRenderCoords, tankRenderRadius, 200);
 		maskTank(graphics, toRenderSpace(new Vector2(0, 0)), tankRenderRadius*zoom, 255);
 		
-		title.render(graphics);
-		pelletText.setText("Number of pellets: " + simulation.getTank().numberOfPellets());
-		protozoaText.setText("Number of protozoa: " + simulation.getTank().numberOfProtozoa());
-		pelletText.render(graphics);
-		protozoaText.render(graphics);
+		ui.render(graphics, this);
 		
 		graphics.dispose();
 		bs.show();
@@ -305,6 +283,10 @@ public class Renderer extends Canvas
 
 	public double getZoom() {
 		return zoom;
+	}
+	
+	public Entity getTracked() {
+		return track;
 	}
 	
 }

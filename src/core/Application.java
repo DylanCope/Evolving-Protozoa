@@ -1,8 +1,8 @@
 package core;
 
-import utils.TextStyle;
 import javax.swing.SwingUtilities;
 
+import utils.TextStyle;
 import utils.Window;
 
 public class Application 
@@ -16,6 +16,9 @@ public class Application
 	{
 		TextStyle.loadFonts();
 		simulation = new Simulation(1);
+//		simulation.loadTank("test");
+		simulation.initDefaultTank();
+//		FileIO.save(simulation.getTank(), "test");
 		window = new Window("Evolving Protozoa", simulation);
 		SwingUtilities.invokeLater(window);
 		new Thread(simulation).run();

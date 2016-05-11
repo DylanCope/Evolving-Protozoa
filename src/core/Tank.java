@@ -1,8 +1,10 @@
 package core;
 
 import java.awt.Graphics;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.function.Predicate;
 
 import utils.Vector2;
@@ -10,8 +12,9 @@ import biology.Entity;
 import biology.Pellet;
 import biology.Protozoa;
 
-public class Tank 
+public class Tank implements Iterable<Entity>, Serializable
 {
+	private static final long serialVersionUID = 2804817237950199223L;
 	private ArrayList<Entity> entities;
 	private double radius = 1;
 	private int protozoaNumber = 0;
@@ -81,5 +84,10 @@ public class Tank
 	
 	public int numberOfPellets() {
 		return pelletNumber;
+	}
+
+	@Override
+	public Iterator<Entity> iterator() {
+		return entities.iterator();
 	}
 }

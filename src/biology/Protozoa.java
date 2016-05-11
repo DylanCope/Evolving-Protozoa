@@ -10,6 +10,7 @@ import core.Simulation;
 
 public class Protozoa extends Entity 
 {
+	private static final long serialVersionUID = 2314292760446370751L;
 	double maxVel = 100;
 	double fitness = 0;
 
@@ -182,6 +183,10 @@ public class Protozoa extends Entity
 
 	public void setRetina(Retina retina) {
 		this.retina = retina;
+	}
+
+	public double getFitness() {
+		return fitness;
 	}
 	
 }

@@ -2,13 +2,14 @@ package biology;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.io.Serializable;
 import java.util.Collection;
 
 import utils.Vector2;
 
-public abstract class Entity 
+public abstract class Entity implements Serializable
 {
-
+	private static final long serialVersionUID = -4333766895269415282L;
 	protected Vector2 pos, vel;
 	protected double radius;
 	protected Color colour, healthyColour;

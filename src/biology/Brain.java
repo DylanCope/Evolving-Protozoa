@@ -1,8 +1,10 @@
 package biology;
 
+import java.io.Serializable;
+
 import core.Simulation;
 
-public interface Brain 
+public interface Brain extends Serializable
 {
 	public double turn(Protozoa p);
 	public double speed(Protozoa p);
@@ -10,8 +12,10 @@ public interface Brain
 	public boolean mate(Protozoa p);
 	public double energyConsumption();
 	
-	public static final Brain RANDOM = new Brain() {
-		
+	public static final Brain RANDOM = new Brain() 
+	{
+		private static final long serialVersionUID = 1648484737904226314L;
+
 		@Override
 		public double turn(Protozoa p) {
 			double x = 2*Simulation.RANDOM.nextDouble() - 1;

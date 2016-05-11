@@ -13,6 +13,11 @@ public class TextStyle {
 	private Color m_colour;
 	private String m_font;
 	
+	public static String toString(double d, int dp) {
+		double ten = Math.pow(10, dp);
+		return Double.toString(((int) (d * ten)) / ten);
+	}
+	
 	public static void loadFonts()
 	{
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();

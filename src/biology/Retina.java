@@ -1,14 +1,18 @@
 package biology;
 
 import java.awt.Color;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
 
-public class Retina implements Iterable<Retina.Cell> 
+public class Retina implements Iterable<Retina.Cell>, Serializable
 {
-	public class Cell {
+	private static final long serialVersionUID = 5214857174841633362L;
+
+	public class Cell implements Serializable {
+		private static final long serialVersionUID = 1L;
 		public double angle;
 		public Entity entity;
 		public Color color = new Color(10, 10, 10);

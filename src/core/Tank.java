@@ -19,6 +19,7 @@ public class Tank implements Iterable<Entity>, Serializable
 	private double radius = 1;
 	private int protozoaNumber = 0;
 	private int pelletNumber = 0;
+	private double timeDilation = 1;
 	
 	public Tank() 
 	{
@@ -44,7 +45,7 @@ public class Tank implements Iterable<Entity>, Serializable
 	public void update(double delta) 
 	{
 		for(Entity e : entities) {
-			e.update(delta, entities);
+			e.update(delta * timeDilation, entities);
 			
 			if (e.getPos().len() - e.getRadius() > radius) {
 				e.setPos(e.getPos().mul(-0.98));
@@ -86,6 +87,14 @@ public class Tank implements Iterable<Entity>, Serializable
 		return pelletNumber;
 	}
 
+	public void setTimeDilation(double d) {
+		timeDilation = d;
+	}
+
+	public double getTimeDilation() {
+		return timeDilation;
+	}
+	
 	@Override
 	public Iterator<Entity> iterator() {
 		return entities.iterator();

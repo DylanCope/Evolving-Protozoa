@@ -18,6 +18,8 @@ public class Simulation implements Runnable, ActionListener
 	private Tank tank;
 	private boolean simulate;
 	private final Timer timer = new Timer((int) Application.refreshDelay, this);
+	private int generation = 0;
+	private double time = 0;
 	
 	public static Random RANDOM;
 	
@@ -56,6 +58,11 @@ public class Simulation implements Runnable, ActionListener
 			e.move(new Vector2(0, 0), tank.getEntities());
 	}
 	
+	public void nextGeneration()
+	{
+		generation++;
+	}
+	
 	public void loadTank(String filename)
 	{
 		tank = (Tank) FileIO.load(filename);
@@ -70,7 +77,9 @@ public class Simulation implements Runnable, ActionListener
 	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
-		tank.update(timer.getDelay() / 1000.0);
+		double delta = timer.getDelay() / 1000.0;
+		time += delta;
+		tank.update(delta);
 		
 		if (simulate)
 			timer.restart();
@@ -81,5 +90,15 @@ public class Simulation implements Runnable, ActionListener
 	public Tank getTank()
 	{
 		return tank;
+	}
+	
+	public int getGeneration()
+	{
+		return generation;
+	}
+
+	public double getElapsedTime()
+	{
+		return time;
 	}
 }

@@ -20,13 +20,8 @@ public class Controller
 		if (input.getKey(KeyEvent.VK_ESCAPE)) 
 			Application.exit();
 		
-//		if (input.getKey(KeyEvent.VK_UP))
-//			renderer.setZoom(renderer.getZoom() * 2);
-//		if (input.getKey(KeyEvent.VK_DOWN))
-//			renderer.setZoom(renderer.getZoom() / 2.0);
-//		else
-			renderer.setZoom(1 - input.getMouseWheelRotation() / 7.0);
-//		
+		renderer.setZoom(1 - input.getMouseWheelRotation() / 7.0);
+
 		if (input.isLeftMouseJustPressed()) 
 		{
 			Vector2 pos = input.getMousePosition();

@@ -162,7 +162,6 @@ public class Renderer extends Canvas
 		Vector2 pos = toRenderSpace(p.getPos());
 		double r = toRenderSpace(p.getRadius());
 
-		
 		if (pos.getX() + r > window.getWidth())
 			return;
 		if (pos.getX() - r < 0)

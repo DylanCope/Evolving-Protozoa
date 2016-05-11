@@ -4,6 +4,7 @@ import javax.swing.SwingUtilities;
 
 import utils.TextStyle;
 import utils.Window;
+import utils.REPL;
 
 public class Application 
 {
@@ -22,6 +23,7 @@ public class Application
 		window = new Window("Evolving Protozoa", simulation);
 		SwingUtilities.invokeLater(window);
 		new Thread(simulation).run();
+		new REPL(simulation);
 	}
 	
 	public static void exit()

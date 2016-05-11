@@ -172,8 +172,8 @@ public class Protozoa extends Entity
 	@Override
 	public void setDead(boolean dead) {
 		super.setDead(dead);
-		if (dead)
-			System.out.println("(" + fitness + ", " + timeAlive + "),");
+//		if (dead)
+//			System.out.println("(" + fitness + ", " + timeAlive + "),");
 	}
 
 

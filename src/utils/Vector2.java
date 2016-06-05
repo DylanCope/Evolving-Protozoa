@@ -8,7 +8,8 @@ public class Vector2 implements Serializable
 	private double x;
 	private double y;
 	
-	public Vector2(double x, double y){
+	public Vector2(double x, double y)
+	{
 		this.setX(x);
 		this.setY(y);
 	}
@@ -73,6 +74,11 @@ public class Vector2 implements Serializable
 
 	public void setY(double y) {
 		this.y = y;
+	}
+	
+	public void set(Vector2 v) {
+		this.x = v.x;
+		this.y = v.y;
 	}
 
 	public Vector2 setLength(double len) {

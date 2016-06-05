@@ -24,6 +24,7 @@ public class Protozoa extends Entity
 	
 	public Protozoa(Brain brain, double radius)
 	{
+		super(radius);
 		healthyColour = new Color(200, 200, 255);
 		setColor(healthyColour);
 		this.brain = brain;
@@ -88,8 +89,8 @@ public class Protozoa extends Entity
 		if(thinkTime >= maxThinkTime)
 		{
 			thinkTime = 0;
-			setVel(getVel().rotate(brain.turn(this)));
-			setVel(getVel().setLength(brain.speed(this)));
+			Vector2 dir = getVel().rotate(brain.turn(this));
+			applyForce(dir.setLength(brain.speed(this)));
 		}
 		double deathRate = radius * delta * 2.5;
 		setHealth(health * (1 - deathRate));
@@ -129,34 +130,13 @@ public class Protozoa extends Entity
 	@Override
 	public void update(double delta, Collection<Entity> entities)
 	{
+		super.update(delta);
 		if (isDead())
 			return;
 
 		think(delta);
 		interact(entities);
-		move(getVel().mul(delta), entities);
-	}
-	
-	public void render(Graphics g)
-	{
-		super.render(g);
-		
-		double r0 = 1;
-		double r1 = 0.8;
-		for (Retina.Cell cell : retina)
-		{
-			double x = Math.cos(cell.angle + getVel().angle());
-			double y = Math.sin(cell.angle + getVel().angle());
-			double len = Math.sqrt(x*x + y*y);
-			double r2 = r1;// + 0.5*(1 - r1)*(1 + Math.cos(2*Math.PI*cell.angle));
-			g.setColor(cell.color);
-			g.drawLine(
-					(int)(getPos().getX() + (x*getRadius()*r0)/len), 
-					(int)(getPos().getY() + (y*getRadius()*r0)/len), 
-					(int)(getPos().getX() + (x*getRadius()*r2)/len),
-					(int)(getPos().getY() + (y*getRadius()*r2)/len)
-					);
-		}
+//		move(getVel().mul(delta), entities);
 	}
 	
 	@Override

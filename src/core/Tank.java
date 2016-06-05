@@ -7,15 +7,16 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
+import physics.Particle;
 import utils.Vector2;
 import biology.Entity;
 import biology.Pellet;
 import biology.Protozoa;
 
-public class Tank implements Iterable<Entity>, Serializable
+public class Tank implements Iterable<Particle>, Serializable
 {
 	private static final long serialVersionUID = 2804817237950199223L;
-	private ArrayList<Entity> entities;
+	private ArrayList<Particle> particles;
 	private double radius = 1;
 	private int protozoaNumber = 0;
 	private int pelletNumber = 0;
@@ -23,18 +24,18 @@ public class Tank implements Iterable<Entity>, Serializable
 	
 	public Tank() 
 	{
-		entities = new ArrayList<Entity>();
+		particles = new ArrayList<Particle>();
 	}
 	
-	public void addEntity(Entity e) {
+	public void add(Particle e) {
 		double rad 	= radius - 2*e.getRadius();
 		double t 	= 2 * Math.PI * Simulation.RANDOM.nextDouble();
 		double r 	= Simulation.RANDOM.nextDouble();
-		e.setPos(new Vector2(
+		e.set(new Vector2(
 					rad * (1 - r*r) * Math.cos(t),
 					rad * (1 - r*r) * Math.sin(t)
 				));
-		entities.add(e);
+		particles.add(e);
 		
 		if (e instanceof Protozoa)
 			protozoaNumber++;
@@ -44,19 +45,31 @@ public class Tank implements Iterable<Entity>, Serializable
 	
 	public void update(double delta) 
 	{
-		for(Entity e : entities) {
-			e.update(delta * timeDilation, entities);
+		double dt = delta * timeDilation;
+
+		int n = particles.size();
+		for (int i = 0; i < n; i++)
+		{
+			Particle p1 = particles.get(i);
+			for (int j = i + 1; j < n; j++)
+			{
+				Particle p2 = particles.get(j);
+				
+				p1.handleCollision(p2, dt);
+			}
+			p1.update(dt);
 			
-			if (e.getPos().len() - e.getRadius() > radius) {
-				e.setPos(e.getPos().mul(-0.98));
+			if (p1.len() - p1.getRadius() > radius) {
+				p1.set(p1.mul(-0.98));
 			}
 		}
 		
-		// Remove dead entities
-		entities.removeIf(new Predicate<Entity>() {
+		// Remove dead particles
+		particles.removeIf(new Predicate<Particle>() {
 
-			public boolean test(Entity e) {
-				if (e.isDead()) {
+			public boolean test(Particle e) 
+			{	
+				if (e instanceof Entity && ((Entity) e).isDead()) {
 					if (e instanceof Protozoa)
 						protozoaNumber--;
 					else if (e instanceof Pellet)
@@ -69,14 +82,15 @@ public class Tank implements Iterable<Entity>, Serializable
 		});
 	}
 	
+	
 	public void render(Graphics g)
 	{
-		for (Entity e : entities)
-			e.render(g);
+//		for (Particle e : particles)
+//			e.render(g);
 	}
 
-	public Collection<Entity> getEntities() {
-		return entities;
+	public Collection<Particle> getParticles() {
+		return particles;
 	}
 	
 	public int numberOfProtozoa() {
@@ -96,7 +110,7 @@ public class Tank implements Iterable<Entity>, Serializable
 	}
 	
 	@Override
-	public Iterator<Entity> iterator() {
-		return entities.iterator();
+	public Iterator<Particle> iterator() {
+		return particles.iterator();
 	}
 }

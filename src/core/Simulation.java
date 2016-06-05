@@ -6,12 +6,11 @@ import java.util.Random;
 
 import javax.swing.Timer;
 
-import utils.Vector2;
+import physics.Particle;
 import utils.FileIO;
 import biology.Brain;
-import biology.Pellet;
 import biology.Protozoa;
-import biology.Entity;
+import biology.Pellet;
 
 public class Simulation implements Runnable, ActionListener
 {
@@ -45,17 +44,17 @@ public class Simulation implements Runnable, ActionListener
 		{
 			double radius = (RANDOM.nextInt(5) + 5) / 500.0;
 			Protozoa p = new Protozoa(Brain.RANDOM, radius);
-			tank.addEntity(p);
+			tank.add(p);
 		}
 		
-		for (int i = creatures; i <  creatures + pellets; i++) 
+		for (int i = 0; i <  pellets; i++) 
 		{
 			double radius = (RANDOM.nextInt(3) + 2) / 500.0;
-			tank.addEntity(new Pellet(radius));
+			tank.add(new Pellet(radius));
 		}
 
-		for (Entity e : tank.getEntities())
-			e.move(new Vector2(0, 0), tank.getEntities());
+//		for (Particle e : tank.getParticles())
+//			e.move(new Vector2(0, 0), tank.getParticles());
 	}
 	
 	public void nextGeneration()

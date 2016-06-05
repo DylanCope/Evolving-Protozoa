@@ -12,7 +12,8 @@ public class Pellet extends Entity
 
 	public Pellet(double radius)
 	{
-		this.setRadius(radius);
+		super(radius);
+//		this.setRadius(radius);
 		setVel(new Vector2(
 				(0.5 - Simulation.RANDOM.nextDouble()) / 30.0,
 				(0.5 - Simulation.RANDOM.nextDouble()) / 30.0));
@@ -28,10 +29,11 @@ public class Pellet extends Entity
 	@Override
 	public void update(double delta, Collection<Entity> entities) 
 	{	
+		super.update(delta);
 		if (isDead())
 			return;
 		
-		move(getVel().mul(delta), entities);
+//		move(getVel().mul(delta), entities);
 	}
 
 	@Override

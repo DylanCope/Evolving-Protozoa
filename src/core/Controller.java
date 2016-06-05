@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 import utils.Input;
 import utils.Vector2;
 import biology.Entity;
+import physics.Particle;
 
 public class Controller
 {
@@ -26,9 +27,14 @@ public class Controller
 		{
 			Vector2 pos = input.getMousePosition();
 			boolean track = false;
-			for (Entity e : simulation.getTank().getEntities()) 
+			for (Particle p : simulation.getTank().getParticles()) 
 			{
-				Vector2 s = renderer.toRenderSpace(e.getPos());
+				Entity e = null;
+				if (p instanceof Entity)
+					e = (Entity) p;
+				else continue;
+				
+				Vector2 s = renderer.toRenderSpace(e);
 				double r = renderer.toRenderSpace(e.getRadius());
 				if (s.sub(pos).len2() < r*r) 
 				{

@@ -2,9 +2,9 @@ package core;
 
 import javax.swing.SwingUtilities;
 
+import utils.REPL;
 import utils.TextStyle;
 import utils.Window;
-import utils.REPL;
 
 public class Application 
 {

@@ -6,12 +6,11 @@ import java.io.Serializable;
 import java.util.Collection;
 
 import utils.Vector2;
+import physics.Particle;
 
-public abstract class Entity implements Serializable
+public abstract class Entity extends Particle implements Serializable
 {
 	private static final long serialVersionUID = -4333766895269415282L;
-	protected Vector2 pos, vel;
-	protected double radius;
 	protected Color colour, healthyColour;
 	
 	protected double thinkTime = 0;
@@ -22,6 +21,11 @@ public abstract class Entity implements Serializable
 	
 	protected boolean dead = false;
 	protected double nutrition;
+	
+	public Entity(double radius)
+	{
+		super(radius);
+	}
 	
 	public abstract void update(double delta, Collection<Entity> entities);
 	
@@ -43,7 +47,7 @@ public abstract class Entity implements Serializable
 	
 	public void handleCollision(Entity other)
 	{
-		setVel(vel.setDir(pos.sub(other.pos)));
+		setVel(v.setDir(sub(other)));
 	}
 	
 	public boolean inInteractionRange(Entity other)
@@ -53,27 +57,6 @@ public abstract class Entity implements Serializable
 	}
 	
 	public abstract boolean isEdible();
-	
-	public boolean move(Vector2 dr, Collection<Entity> entities)
-	{
-		setPos(getPos().add(dr));
-		
-		for (Entity e : entities) 
-		{
-			Vector2 dx = getPos().sub(e.getPos());
-			if (!e.equals(this) && isCollidingWith(e)) 
-			{
-				if (e.getVel().len()*e.getRadius() > getVel().len()*getRadius())
-					setPos(e.getPos().add(dx.setLength(e.getRadius() + getRadius())));
-				else
-					e.setPos(getPos().sub(dx.setLength(e.getRadius() + getRadius())));
-
-				return false;
-			}
-		}
-		
-		return true;
-	}
 	
 	public void setHealth(double h)
 	{
@@ -102,11 +85,11 @@ public abstract class Entity implements Serializable
 	}
 	
 	public Vector2 getPos() {
-		return pos;
+		return this;
 	}
 
 	public void setPos(Vector2 pos) {
-		this.pos = pos;
+		set(pos);
 	}
 
 	public double getRadius() {
@@ -126,11 +109,11 @@ public abstract class Entity implements Serializable
 	}
 
 	public Vector2 getVel() {
-		return vel;
+		return v;
 	}
 
 	public void setVel(Vector2 vel) {
-		this.vel = vel;
+		v = vel;
 	}
 
 	public Color getColor() {

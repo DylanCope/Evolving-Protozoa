@@ -109,7 +109,7 @@ public class Particle extends PointParticle
 
 	private double computeRestitutionCoef(Particle p)
 	{
-		return 0.6;
+		return 1;
 	}
 	
 //	Calculates and sets the new positions and force on the particles

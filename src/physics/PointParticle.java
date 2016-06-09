@@ -18,11 +18,6 @@ public class PointParticle extends Vector2 implements Serializable
 		forces = new ArrayList<Vector2>();
 	}
 	
-//	public void applyForce(Force f)
-//	{
-//		forces.add(f);
-//	}
-	
 	public void applyForce(Vector2 f)
 	{
 		forces.add(f);

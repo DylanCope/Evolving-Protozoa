@@ -95,7 +95,7 @@ public class Particle extends PointParticle
 	    return new Vector2(vx, vy);
 	}
 
-	public void applyCollisionForces(Particle p, double cR, double delta) 
+	private void applyCollisionForces(Particle p, double cR, double delta)
 	{
 	    Vector2 v1 = momentumCalculation(p, cR);
 	    Vector2 v2 = p.momentumCalculation(this, cR);
@@ -131,8 +131,8 @@ public class Particle extends PointParticle
 	        if (0 < t && t <= delta)
 	        {
 //	            Apply s = s0 + vt to move particles to where they collide
-	            set(p.add(v.mul(t)));
-	            p.set(add(p.v.mul(t)));
+	            p.set(p.add(v.mul(t)));
+	            set(add(p.v.mul(t)));
 
 	            applyCollisionForces(p, cR, delta);
 	            p.applyCollisionForces(this, cR, delta);

@@ -31,10 +31,12 @@ public class Protozoa extends Entity
 		retina = new Retina();
 		setPos(new Vector2(0, 0));
 		double t = 2 * Math.PI * Simulation.RANDOM.nextDouble();
-		setVel(new Vector2(
+		applyForce(new Vector2(
 				maxVel * Math.cos(t), 
 				maxVel * Math.sin(t)));
-		setVel(getVel().rotate(brain.turn(this)));
+		setVel(new Vector2(0, 0));
+		setVel(getVel().rotate(
+				brain.turn(this)));
 		setVel(getVel().setLength(brain.speed(this)));
 		this.setRadius(radius);
 		
@@ -89,8 +91,8 @@ public class Protozoa extends Entity
 		if(thinkTime >= maxThinkTime)
 		{
 			thinkTime = 0;
-			Vector2 dir = getVel().rotate(brain.turn(this));
-			applyForce(dir.setLength(brain.speed(this)));
+//			Vector2 dir = getVel().rotate(brain.turn(this));
+//			applyForce(dir.setLength(brain.speed(this)));
 		}
 		double deathRate = radius * delta * 2.5;
 		setHealth(health * (1 - deathRate));

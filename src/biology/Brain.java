@@ -25,7 +25,7 @@ public interface Brain extends Serializable
 
 		@Override
 		public double speed(Protozoa p) {
-			return Simulation.RANDOM.nextDouble() / 10.0;
+			return Simulation.RANDOM.nextDouble() ; /// 10.0;
 		}
 
 		@Override

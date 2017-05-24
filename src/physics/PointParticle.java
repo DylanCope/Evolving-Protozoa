@@ -23,18 +23,16 @@ public class PointParticle extends Vector2 implements Serializable
 		forces.add(f);
 	}
 	
-	public void update(double delta)
-	{
+	public void update(double delta) {
 		Vector2 F = new Vector2(0, 0);
-		for (Vector2 f : forces)
-		{
+		for (Vector2 f : forces) {
 //			f.update(delta);
 			F = F.add(f);
 		}
 		a = F.mul(1 / mass);
 		v = v.add(a.mul(delta));
 		set(add(v.mul(delta)));
-		
+
 		forces.clear();
 //		forces.removeIf(new Predicate<Force>() {
 //			@Override
@@ -43,5 +41,4 @@ public class PointParticle extends Vector2 implements Serializable
 //			}
 //		});
 	}
-	
 }

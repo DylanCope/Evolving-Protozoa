@@ -5,7 +5,6 @@ import java.awt.event.KeyEvent;
 import utils.Input;
 import utils.Vector2;
 import biology.Entity;
-import physics.Particle;
 
 public class Controller
 {
@@ -21,20 +20,20 @@ public class Controller
 		if (input.getKey(KeyEvent.VK_ESCAPE)) 
 			Application.exit();
 		
-		renderer.setZoom(1 - input.getMouseWheelRotation() / 7.0);
-
+//		if (input.getKey(KeyEvent.VK_UP))
+//			renderer.setZoom(renderer.getZoom() * 2);
+//		if (input.getKey(KeyEvent.VK_DOWN))
+//			renderer.setZoom(renderer.getZoom() / 2.0);
+//		else
+			renderer.setZoom(1 - input.getMouseWheelRotation() / 7.0);
+//		
 		if (input.isLeftMouseJustPressed()) 
 		{
 			Vector2 pos = input.getMousePosition();
 			boolean track = false;
-			for (Particle p : simulation.getTank().getParticles()) 
+			for (Entity e : simulation.getTank().getEntities()) 
 			{
-				Entity e = null;
-				if (p instanceof Entity)
-					e = (Entity) p;
-				else continue;
-				
-				Vector2 s = renderer.toRenderSpace(e);
+				Vector2 s = renderer.toRenderSpace(e.getPos());
 				double r = renderer.toRenderSpace(e.getRadius());
 				if (s.sub(pos).len2() < r*r) 
 				{

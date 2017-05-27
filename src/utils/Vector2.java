@@ -43,13 +43,15 @@ public class Vector2 implements Serializable
 		return new Vector2(-getY(), getX());
 	}
 	
-	public Vector2 rotate(double angle) {
+	public Vector2 rotate(double angle)
+	{
 		double c = Math.cos(angle);
 		double s = Math.sin(angle);
 		return new Vector2(x*c - y*s, x*s + y*c);
 	}
 	
-	public Vector2 unit() {
+	public Vector2 unit()
+	{
 		double len = len();
 		if (len == 0)
 			return new Vector2(0, 0);
@@ -75,13 +77,9 @@ public class Vector2 implements Serializable
 	public void setY(double y) {
 		this.y = y;
 	}
-	
-	public void set(Vector2 v) {
-		this.x = v.x;
-		this.y = v.y;
-	}
 
-	public Vector2 setLength(double len) {
+	public Vector2 setLength(double len)
+	{
 		Vector2 u = unit();
 		return u.mul(len);
 	}
@@ -94,5 +92,11 @@ public class Vector2 implements Serializable
 	public String toString()
 	{
 		return "(" + x + ", " + y + ")";
+	}
+
+	public double angleBetween(Vector2 other)
+	{
+		double a = len2(), b = other.len2();
+		return Math.acos(dot(other) / Math.sqrt(a*b));
 	}
 }

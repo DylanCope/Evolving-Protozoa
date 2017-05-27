@@ -1,13 +1,8 @@
-package neuro;
+package neat;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Random;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
-public class Genome 
+public class NetworkGenome
 {
 	public static int innovation = 0;
 	
@@ -17,7 +12,9 @@ public class Genome
 	{
 		int id;
 		NeuronType type;
-		
+
+		public NeuronGene(int id, NeuronType type) { this.id = id; this.type = type; }
+
 		@Override
 		public int compareTo(NeuronGene o) {
 			return id - o.id;
@@ -26,6 +23,7 @@ public class Genome
 	
 	public class SynapseGene implements Comparable<SynapseGene>
 	{
+		int id;
 		int innovation;
 		NeuronGene in, out;
 		double weight;
@@ -43,14 +41,14 @@ public class Genome
 	private double mutationChance = 0.05;
 	private double fitness;
 	
-	public Genome()
+	public NetworkGenome()
 	{	
 		neurons = new HashSet<NeuronGene>();
 		synapses = new TreeSet<SynapseGene>();
 		random = new Random();
 	}
 	
-	public void mutateSynapse(NeuronGene in, NeuronGene out) 
+	private void mutateSynapse(NeuronGene in, NeuronGene out)
 	{
 		SynapseGene g = new SynapseGene();
 		g.innovation = innovation++;
@@ -61,9 +59,9 @@ public class Genome
 		synapses.add(g);
 	}
 	
-	public void mutateNeuron(NeuronGene in, NeuronGene out) 
+	private void mutateNeuron(NeuronGene in, NeuronGene out)
 	{
-		NeuronGene n = new NeuronGene();
+		NeuronGene n = new NeuronGene(neurons.size(), NeuronType.HIDDEN);
 		n.type = NeuronType.HIDDEN;
 		n.id = neurons.size();
 		neurons.add(n);
@@ -75,7 +73,7 @@ public class Genome
 				g.disabled = true;
 	}
 	
-	public Iterable<NeuronGene> neurons(NeuronType type)
+	private Iterable<NeuronGene> neurons(NeuronType type)
 	{
 		return new Iterable<NeuronGene>() {
 
@@ -105,7 +103,7 @@ public class Genome
 		};
 	}
 	
-	public void mutate()
+	private NetworkGenome mutate()
 	{
 		for (NeuronGene in : neurons(NeuronType.SENSOR)) {
 			for (NeuronGene out : neurons(NeuronType.HIDDEN))
@@ -119,13 +117,15 @@ public class Genome
 		for (SynapseGene g : synapses)
 			if (random.nextDouble() <= mutationChance)
 				 mutateSynapse(g.in, g.out);
+
+		return this;
 	}
 	
-	public Genome crossover(Genome other) 
+	private NetworkGenome crossover(NetworkGenome other)
 	{
-		Genome G = new Genome();
+		NetworkGenome G = new NetworkGenome();
 
-		G.synapses = new TreeSet<SynapseGene>();
+		G.synapses = new TreeSet<>();
 		
 		if (other.fitness > fitness) {
 			G.synapses.addAll(other.synapses);
@@ -136,7 +136,7 @@ public class Genome
 			G.synapses.addAll(other.synapses);
 		}
 
-		G.neurons = new HashSet<NeuronGene>();
+		G.neurons = new HashSet<>();
 		for (SynapseGene s : G.synapses) {
 			G.neurons.add(s.in);
 			G.neurons.add(s.out);
@@ -144,8 +144,44 @@ public class Genome
 		
 		return G;
 	}
+
+	protected NetworkGenome reproduce(NetworkGenome other)
+	{
+		return crossover(other).mutate();
+	}
+
+	protected NeuralNetwork networkPhenotype()
+	{
+		Neuron[] ns = new Neuron[neurons.size()];
+		List<Neuron> outputs = new ArrayList<>();
+		for (int i = 0; i < ns.length; i++)
+		{
+			ns[i].id = i;
+			List<Neuron> inputs = new ArrayList<>();
+			List<Double> ws = new ArrayList<>();
+			NeuronGene neuronGene = null;
+			for (SynapseGene syn : synapses)
+				if (!syn.disabled && syn.out.id == i) {
+					neuronGene = syn.out;
+					inputs.add(ns[syn.in.id]);
+					ws.add(syn.weight);
+				}
+
+			if (neuronGene != null && neuronGene.type == NeuronType.OUTPUT)
+				outputs.add(ns[neuronGene.id]);
+			else if (neuronGene.type == NeuronType.SENSOR)
+				ns[i].setActivation(Neuron.LINEAR);
+
+			ns[i].inputs = (Neuron[]) inputs.toArray();
+			ns[i].weights = new double[ws.size()];
+			for (int j = 0; j < ws.size(); j++)
+				ns[i].weights[j] = ws.get(j);
+		}
+		return new NeuralNetwork((Neuron[]) outputs.toArray(), ns);
+	}
 	
-	public int getInnovation() {
+	public int getInnovation()
+	{
 		int i = 0;
 		for (SynapseGene synapse : synapses)
 			if (synapse.innovation > i)
@@ -153,14 +189,13 @@ public class Genome
 		return i;		
 	}
 	
-	public double distance(Genome other) 
+	public double distance(NetworkGenome other)
 	{
 //		int excess = 0;
 //		int disjoint = 0;
 		return 0;
 	}
-	
-	
+
 	public void addNeuron(NeuronGene n) {
 		neurons.add(n);
 	}

@@ -4,46 +4,96 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Collection;
 
-import neuro.Genome;
+import neat.NetworkGenome;
+import neat.NeuralNetwork;
 import utils.Vector2;
 import core.Simulation;
 
 public class Protozoa extends Entity 
 {
+	class ProtozoaGenome extends NetworkGenome
+	{
+		public ProtozoaGenome(Retina ret)
+		{
+			int n = ret.numberOfCells();
+			for (int i = 0; i < n; i++) {
+				addNeuron(new NeuronGene(i, NeuronType.SENSOR));
+			}
+		}
+
+		public Brain brainPhenotype()
+		{
+			return new Brain()
+			{
+				private NeuralNetwork network = networkPhenotype();
+				private double maxTurn = Math.toRadians(35);
+				private double maxVel = 0.1;
+
+				@Override
+				public double turn(Protozoa p)
+				{
+					double x = 2*Simulation.RANDOM.nextDouble() - 1;
+					return maxTurn*x;
+				}
+
+				@Override
+				public double speed(Protozoa p) {
+					return maxVel*Simulation.RANDOM.nextDouble();
+				}
+
+				@Override
+				public boolean wantToAttack(Protozoa p) {
+					return Simulation.RANDOM.nextBoolean();
+				}
+
+				@Override
+				public boolean wantToMateWith(Protozoa p) {
+					return Simulation.RANDOM.nextBoolean();
+				}
+
+				@Override
+				public double energyConsumption() {
+					return 0;
+				}
+
+			};
+		}
+
+		public Protozoa reproduce(Protozoa a, Protozoa b)
+		{
+			Brain brain = brainPhenotype();
+			Protozoa offspring = new Protozoa(brain, radius);
+			offspring.setPos(a.getPos().add(b.getPos()).mul(0.5));
+			return offspring;
+		}
+	}
+
 	private static final long serialVersionUID = 2314292760446370751L;
 	public transient int id = Simulation.RANDOM.nextInt();
-	double maxVel = 100;
-	double fitness = 0;
+	private double totalConsumption = 0;
 	
-	Genome genome;
+	private ProtozoaGenome genome;
 	private Retina retina;
-	Brain brain;
-	
-	boolean attack;
-	boolean mate;
-	
+	private Brain brain;
+
 	public Protozoa(Brain brain, double radius)
 	{
-		super(radius);
 		healthyColour = new Color(200, 200, 255);
 		setColor(healthyColour);
 		this.brain = brain;
 		retina = new Retina();
 		setPos(new Vector2(0, 0));
 		double t = 2 * Math.PI * Simulation.RANDOM.nextDouble();
-		applyForce(new Vector2(
+		setVel(new Vector2(
 				maxVel * Math.cos(t), 
 				maxVel * Math.sin(t)));
-		setVel(new Vector2(0, 0));
-		setVel(getVel().rotate(
-				brain.turn(this)));
+		setVel(getVel().rotate(brain.turn(this)));
 		setVel(getVel().setLength(brain.speed(this)));
 		this.setRadius(radius);
 		
 		maxThinkTime = 0.2;
 	}
-	
-	
+
 	public void see(Entity e)
 	{
 		Vector2 dr = getPos().sub(e.getPos());
@@ -69,7 +119,7 @@ public class Protozoa extends Entity
 	
 	public void eat(Entity e) 
 	{
-		fitness += e.getNutrition();
+		totalConsumption += e.getNutrition();
 		setHealth(health + e.getNutrition());
 		e.setHealth(e.health - e.getNutrition());
 	}
@@ -91,14 +141,14 @@ public class Protozoa extends Entity
 		if(thinkTime >= maxThinkTime)
 		{
 			thinkTime = 0;
-//			Vector2 dir = getVel().rotate(brain.turn(this));
-//			applyForce(dir.setLength(brain.speed(this)));
+			setVel(getVel().rotate(brain.turn(this)));
+			setVel(getVel().setLength(brain.speed(this)));
 		}
 		double deathRate = radius * delta * 2.5;
 		setHealth(health * (1 - deathRate));
 		
 	}
-	
+
 	public void interact(Collection<Entity> entities)
 	{
 		for (Retina.Cell cell : retina) 
@@ -112,13 +162,14 @@ public class Protozoa extends Entity
 			if (e.equals(this)) 
 				continue;
 			
-			if (inInteractionRange(e)) 
+			if (canInteractWith(e))
 			{
 				if (e instanceof Protozoa){
-//					if (attack)
-						fight((Protozoa) e);
-//					else if (mate)
-//						mate((Protozoa) e);
+					Protozoa p = (Protozoa) e;
+					if (brain.wantToAttack(p))
+						fight(p);
+					else if (brain.wantToMateWith(p) && p.brain.wantToMateWith(this))
+						entities.add(genome.reproduce(this, p));
 				}
 				else {
 					eat(e);
@@ -132,13 +183,34 @@ public class Protozoa extends Entity
 	@Override
 	public void update(double delta, Collection<Entity> entities)
 	{
-		super.update(delta);
 		if (isDead())
 			return;
 
 		think(delta);
 		interact(entities);
-//		move(getVel().mul(delta), entities);
+		move(getVel().mul(delta), entities);
+	}
+	
+	public void render(Graphics g)
+	{
+		super.render(g);
+		
+		double r0 = 1;
+		double r1 = 0.8;
+		for (Retina.Cell cell : retina)
+		{
+			double x = Math.cos(cell.angle + getVel().angle());
+			double y = Math.sin(cell.angle + getVel().angle());
+			double len = Math.sqrt(x*x + y*y);
+			double r2 = r1;// + 0.5*(1 - r1)*(1 + Math.cos(2*Math.PI*cell.angle));
+			g.setColor(cell.color);
+			g.drawLine(
+					(int)(getPos().getX() + (x*getRadius()*r0)/len), 
+					(int)(getPos().getY() + (y*getRadius()*r0)/len), 
+					(int)(getPos().getX() + (x*getRadius()*r2)/len),
+					(int)(getPos().getY() + (y*getRadius()*r2)/len)
+					);
+		}
 	}
 	
 	@Override
@@ -152,24 +224,18 @@ public class Protozoa extends Entity
 	}
 
 	@Override
-	public void setDead(boolean dead) {
-		super.setDead(dead);
-//		if (dead)
-//			System.out.println("(" + fitness + ", " + timeAlive + "),");
-	}
-
+	public void setDead(boolean dead) { super.setDead(dead); }
 
 	public Retina getRetina() {
 		return retina;
 	}
-
 
 	public void setRetina(Retina retina) {
 		this.retina = retina;
 	}
 
 	public double getFitness() {
-		return fitness;
+		return totalConsumption;
 	}
 	
 }

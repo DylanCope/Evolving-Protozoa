@@ -1,8 +1,6 @@
 package utils;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -10,24 +8,23 @@ import java.io.ObjectOutputStream;
 
 public class FileIO 
 {
-	
+
 	public static void save(Object object, String filename)
 	{ 
 		try
 	    {
-			File f = new File("resources/data/" + filename + ".dat");
-			if (!f.exists())
-				f.createNewFile();
-			FileOutputStream fileOut = new FileOutputStream(f);
+			FileOutputStream fileOut =
+			new FileOutputStream("resources/data/" + filename + ".dat");
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(object);
 			out.close();
 			fileOut.close();
 			System.out.println("Serialized data saved to resources/data/" + filename + ".dat" );
-	    }
-		catch(IOException i) {
-			i.printStackTrace();
-		}
+	     }
+		catch(IOException i)
+	     {
+	    	 i.printStackTrace();
+	     }
 	}
 	
 	public static Object load(String filename)
@@ -40,17 +37,7 @@ public class FileIO
 			result = in.readObject();
 			in.close();
 			fileIn.close();
-		} 
-		catch (FileNotFoundException e) 
-		{
-			File f = new File("resources/data/" + filename + ".dat");
-			try {
-				f.createNewFile();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-		} 
-		catch (IOException|ClassNotFoundException e) {
+		} catch (IOException|ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 		return result;

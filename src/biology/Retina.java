@@ -44,5 +44,7 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 	public double getFov() {
 		return fov;
 	}
+
+	public int numberOfCells() { return cells.size(); }
 	
 }

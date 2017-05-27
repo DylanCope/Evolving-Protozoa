@@ -16,7 +16,6 @@ import biology.Entity;
 import biology.Pellet;
 import biology.Protozoa;
 import biology.Retina;
-import physics.Particle;
 
 public class Renderer extends Canvas
 {	
@@ -163,6 +162,7 @@ public class Renderer extends Canvas
 		Vector2 pos = toRenderSpace(p.getPos());
 		double r = toRenderSpace(p.getRadius());
 
+		
 		if (pos.getX() + r > window.getWidth())
 			return;
 		if (pos.getX() - r < 0)
@@ -192,7 +192,7 @@ public class Renderer extends Canvas
 	
 	public void entities(Graphics2D g, Tank tank)
 	{
-		for (Particle e : tank) {
+		for (Entity e : tank) {
 			if (e instanceof Protozoa)
 				protozoa(g, (Protozoa) e);
 			else if (e instanceof Pellet)

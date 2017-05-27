@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ArquillianContainersManager">
+    <container containerId="container.arquillian.embedded.glassfish.3.1" name="GlassFish Embedded 3.1">
+      <maven-library groupId="org.jboss.arquillian.container" artifactId="arquillian-glassfish-embedded-3.1" version="RELEASE" />
+    </container>
+  </component>
+</project>

@@ -2,56 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2a3908a2-62f6-4547-b380-1b00a2364464" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/arquillianContainers.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Arquillian_JUnit_Release.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/neat/NeuralNetwork.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/neat/Neuron.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/tests/neat/NeuralNetworkTest.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/neuro/Genome$1$1.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/neuro/Genome$1.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/neuro/Genome$NeuronGene.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/neuro/Genome$NeuronType.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/neuro/Genome$SynapseGene.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/neuro/Genome.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/neuro/NeuralNetwork.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/physics/Force.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/physics/Particle.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/physics/PointParticle.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/neuro/NeuralNetwork.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/physics/Force.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/physics/Particle.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/physics/PointParticle.java" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/neuro/Genome.java" afterPath="$PROJECT_DIR$/src/neat/NetworkGenome.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/biology/Brain$1.class" afterPath="$PROJECT_DIR$/bin/biology/Brain$1.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/biology/Brain.class" afterPath="$PROJECT_DIR$/bin/biology/Brain.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/biology/Entity.class" afterPath="$PROJECT_DIR$/bin/biology/Entity.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/biology/Pellet.class" afterPath="$PROJECT_DIR$/bin/biology/Pellet.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/biology/Protozoa.class" afterPath="$PROJECT_DIR$/bin/biology/Protozoa.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/core/Controller.class" afterPath="$PROJECT_DIR$/bin/core/Controller.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/core/Renderer.class" afterPath="$PROJECT_DIR$/bin/core/Renderer.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/core/Simulation.class" afterPath="$PROJECT_DIR$/bin/core/Simulation.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/core/Tank$1.class" afterPath="$PROJECT_DIR$/bin/core/Tank$1.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/core/Tank.class" afterPath="$PROJECT_DIR$/bin/core/Tank.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/utils/FileIO.class" afterPath="$PROJECT_DIR$/bin/utils/FileIO.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/utils/REPL.class" afterPath="$PROJECT_DIR$/bin/utils/REPL.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/utils/Vector2.class" afterPath="$PROJECT_DIR$/bin/utils/Vector2.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Evolving-Protozoa.iml" afterPath="$PROJECT_DIR$/Evolving-Protozoa.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/biology/Brain.java" afterPath="$PROJECT_DIR$/src/biology/Brain.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/biology/Entity.java" afterPath="$PROJECT_DIR$/src/biology/Entity.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/biology/Pellet.java" afterPath="$PROJECT_DIR$/src/biology/Pellet.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/biology/Protozoa.java" afterPath="$PROJECT_DIR$/src/biology/Protozoa.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/biology/Retina.java" afterPath="$PROJECT_DIR$/src/biology/Retina.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/core/Controller.java" afterPath="$PROJECT_DIR$/src/core/Controller.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/core/Renderer.java" afterPath="$PROJECT_DIR$/src/core/Renderer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/core/Simulation.java" afterPath="$PROJECT_DIR$/src/core/Simulation.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/core/Tank.java" afterPath="$PROJECT_DIR$/src/core/Tank.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/utils/FileIO.java" afterPath="$PROJECT_DIR$/src/utils/FileIO.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/utils/REPL.java" afterPath="$PROJECT_DIR$/src/utils/REPL.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/utils/Vector2.java" afterPath="$PROJECT_DIR$/src/utils/Vector2.java" />
     </list>
     <ignored path="$PROJECT_DIR$/bin/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -966,8 +917,16 @@
       <option name="presentableId" value="Default" />
       <updated>1495664451125</updated>
       <workItem from="1495664459279" duration="24221000" />
-      <workItem from="1495898209702" duration="7264000" />
+      <workItem from="1495898209702" duration="7683000" />
     </task>
+    <task id="LOCAL-00001" summary="Neural networks implemented, and testing suite started.">
+      <created>1495905989375</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1495905989375</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -1003,7 +962,7 @@
     </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="31485000" />
+    <option name="totallyTimeSpent" value="31904000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1056,6 +1015,10 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Neural networks implemented, and testing suite started." />
+    <option name="LAST_COMMIT_MESSAGE" value="Neural networks implemented, and testing suite started." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />

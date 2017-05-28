@@ -6,12 +6,9 @@ import java.util.Random;
 
 import javax.swing.Timer;
 
+import biology.*;
 import utils.Vector2;
 import utils.FileIO;
-import biology.Brain;
-import biology.Pellet;
-import biology.Protozoa;
-import biology.Entity;
 
 public class Simulation implements Runnable, ActionListener
 {
@@ -38,14 +35,15 @@ public class Simulation implements Runnable, ActionListener
 	{
 		tank = new Tank();
 
-		int creatures = 60;
+		int creatures = 40;
 		int pellets = 300;
 		
 		for (int i = 0; i < creatures; i++) 
 		{
 			double radius = (RANDOM.nextInt(5) + 5) / 500.0;
-			Protozoa p = new Protozoa(Brain.RANDOM, radius);
-			tank.addEntity(p);
+//			ProtozoaGenome genome = new ProtozoaGenome(10, radius);
+//			tank.addEntity(genome.phenotype());
+			tank.addEntity(new Protozoa(Brain.RANDOM, new Retina(60), radius));
 		}
 		
 		for (int i = creatures; i <  creatures + pellets; i++) 

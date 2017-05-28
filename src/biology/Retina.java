@@ -20,10 +20,15 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 	
 	private Collection<Cell> cells;
 	private double fov = Math.toRadians(90);
-	
-	public Retina() 
+
+	public Retina()
 	{
-		int n = 60;
+		this(60);
+	}
+
+	public Retina(int numCells)
+	{
+		int n = numCells;
 		cells = new ArrayList<Cell>();
 		for (int i = 0; i < n; i++) {
 			Cell cell = new Cell();

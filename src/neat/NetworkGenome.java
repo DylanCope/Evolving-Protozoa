@@ -4,7 +4,7 @@ import java.util.*;
 
 public class NetworkGenome
 {
-	public static int innovation = 0;
+	private static int innovation = 0;
 	
 	public enum NeuronType { SENSOR, HIDDEN, OUTPUT };
 	
@@ -12,8 +12,14 @@ public class NetworkGenome
 	{
 		int id;
 		NeuronType type;
+		Neuron.Activation activation;
 
-		public NeuronGene(int id, NeuronType type) { this.id = id; this.type = type; }
+		public NeuronGene(int id, NeuronType type, Neuron.Activation activation)
+		{
+			this.id = id;
+			this.type = type;
+			this.activation = activation;
+		}
 
 		@Override
 		public int compareTo(NeuronGene o) {
@@ -24,7 +30,8 @@ public class NetworkGenome
 		public String toString()
 		{
 			String typeStr;
-			switch (type){
+			switch (type)
+			{
 				case HIDDEN: typeStr = "HIDDEN"; break;
 				case SENSOR: typeStr = "SENSOR"; break;
 				case OUTPUT: typeStr = "OUTPUT"; break;
@@ -60,6 +67,7 @@ public class NetworkGenome
 	private Random random;
 	private double mutationChance = 0.05;
 	private double fitness;
+	private Neuron.Activation defaultActivation;
 
 	public NetworkGenome(long seed)
 	{
@@ -68,15 +76,30 @@ public class NetworkGenome
 		random = new Random(0);
 	}
 
+	public void setProperties(NetworkGenome other)
+	{
+		this.neurons = other.neurons;
+		this.synapses = other.synapses;
+		this.random = other.random;
+		this.mutationChance = other.mutationChance;
+	}
+
 	public NetworkGenome(long seed, int numInputs, int numOutputs)
-	{	
+	{
+		this(seed, numInputs, numOutputs, Neuron.SIGMOID);
+	}
+
+	public NetworkGenome(long seed, int numInputs,
+						 int numOutputs, Neuron.Activation defaultActivation)
+	{
 		neurons = new TreeSet<NeuronGene>();
 		for (int i = 0; i < numInputs; i++)
-			neurons.add(new NeuronGene(i, NeuronType.SENSOR));
+			neurons.add(new NeuronGene(i, NeuronType.SENSOR, Neuron.LINEAR));
 		for (int i = numInputs; i < numInputs + numOutputs; i++)
-			neurons.add(new NeuronGene(i, NeuronType.OUTPUT));
+			neurons.add(new NeuronGene(i, NeuronType.OUTPUT, defaultActivation));
 		synapses = new TreeSet<SynapseGene>();
 		random = new Random(seed);
+		this.defaultActivation = defaultActivation;
 	}
 	
 	private void mutateSynapse(NeuronGene in, NeuronGene out)
@@ -92,16 +115,24 @@ public class NetworkGenome
 	
 	private void mutateNeuron(NeuronGene in, NeuronGene out)
 	{
-		NeuronGene n = new NeuronGene(neurons.size(), NeuronType.HIDDEN);
-		n.type = NeuronType.HIDDEN;
-		n.id = neurons.size();
-		neurons.add(n);
-		mutateSynapse(in, n);
-		mutateSynapse(n, out);
-		
-		for (SynapseGene g : synapses)
-			if (g.in.id == in.id && g.out.id == out.id)
-				g.disabled = true;
+		if (random.nextBoolean())
+		{
+			NeuronGene n = new NeuronGene(neurons.size(),
+					NeuronType.HIDDEN, defaultActivation);
+			n.type = NeuronType.HIDDEN;
+			n.id = neurons.size();
+			neurons.add(n);
+			mutateSynapse(in, n);
+			mutateSynapse(n, out);
+
+			for (SynapseGene g : synapses)
+				if (g.in.id == in.id && g.out.id == out.id)
+					g.disabled = true;
+		}
+		else
+		{
+			addSynapse(in.id, out.id, random.nextDouble()*2 - 1);
+		}
 	}
 	
 	private Iterable<NeuronGene> neurons(NeuronType type)
@@ -203,12 +234,10 @@ public class NetworkGenome
 					neuronGene = gene;
 					if (neuronGene.type == NeuronType.OUTPUT)
 						outputs.add(ns[neuronGene.id]);
-					else if (neuronGene.type == NeuronType.SENSOR)
-						ns[neuronGene.id].setActivation(Neuron.LINEAR);
+					ns[neuronGene.id].setActivation(neuronGene.activation);
 					break;
 				}
 
-//			ns[i].inputs = (Neuron[]) inputs.toArray();
 			ns[i].inputs = new Neuron[inputs.size()];
 			for (int j = 0; j < inputs.size(); j++)
 				ns[i].inputs[j] = inputs.get(j);

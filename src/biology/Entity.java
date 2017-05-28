@@ -10,21 +10,28 @@ import utils.Vector2;
 public abstract class Entity implements Serializable
 {
 	private static final long serialVersionUID = -4333766895269415282L;
-	protected Vector2 pos, vel;
-	protected double radius;
-	protected double interactAngle = Math.PI / 8;
-	protected Color colour, healthyColour;
+	private Vector2 pos;
+	private double radius;
+	private double direction = 0;
+	private double speed = 0;
+	private double interactAngle = Math.PI / 8;
+	private Color colour, healthyColour;
 	
-	protected double thinkTime = 0;
-	protected double maxThinkTime;
-	protected double timeAlive = 0;
-	protected double health = 1;
-	protected int maxVel;
+	private double thinkTime = 0;
+	private double maxThinkTime;
+	private double timeAlive = 0;
+	private double health = 1;
 	
-	protected boolean dead = false;
-	protected double nutrition;
+	private boolean dead = false;
+	private double nutrition;
+
+	public Entity()
+	{
+		healthyColour = new Color(255, 255, 255);
+		colour = new Color(255, 255, 255);
+	}
 	
-	public abstract void update(double delta, Collection<Entity> entities);
+	public abstract Collection<Entity> update(double delta, Collection<Entity> entities);
 	
 	public void render(Graphics g)
 	{
@@ -35,6 +42,18 @@ public abstract class Entity implements Serializable
 				(int)(2*radius), 
 				(int)(2*radius));
 	}
+
+	public boolean tick(double delta)
+	{
+		thinkTime += delta;
+		timeAlive += delta;
+
+		if (thinkTime >= maxThinkTime) {
+			thinkTime = 0;
+			return true;
+		}
+		return false;
+	}
 	
 	public boolean isCollidingWith(Entity other)
 	{
@@ -44,14 +63,15 @@ public abstract class Entity implements Serializable
 	
 	public void handleCollision(Entity other)
 	{
-		setVel(vel.setDir(pos.sub(other.pos)));
+		setDir(getDir().setDir(pos.sub(other.pos)));
 	}
 	
-	public boolean canInteractWith(Entity other)
+	protected boolean canInteractWith(Entity other)
 	{
 		Vector2 ds = other.getPos().sub(getPos());
-		return 0.9*ds.len() <= getRadius() + other.getRadius() &&
-				getVel().angleBetween(ds) < interactAngle;
+//		return 0.9*ds.len() <= getRadius() + other.getRadius() &&
+//				getVel().angleBetween(ds) < interactAngle;
+		return 0.9*ds.len() <= getRadius() + other.getRadius();
 	}
 	
 	public abstract boolean isEdible();
@@ -60,7 +80,7 @@ public abstract class Entity implements Serializable
 	{
 		setPos(getPos().add(dr));
 		
-		for (Entity e : entities) 
+		for (Entity e : entities)
 		{
 			Vector2 dx = getPos().sub(e.getPos());
 			if (!e.equals(this) && isCollidingWith(e)) 
@@ -97,6 +117,12 @@ public abstract class Entity implements Serializable
 				(int)(health * g), 
 				(int)(health * b));
 	}
+
+	public void setMaxThinkTime(double maxThinkTime) { this.maxThinkTime = maxThinkTime; }
+
+	public Color getHealthyColour() { return healthyColour; }
+
+	public void setHealthyColour(Color healthyColour) { this.healthyColour = healthyColour; }
 	
 	public double getHealth() 
 	{
@@ -127,13 +153,29 @@ public abstract class Entity implements Serializable
 		this.dead = dead;
 	}
 
+	public Vector2 getDir() {
+		return new Vector2(Math.cos(direction), Math.sin(direction));
+	}
+
+	public void setDir(Vector2 dir) {
+		this.direction = dir.angle();
+	}
+
+	public void rotate(double theta) {
+		this.direction += theta;
+	}
+
 	public Vector2 getVel() {
-		return vel;
+		return getDir().mul(speed);
 	}
 
 	public void setVel(Vector2 vel) {
-		this.vel = vel;
+		this.speed = vel.len();
+		if (this.speed != 0)
+			setDir(vel.mul(1 / this.speed));
 	}
+
+	public void setSpeed(double speed) { this.speed = speed; }
 
 	public Color getColor() {
 		return colour;

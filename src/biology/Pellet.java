@@ -1,6 +1,7 @@
 package biology;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import utils.Vector2;
@@ -16,22 +17,21 @@ public class Pellet extends Entity
 		setVel(new Vector2(
 				(0.5 - Simulation.RANDOM.nextDouble()) / 30.0,
 				(0.5 - Simulation.RANDOM.nextDouble()) / 30.0));
-		healthyColour = new Color(
+		setColor(new Color(
 				150 + Simulation.RANDOM.nextInt(105), 
 				10  + Simulation.RANDOM.nextInt(100), 
-				10  + Simulation.RANDOM.nextInt(100));
-		setColor(healthyColour);
+				10  + Simulation.RANDOM.nextInt(100)));
 		setNutrition(0.25 * radius);
-		maxVel = 50;
 	}
 
 	@Override
-	public void update(double delta, Collection<Entity> entities) 
+	public Collection<Entity> update(double delta, Collection<Entity> entities)
 	{	
 		if (isDead())
-			return;
+			return new ArrayList<Entity>();
 		
 		move(getVel().mul(delta), entities);
+		return new ArrayList<Entity>();
 	}
 
 	@Override
@@ -41,7 +41,7 @@ public class Pellet extends Entity
 	
 	@Override
 	public double getNutrition() {
-		return 10 * radius;
+		return 10 * getRadius();
 	}
 
 }

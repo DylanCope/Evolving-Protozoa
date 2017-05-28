@@ -43,28 +43,26 @@ public class Tank implements Iterable<Entity>, Serializable
 	
 	public void update(double delta) 
 	{
+		Collection<Entity> newEntities = new ArrayList<>();
 		for(Entity e : entities) {
-			e.update(delta, entities);
+			newEntities.addAll(e.update(delta, entities));
 			
 			if (e.getPos().len() - e.getRadius() > radius) {
 				e.setPos(e.getPos().mul(-0.98));
 			}
 		}
+		entities.addAll(newEntities);
 		
 		// Remove dead entities
-		entities.removeIf(new Predicate<Entity>() {
-
-			public boolean test(Entity e) {
-				if (e.isDead()) {
-					if (e instanceof Protozoa)
-						protozoaNumber--;
-					else if (e instanceof Pellet)
-						pelletNumber--;
-					return true;
-				}
-				return false;
+		entities.removeIf((Entity e) -> {
+			if (e.isDead()) {
+				if (e instanceof Protozoa)
+					protozoaNumber--;
+				else if (e instanceof Pellet)
+					pelletNumber--;
+				return true;
 			}
-			
+			return false;
 		});
 	}
 	

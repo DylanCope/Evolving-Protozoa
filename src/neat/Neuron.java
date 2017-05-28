@@ -1,6 +1,9 @@
 package neat;
 
+import core.Simulation;
+
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by dylan on 26/05/2017.
@@ -14,6 +17,7 @@ public class Neuron
 
     public static final Activation SIGMOID = (double z) -> 1 / (1 + Math.exp(-z));
     public static final Activation LINEAR = (double z) -> z;
+    public static final Activation TANH = (double z) -> Math.tanh(z);
 
     Neuron[] inputs;
     double[] weights;
@@ -21,7 +25,7 @@ public class Neuron
     double state = 0;
 
     private double next_state = 0;
-    private Neuron.Activation activation = SIGMOID;
+    private Neuron.Activation activation = TANH;
 
     public Neuron(int id)
     {
@@ -40,9 +44,8 @@ public class Neuron
     void tick()
     {
         double z = 0;
-        for (int i = 0; i < inputs.length; i++) {
+        for (int i = 0; i < inputs.length; i++)
             z += weights[i] * inputs[i].state;
-        }
         next_state = activation.transfer(z);
     }
 
@@ -59,6 +62,6 @@ public class Neuron
         for (int i = 0; i < inputs.length; i++)
             connections += "(" + inputs[i].id + ", " + weights[i] + ")";
         connections += "]";
-        return String.format("id:%d, state:%.2f, inputs:%s", id, state, connections );
+        return String.format("id:%d, state:%.2f, inputs:%s", id, state, connections);
     }
 }

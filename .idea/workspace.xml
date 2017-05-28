@@ -2,19 +2,37 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2a3908a2-62f6-4547-b380-1b00a2364464" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/biology/Protozoa$ProtozoaGenome.class" afterPath="$PROJECT_DIR$/bin/biology/Protozoa$ProtozoaGenome.class" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/biology/ProtozoaGenome.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/tests/neat/NetworkGenomeTest.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/biology/Protozoa$ProtozoaGenome$1.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/biology/Protozoa$ProtozoaGenome.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bin/core/Tank$1.class" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/biology/Brain$1.class" afterPath="$PROJECT_DIR$/bin/biology/Brain$1.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/biology/Brain.class" afterPath="$PROJECT_DIR$/bin/biology/Brain.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/biology/Entity.class" afterPath="$PROJECT_DIR$/bin/biology/Entity.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/biology/Pellet.class" afterPath="$PROJECT_DIR$/bin/biology/Pellet.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/biology/Protozoa.class" afterPath="$PROJECT_DIR$/bin/biology/Protozoa.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/biology/Retina.class" afterPath="$PROJECT_DIR$/bin/biology/Retina.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/core/Simulation.class" afterPath="$PROJECT_DIR$/bin/core/Simulation.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/core/Tank.class" afterPath="$PROJECT_DIR$/bin/core/Tank.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/neat/NetworkGenome$1$1.class" afterPath="$PROJECT_DIR$/bin/neat/NetworkGenome$1$1.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/neat/NetworkGenome$1.class" afterPath="$PROJECT_DIR$/bin/neat/NetworkGenome$1.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/neat/NetworkGenome$NeuronGene.class" afterPath="$PROJECT_DIR$/bin/neat/NetworkGenome$NeuronGene.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/neat/NetworkGenome$SynapseGene.class" afterPath="$PROJECT_DIR$/bin/neat/NetworkGenome$SynapseGene.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/neat/NetworkGenome.class" afterPath="$PROJECT_DIR$/bin/neat/NetworkGenome.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/neat/NeuralNetwork.class" afterPath="$PROJECT_DIR$/bin/neat/NeuralNetwork.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/neat/Neuron.class" afterPath="$PROJECT_DIR$/bin/neat/Neuron.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/tests/neat/NeuralNetworkTest.class" afterPath="$PROJECT_DIR$/bin/tests/neat/NeuralNetworkTest.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/libraries/Arquillian_JUnit_Release.xml" afterPath="$PROJECT_DIR$/.idea/libraries/Arquillian_JUnit_Release.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/biology/Brain.java" afterPath="$PROJECT_DIR$/src/biology/Brain.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/biology/Entity.java" afterPath="$PROJECT_DIR$/src/biology/Entity.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/biology/Pellet.java" afterPath="$PROJECT_DIR$/src/biology/Pellet.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/biology/Protozoa.java" afterPath="$PROJECT_DIR$/src/biology/Protozoa.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/biology/Retina.java" afterPath="$PROJECT_DIR$/src/biology/Retina.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/core/Controller.java" afterPath="$PROJECT_DIR$/src/core/Controller.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/core/Simulation.java" afterPath="$PROJECT_DIR$/src/core/Simulation.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/core/Tank.java" afterPath="$PROJECT_DIR$/src/core/Tank.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/neat/NetworkGenome.java" afterPath="$PROJECT_DIR$/src/neat/NetworkGenome.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/neat/NeuralNetwork.java" afterPath="$PROJECT_DIR$/src/neat/NeuralNetwork.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/neat/Neuron.java" afterPath="$PROJECT_DIR$/src/neat/Neuron.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/tests/neat/NeuralNetworkTest.java" afterPath="$PROJECT_DIR$/src/tests/neat/NeuralNetworkTest.java" />
     </list>
@@ -37,7 +55,7 @@
     <SUITE FILE_PATH="coverage/Evolving_Protozoa$NeuralNetworkTest_setInputs.coverage" NAME="NeuralNetworkTest.setInputs Coverage Results" MODIFIED="1495902383865" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>tests.neat.*</FILTER>
     </SUITE>
-    <SUITE FILE_PATH="coverage/Evolving_Protozoa$Application.coverage" NAME="Application Coverage Results" MODIFIED="1495822250572" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
+    <SUITE FILE_PATH="coverage/Evolving_Protozoa$Application.coverage" NAME="Application Coverage Results" MODIFIED="1495976803687" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false">
       <FILTER>core.*</FILTER>
     </SUITE>
   </component>
@@ -59,68 +77,47 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="600">
-      <file leaf-file-name="REPL.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/utils/REPL.java">
+      <file leaf-file-name="Protozoa.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/biology/Protozoa.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="33">
-              <caret line="23" column="37" lean-forward="false" selection-start-line="23" selection-start-column="37" selection-end-line="23" selection-end-column="37" />
+            <state relative-caret-position="446">
+              <caret line="43" column="0" lean-forward="false" selection-start-line="43" selection-start-column="0" selection-end-line="43" selection-end-column="0" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="method#render#0;class#Protozoa#0" expanded="false" />
+                <element signature="e#4110#4111#0" expanded="true" />
+                <element signature="e#4130#4131#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="NetworkGenomeTest.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/tests/neat/NetworkGenomeTest.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="878">
+              <caret line="39" column="35" lean-forward="false" selection-start-line="39" selection-start-column="35" selection-end-line="39" selection-end-column="35" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Protozoa.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/biology/Protozoa.java">
+      <file leaf-file-name="Tank.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/core/Tank.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="233">
-              <caret line="27" column="0" lean-forward="true" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#323#324#0" expanded="true" />
-                <element signature="e#364#365#0" expanded="true" />
-                <element signature="method#see#0;class#Protozoa#0" expanded="false" />
-                <element signature="method#eat#0;class#Protozoa#0" expanded="false" />
-                <element signature="method#fight#0;class#Protozoa#0" expanded="false" />
-                <element signature="method#update#0;class#Protozoa#0" expanded="false" />
-                <element signature="method#render#0;class#Protozoa#0" expanded="false" />
-              </folding>
+            <state relative-caret-position="524">
+              <caret line="54" column="8" lean-forward="false" selection-start-line="54" selection-start-column="8" selection-end-line="54" selection-end-column="8" />
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Retina.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/biology/Retina.java">
+      <file leaf-file-name="Pellet.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/biology/Pellet.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1221">
-              <caret line="47" column="55" lean-forward="false" selection-start-line="47" selection-start-column="55" selection-end-line="47" selection-end-column="55" />
-              <folding>
-                <element signature="imports" expanded="false" />
-                <element signature="e#807#808#0" expanded="false" />
-                <element signature="e#837#838#0" expanded="false" />
-                <element signature="e#870#871#0" expanded="false" />
-                <element signature="e#911#912#0" expanded="false" />
-                <element signature="e#939#940#0" expanded="false" />
-                <element signature="e#956#957#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="NetworkGenome.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/neat/NetworkGenome.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="944">
-              <caret line="210" column="51" lean-forward="true" selection-start-line="210" selection-start-column="51" selection-end-line="210" selection-end-column="51" />
-              <folding>
-                <element signature="e#4048#4049#0" expanded="true" />
-                <element signature="e#4087#4088#0" expanded="true" />
-                <element signature="method#getInnovation#0;class#NetworkGenome#0" expanded="false" />
-                <element signature="method#distance#0;class#NetworkGenome#0" expanded="false" />
-                <element signature="e#5604#5605#0" expanded="true" />
-                <element signature="e#5625#5626#0" expanded="true" />
-                <element signature="e#5668#5669#0" expanded="true" />
-                <element signature="e#5690#5691#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="891">
+              <caret line="32" column="44" lean-forward="false" selection-start-line="32" selection-start-column="44" selection-end-line="32" selection-end-column="44" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -128,42 +125,62 @@
       <file leaf-file-name="Brain.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/biology/Brain.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="990">
-              <caret line="34" column="9" lean-forward="false" selection-start-line="34" selection-start-column="9" selection-end-line="34" selection-end-column="9" />
+            <state relative-caret-position="647">
+              <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="NetworkGenome.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/neat/NetworkGenome.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1378">
+              <caret line="101" column="51" lean-forward="false" selection-start-line="101" selection-start-column="51" selection-end-line="101" selection-end-column="51" />
               <folding>
-                <element signature="e#743#744#0" expanded="true" />
-                <element signature="e#790#791#0" expanded="true" />
+                <element signature="e#1892#1893#0" expanded="true" />
+                <element signature="e#1948#1949#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NeuralNetworkTest.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="NeuralNetworkTest.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/tests/neat/NeuralNetworkTest.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="812">
-              <caret line="85" column="47" lean-forward="true" selection-start-line="85" selection-start-column="47" selection-end-line="85" selection-end-column="47" />
+            <state relative-caret-position="462">
+              <caret line="20" column="27" lean-forward="false" selection-start-line="20" selection-start-column="27" selection-end-line="20" selection-end-column="27" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NeuralNetwork.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/neat/NeuralNetwork.java">
+      <file leaf-file-name="Simulation.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/core/Simulation.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="660">
-              <caret line="20" column="38" lean-forward="true" selection-start-line="20" selection-start-column="38" selection-end-line="20" selection-end-column="38" />
+            <state relative-caret-position="559">
+              <caret line="31" column="5" lean-forward="false" selection-start-line="31" selection-start-column="5" selection-end-line="31" selection-end-column="5" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Neuron.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/neat/Neuron.java">
+      <file leaf-file-name="ProtozoaGenome.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/biology/ProtozoaGenome.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="957">
-              <caret line="59" column="70" lean-forward="true" selection-start-line="59" selection-start-column="70" selection-end-line="59" selection-end-column="70" />
-              <folding />
+            <state relative-caret-position="545">
+              <caret line="20" column="5" lean-forward="false" selection-start-line="20" selection-start-column="5" selection-end-line="20" selection-end-column="5" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="class#478:2080" expanded="false" />
+                <element signature="method#tick#0;class#478:2080" expanded="false" />
+                <element signature="e#2120#2121#0" expanded="true" />
+                <element signature="e#2170#2171#0" expanded="true" />
+                <element signature="e#2207#2208#0" expanded="true" />
+                <element signature="e#2236#2237#0" expanded="true" />
+                <element signature="e#2275#2276#0" expanded="true" />
+                <element signature="e#2316#2317#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -171,8 +188,8 @@
       <file leaf-file-name="Entity.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/biology/Entity.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1485">
-              <caret line="55" column="4" lean-forward="true" selection-start-line="55" selection-start-column="4" selection-end-line="55" selection-end-column="4" />
+            <state relative-caret-position="380">
+              <caret line="33" column="39" lean-forward="false" selection-start-line="33" selection-start-column="39" selection-end-line="33" selection-end-column="39" />
               <folding />
             </state>
           </provider>
@@ -184,9 +201,9 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Arquillian JUnit Test Class" />
-        <option value="Class" />
         <option value="JUnit5 Test Class" />
         <option value="JUnit4 Test Class" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -210,21 +227,26 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/core/Simulation.java" />
         <option value="$PROJECT_DIR$/src/core/Application.java" />
-        <option value="$PROJECT_DIR$/src/biology/Brain.java" />
         <option value="$PROJECT_DIR$/src/utils/REPL.java" />
         <option value="$PROJECT_DIR$/src/utils/Vector2.java" />
-        <option value="$PROJECT_DIR$/src/biology/Entity.java" />
         <option value="$PROJECT_DIR$/src/neat/Genome.java" />
         <option value="$PROJECT_DIR$/src/neat/FeedForwardANN.java" />
         <option value="$PROJECT_DIR$/src/neat/NeuralNetworkTest.java" />
-        <option value="$PROJECT_DIR$/src/biology/Retina.java" />
-        <option value="$PROJECT_DIR$/src/biology/Protozoa.java" />
-        <option value="$PROJECT_DIR$/src/neat/Neuron.java" />
-        <option value="$PROJECT_DIR$/src/neat/NetworkGenome.java" />
         <option value="$PROJECT_DIR$/src/neat/NeuralNetwork.java" />
+        <option value="$PROJECT_DIR$/src/core/Controller.java" />
+        <option value="$PROJECT_DIR$/src/neat/Neuron.java" />
+        <option value="$PROJECT_DIR$/src/biology/Retina.java" />
+        <option value="$PROJECT_DIR$/src/biology/Entity.java" />
+        <option value="$PROJECT_DIR$/src/core/Tank.java" />
+        <option value="$PROJECT_DIR$/src/biology/Pellet.java" />
+        <option value="$PROJECT_DIR$/src/biology/Protozoa.java" />
+        <option value="$PROJECT_DIR$/src/biology/ProtozoaGenome.java" />
         <option value="$PROJECT_DIR$/src/tests/neat/NeuralNetworkTest.java" />
+        <option value="$PROJECT_DIR$/src/neat/NetworkGenome.java" />
+        <option value="$PROJECT_DIR$/src/tests/neat/NetworkGenomeTest.java" />
+        <option value="$PROJECT_DIR$/src/biology/Brain.java" />
+        <option value="$PROJECT_DIR$/src/core/Simulation.java" />
       </list>
     </option>
   </component>
@@ -335,6 +357,10 @@
               <option name="myItemId" value="src" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="core" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -424,7 +450,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="JUnit.Tests">
+  <component name="RunManager" selected="Application.Application">
     <configuration default="false" name="Application" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
@@ -515,6 +541,32 @@
       <option name="PACKAGE_NAME" value="tests.neat" />
       <option name="MAIN_CLASS_NAME" value="tests.neat.NeuralNetworkTest" />
       <option name="METHOD_NAME" value="initGenome" />
+      <option name="TEST_OBJECT" value="method" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+      <method />
+    </configuration>
+    <configuration default="false" name="NetworkGenomeTest.disconnectedPhenotype" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="tests.neat.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <module name="Evolving-Protozoa" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" value="tests.neat" />
+      <option name="MAIN_CLASS_NAME" value="tests.neat.NetworkGenomeTest" />
+      <option name="METHOD_NAME" value="disconnectedPhenotype" />
       <option name="TEST_OBJECT" value="method" />
       <option name="VM_PARAMETERS" value="-ea" />
       <option name="PARAMETERS" />
@@ -921,9 +973,9 @@
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="PACKAGE_NAME" value="tests.neat" />
-      <option name="MAIN_CLASS_NAME" value="tests.neat.NeuralNetworkTest" />
-      <option name="METHOD_NAME" value="feed" />
-      <option name="TEST_OBJECT" value="class" />
+      <option name="MAIN_CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="TEST_OBJECT" value="package" />
       <option name="VM_PARAMETERS" value="-ea" />
       <option name="PARAMETERS" value="" />
       <option name="WORKING_DIRECTORY" value="file://$MODULE_DIR$" />
@@ -936,19 +988,21 @@
       <patterns />
       <method />
     </configuration>
-    <list size="5">
+    <list size="6">
       <item index="0" class="java.lang.String" itemvalue="JUnit.Tests" />
       <item index="1" class="java.lang.String" itemvalue="Application.Application" />
       <item index="2" class="java.lang.String" itemvalue="Arquillian JUnit.NeuralNetworkTest" />
       <item index="3" class="java.lang.String" itemvalue="JUnit.NeuralNetworkTest.setInputs" />
       <item index="4" class="java.lang.String" itemvalue="JUnit.NeuralNetworkTest.initGenome" />
+      <item index="5" class="java.lang.String" itemvalue="JUnit.NetworkGenomeTest.disconnectedPhenotype" />
     </list>
     <recent_temporary>
-      <list size="4">
-        <item index="0" class="java.lang.String" itemvalue="JUnit.NeuralNetworkTest.initGenome" />
-        <item index="1" class="java.lang.String" itemvalue="JUnit.NeuralNetworkTest.setInputs" />
-        <item index="2" class="java.lang.String" itemvalue="Arquillian JUnit.NeuralNetworkTest" />
-        <item index="3" class="java.lang.String" itemvalue="Application.Application" />
+      <list size="5">
+        <item index="0" class="java.lang.String" itemvalue="Application.Application" />
+        <item index="1" class="java.lang.String" itemvalue="Arquillian JUnit.NeuralNetworkTest" />
+        <item index="2" class="java.lang.String" itemvalue="JUnit.NetworkGenomeTest.disconnectedPhenotype" />
+        <item index="3" class="java.lang.String" itemvalue="JUnit.NeuralNetworkTest.initGenome" />
+        <item index="4" class="java.lang.String" itemvalue="JUnit.NeuralNetworkTest.setInputs" />
       </list>
     </recent_temporary>
   </component>
@@ -967,7 +1021,7 @@
       <updated>1495664451125</updated>
       <workItem from="1495664459279" duration="24221000" />
       <workItem from="1495898209702" duration="8689000" />
-      <workItem from="1495930469985" duration="10476000" />
+      <workItem from="1495930469985" duration="25848000" />
     </task>
     <task id="LOCAL-00001" summary="Neural networks implemented, and testing suite started.">
       <created>1495905989375</created>
@@ -976,27 +1030,25 @@
       <option name="project" value="LOCAL" />
       <updated>1495905989375</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Genome construction test">
+      <created>1495941809817</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1495941809832</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="NeuralNetworkTest_initGenome - 2017.05.28 at 03h 46m 43s.xml">
-      <configuration name="NeuralNetworkTest.initGenome" configurationId="JUnit" />
+    <history-entry file="NetworkGenomeTest_disconnectedPhenotype - 2017.05.28 at 16h 08m 56s.xml">
+      <configuration name="NetworkGenomeTest.disconnectedPhenotype" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="NeuralNetworkTest_initGenome - 2017.05.28 at 03h 47m 39s.xml">
-      <configuration name="NeuralNetworkTest.initGenome" configurationId="JUnit" />
+    <history-entry file="NetworkGenomeTest_disconnectedPhenotype - 2017.05.28 at 16h 38m 39s.xml">
+      <configuration name="NetworkGenomeTest.disconnectedPhenotype" configurationId="JUnit" />
     </history-entry>
-    <history-entry file="NeuralNetworkTest_initGenome - 2017.05.28 at 03h 56m 29s.xml">
-      <configuration name="NeuralNetworkTest.initGenome" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="NeuralNetworkTest_initGenome - 2017.05.28 at 04h 01m 36s.xml">
-      <configuration name="NeuralNetworkTest.initGenome" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="NeuralNetworkTest_initGenome - 2017.05.28 at 04h 01m 52s.xml">
-      <configuration name="NeuralNetworkTest.initGenome" configurationId="JUnit" />
-    </history-entry>
-    <history-entry file="Tests - 2017.05.28 at 04h 08m 36s.xml">
-      <configuration name="Tests" configurationId="JUnit" />
+    <history-entry file="NeuralNetworkTest - 2017.05.28 at 16h 38m 58s.xml">
+      <configuration name="NeuralNetworkTest" configurationId="ArquillianJUnit" />
     </history-entry>
     <history-entry file="Tests - 2017.05.28 at 04h 09m 18s.xml">
       <configuration name="Tests" configurationId="JUnit" />
@@ -1010,9 +1062,18 @@
     <history-entry file="Tests - 2017.05.28 at 04h 15m 46s.xml">
       <configuration name="Tests" configurationId="JUnit" />
     </history-entry>
+    <history-entry file="Tests - 2017.05.28 at 04h 39m 20s.xml">
+      <configuration name="Tests" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="Tests - 2017.05.28 at 16h 00m 48s.xml">
+      <configuration name="Tests" configurationId="JUnit" />
+    </history-entry>
+    <history-entry file="Tests - 2017.05.28 at 16h 07m 15s.xml">
+      <configuration name="Tests" configurationId="JUnit" />
+    </history-entry>
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="43386000" />
+    <option name="totallyTimeSpent" value="58758000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1037,20 +1098,20 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.19472834" sideWeight="0.50137365" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.30356133" sideWeight="0.49862638" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.30356133" sideWeight="0.49862638" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1823489" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Properties" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32956472" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2084478" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.29979396" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39966083" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1068,11 +1129,12 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Neural networks implemented, and testing suite started." />
-    <option name="LAST_COMMIT_MESSAGE" value="Neural networks implemented, and testing suite started." />
+    <MESSAGE value="Genome construction test" />
+    <option name="LAST_COMMIT_MESSAGE" value="Genome construction test" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="2" />
+      <option name="time" value="3" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1095,13 +1157,9 @@
           <caret line="20" column="13" lean-forward="true" selection-start-line="20" selection-start-column="13" selection-end-line="20" selection-end-column="13" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#323#324#0" expanded="true" />
-            <element signature="e#364#365#0" expanded="true" />
-            <element signature="method#see#0;class#Protozoa#0" expanded="false" />
-            <element signature="method#eat#0;class#Protozoa#0" expanded="false" />
-            <element signature="method#fight#0;class#Protozoa#0" expanded="false" />
-            <element signature="method#update#0;class#Protozoa#0" expanded="false" />
             <element signature="method#render#0;class#Protozoa#0" expanded="false" />
+            <element signature="e#4110#4111#0" expanded="true" />
+            <element signature="e#4130#4131#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1110,15 +1168,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1551">
           <caret line="47" column="55" lean-forward="false" selection-start-line="47" selection-start-column="55" selection-end-line="47" selection-end-column="55" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#807#808#0" expanded="false" />
-            <element signature="e#837#838#0" expanded="false" />
-            <element signature="e#870#871#0" expanded="false" />
-            <element signature="e#911#912#0" expanded="false" />
-            <element signature="e#939#940#0" expanded="false" />
-            <element signature="e#956#957#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1127,14 +1177,13 @@
         <state relative-caret-position="2277">
           <caret line="69" column="8" lean-forward="true" selection-start-line="69" selection-start-column="8" selection-end-line="69" selection-end-column="8" />
           <folding>
-            <element signature="e#4048#4049#0" expanded="true" />
-            <element signature="e#4087#4088#0" expanded="true" />
-            <element signature="method#getInnovation#0;class#NetworkGenome#0" expanded="false" />
-            <element signature="method#distance#0;class#NetworkGenome#0" expanded="false" />
-            <element signature="e#5604#5605#0" expanded="true" />
-            <element signature="e#5625#5626#0" expanded="true" />
-            <element signature="e#5668#5669#0" expanded="true" />
-            <element signature="e#5690#5691#0" expanded="true" />
+            <element signature="e#4787#4788#0" expanded="false" />
+            <element signature="e#4826#4827#0" expanded="false" />
+            <element signature="e#6249#6250#0" expanded="false" />
+            <element signature="e#6270#6271#0" expanded="false" />
+            <element signature="e#6313#6314#0" expanded="false" />
+            <element signature="e#6335#6336#0" expanded="false" />
+            <element signature="method#addSynapse#1;class#NetworkGenome#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1144,8 +1193,8 @@
         <state relative-caret-position="1122">
           <caret line="34" column="9" lean-forward="true" selection-start-line="34" selection-start-column="9" selection-end-line="34" selection-end-column="9" />
           <folding>
-            <element signature="e#743#744#0" expanded="true" />
-            <element signature="e#790#791#0" expanded="true" />
+            <element signature="e#811#812#0" expanded="false" />
+            <element signature="e#858#859#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1195,14 +1244,13 @@
         <state relative-caret-position="4587">
           <caret line="153" column="5" lean-forward="false" selection-start-line="153" selection-start-column="5" selection-end-line="153" selection-end-column="5" />
           <folding>
-            <element signature="e#4048#4049#0" expanded="true" />
-            <element signature="e#4087#4088#0" expanded="true" />
-            <element signature="method#getInnovation#0;class#NetworkGenome#0" expanded="false" />
-            <element signature="method#distance#0;class#NetworkGenome#0" expanded="false" />
-            <element signature="e#5604#5605#0" expanded="true" />
-            <element signature="e#5625#5626#0" expanded="true" />
-            <element signature="e#5668#5669#0" expanded="true" />
-            <element signature="e#5690#5691#0" expanded="true" />
+            <element signature="e#4787#4788#0" expanded="false" />
+            <element signature="e#4826#4827#0" expanded="false" />
+            <element signature="e#6249#6250#0" expanded="false" />
+            <element signature="e#6270#6271#0" expanded="false" />
+            <element signature="e#6313#6314#0" expanded="false" />
+            <element signature="e#6335#6336#0" expanded="false" />
+            <element signature="method#addSynapse#1;class#NetworkGenome#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1212,8 +1260,8 @@
         <state relative-caret-position="924">
           <caret line="32" column="35" lean-forward="false" selection-start-line="32" selection-start-column="23" selection-end-line="32" selection-end-column="35" />
           <folding>
-            <element signature="e#743#744#0" expanded="true" />
-            <element signature="e#790#791#0" expanded="true" />
+            <element signature="e#811#812#0" expanded="false" />
+            <element signature="e#858#859#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1267,13 +1315,9 @@
           <caret line="123" column="23" lean-forward="true" selection-start-line="123" selection-start-column="23" selection-end-line="123" selection-end-column="23" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#323#324#0" expanded="true" />
-            <element signature="e#364#365#0" expanded="true" />
-            <element signature="method#see#0;class#Protozoa#0" expanded="false" />
-            <element signature="method#eat#0;class#Protozoa#0" expanded="false" />
-            <element signature="method#fight#0;class#Protozoa#0" expanded="false" />
-            <element signature="method#update#0;class#Protozoa#0" expanded="false" />
             <element signature="method#render#0;class#Protozoa#0" expanded="false" />
+            <element signature="e#4110#4111#0" expanded="true" />
+            <element signature="e#4130#4131#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1282,21 +1326,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-161">
           <caret line="9" column="13" lean-forward="false" selection-start-line="9" selection-start-column="13" selection-end-line="9" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.8.0_131/src.zip!/java/util/function/Predicate.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="401">
-          <caret line="48" column="12" lean-forward="false" selection-start-line="48" selection-start-column="12" selection-end-line="48" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/core/Tank.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1452">
-          <caret line="57" column="33" lean-forward="true" selection-start-line="57" selection-start-column="33" selection-end-line="57" selection-end-column="33" />
           <folding />
         </state>
       </provider>
@@ -1320,19 +1349,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/core/Simulation.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1155">
-          <caret line="24" column="4" lean-forward="true" selection-start-line="24" selection-start-column="4" selection-end-line="24" selection-end-column="4" />
-          <folding>
-            <element signature="e#1296#1297#0" expanded="false" />
-            <element signature="e#1338#1339#0" expanded="false" />
-            <element signature="e#1374#1375#0" expanded="false" />
-            <element signature="e#1394#1395#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/core/Renderer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-5672">
@@ -1345,14 +1361,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-590">
           <caret line="33" column="37" lean-forward="true" selection-start-line="33" selection-start-column="37" selection-end-line="33" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/core/Application.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="693">
-          <caret line="25" column="15" lean-forward="false" selection-start-line="25" selection-start-column="15" selection-end-line="25" selection-end-column="15" />
           <folding />
         </state>
       </provider>
@@ -1387,106 +1395,172 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/core/Controller.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="614">
+          <caret line="44" column="23" lean-forward="true" selection-start-line="44" selection-start-column="23" selection-end-line="44" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/core/Application.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="792">
+          <caret line="30" column="8" lean-forward="true" selection-start-line="30" selection-start-column="8" selection-end-line="30" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/utils/Vector2.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="924">
-          <caret line="41" column="21" lean-forward="false" selection-start-line="41" selection-start-column="21" selection-end-line="41" selection-end-column="21" />
+        <state relative-caret-position="396">
+          <caret line="60" column="18" lean-forward="false" selection-start-line="60" selection-start-column="18" selection-end-line="60" selection-end-column="18" />
           <folding>
-            <element signature="e#766#767#0" expanded="false" />
-            <element signature="e#808#809#0" expanded="false" />
+            <element signature="e#1132#1133#0" expanded="false" />
+            <element signature="e#1172#1173#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/neat/NeuralNetwork.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="957">
+          <caret line="32" column="48" lean-forward="true" selection-start-line="32" selection-start-column="48" selection-end-line="32" selection-end-column="48" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/neat/Neuron.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="548">
+          <caret line="48" column="40" lean-forward="false" selection-start-line="48" selection-start-column="40" selection-end-line="48" selection-end-column="40" />
+          <folding>
+            <element signature="imports" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/biology/Retina.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1221">
-          <caret line="47" column="55" lean-forward="false" selection-start-line="47" selection-start-column="55" selection-end-line="47" selection-end-column="55" />
+        <state relative-caret-position="858">
+          <caret line="30" column="25" lean-forward="true" selection-start-line="30" selection-start-column="25" selection-end-line="30" selection-end-column="25" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#807#808#0" expanded="false" />
-            <element signature="e#837#838#0" expanded="false" />
-            <element signature="e#870#871#0" expanded="false" />
-            <element signature="e#911#912#0" expanded="false" />
-            <element signature="e#939#940#0" expanded="false" />
-            <element signature="e#956#957#0" expanded="false" />
+            <element signature="e#582#583#0" expanded="false" />
+            <element signature="e#597#598#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_131/src.zip!/java/util/ArrayList.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="850" column="0" lean-forward="false" selection-start-line="850" selection-start-column="0" selection-end-line="850" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/biology/Entity.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1485">
-          <caret line="55" column="4" lean-forward="true" selection-start-line="55" selection-start-column="4" selection-end-line="55" selection-end-column="4" />
+        <state relative-caret-position="380">
+          <caret line="33" column="39" lean-forward="false" selection-start-line="33" selection-start-column="39" selection-end-line="33" selection-end-column="39" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.8.0_131/src.zip!/java/util/function/Predicate.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="48" column="12" lean-forward="false" selection-start-line="48" selection-start-column="12" selection-end-line="48" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/core/Tank.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="524">
+          <caret line="54" column="8" lean-forward="false" selection-start-line="54" selection-start-column="8" selection-end-line="54" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/biology/ProtozoaGenome.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="545">
+          <caret line="20" column="5" lean-forward="false" selection-start-line="20" selection-start-column="5" selection-end-line="20" selection-end-column="5" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="class#478:2080" expanded="false" />
+            <element signature="method#tick#0;class#478:2080" expanded="false" />
+            <element signature="e#2120#2121#0" expanded="true" />
+            <element signature="e#2170#2171#0" expanded="true" />
+            <element signature="e#2207#2208#0" expanded="true" />
+            <element signature="e#2236#2237#0" expanded="true" />
+            <element signature="e#2275#2276#0" expanded="true" />
+            <element signature="e#2316#2317#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/biology/Protozoa.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="233">
-          <caret line="27" column="0" lean-forward="true" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+        <state relative-caret-position="446">
+          <caret line="43" column="0" lean-forward="false" selection-start-line="43" selection-start-column="0" selection-end-line="43" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#323#324#0" expanded="true" />
-            <element signature="e#364#365#0" expanded="true" />
-            <element signature="method#see#0;class#Protozoa#0" expanded="false" />
-            <element signature="method#eat#0;class#Protozoa#0" expanded="false" />
-            <element signature="method#fight#0;class#Protozoa#0" expanded="false" />
-            <element signature="method#update#0;class#Protozoa#0" expanded="false" />
             <element signature="method#render#0;class#Protozoa#0" expanded="false" />
+            <element signature="e#4110#4111#0" expanded="true" />
+            <element signature="e#4130#4131#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/neat/NetworkGenome.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="944">
-          <caret line="210" column="51" lean-forward="true" selection-start-line="210" selection-start-column="51" selection-end-line="210" selection-end-column="51" />
-          <folding>
-            <element signature="e#4048#4049#0" expanded="true" />
-            <element signature="e#4087#4088#0" expanded="true" />
-            <element signature="method#getInnovation#0;class#NetworkGenome#0" expanded="false" />
-            <element signature="method#distance#0;class#NetworkGenome#0" expanded="false" />
-            <element signature="e#5604#5605#0" expanded="true" />
-            <element signature="e#5625#5626#0" expanded="true" />
-            <element signature="e#5668#5669#0" expanded="true" />
-            <element signature="e#5690#5691#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/biology/Brain.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="990">
-          <caret line="34" column="9" lean-forward="false" selection-start-line="34" selection-start-column="9" selection-end-line="34" selection-end-column="9" />
-          <folding>
-            <element signature="e#743#744#0" expanded="true" />
-            <element signature="e#790#791#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/neat/Neuron.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="957">
-          <caret line="59" column="70" lean-forward="true" selection-start-line="59" selection-start-column="70" selection-end-line="59" selection-end-column="70" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/neat/NeuralNetwork.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="660">
-          <caret line="20" column="38" lean-forward="true" selection-start-line="20" selection-start-column="38" selection-end-line="20" selection-end-column="38" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/tests/neat/NeuralNetworkTest.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="812">
-          <caret line="85" column="47" lean-forward="true" selection-start-line="85" selection-start-column="47" selection-end-line="85" selection-end-column="47" />
+        <state relative-caret-position="462">
+          <caret line="20" column="27" lean-forward="false" selection-start-line="20" selection-start-column="27" selection-end-line="20" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/neat/NetworkGenome.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1378">
+          <caret line="101" column="51" lean-forward="false" selection-start-line="101" selection-start-column="51" selection-end-line="101" selection-end-column="51" />
+          <folding>
+            <element signature="e#1892#1893#0" expanded="true" />
+            <element signature="e#1948#1949#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/tests/neat/NetworkGenomeTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="878">
+          <caret line="39" column="35" lean-forward="false" selection-start-line="39" selection-start-column="35" selection-end-line="39" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/biology/Brain.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="647">
+          <caret line="29" column="0" lean-forward="false" selection-start-line="29" selection-start-column="0" selection-end-line="29" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/biology/Pellet.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="891">
+          <caret line="32" column="44" lean-forward="false" selection-start-line="32" selection-start-column="44" selection-end-line="32" selection-end-column="44" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/core/Simulation.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="559">
+          <caret line="31" column="5" lean-forward="false" selection-start-line="31" selection-start-column="5" selection-end-line="31" selection-end-column="5" />
           <folding />
         </state>
       </provider>

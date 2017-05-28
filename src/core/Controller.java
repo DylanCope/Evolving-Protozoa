@@ -42,7 +42,7 @@ public class Controller
 					break;
 				}
 			}
-			if (track == false)
+			if (!track)
 				renderer.track(null);
 		}
 		

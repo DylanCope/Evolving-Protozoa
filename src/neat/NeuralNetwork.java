@@ -14,11 +14,11 @@ public class NeuralNetwork
         this.neurons = neurons;
     }
 
-    public void setInputs(double[] inputs)
+    public void setState(double ... state)
     {
         for (Neuron n : neurons)
-            if (0 <= n.id && n.id < inputs.length)
-                n.state = inputs[n.id];
+            if (0 <= n.id && n.id < state.length)
+                n.state = state[n.id];
     }
 
     public void tick()
@@ -40,7 +40,7 @@ public class NeuralNetwork
     {
         String s = "";
         for (Neuron n : neurons)
-            s += String.format("%d:%f\n", n.id, n.state);
+            s += n.toString() + "\n";
         return s;
     }
 

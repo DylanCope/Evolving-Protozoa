@@ -15,10 +15,7 @@ public class Protozoa extends Entity
 	{
 		public ProtozoaGenome(Retina ret)
 		{
-			int n = ret.numberOfCells();
-			for (int i = 0; i < n; i++) {
-				addNeuron(new NeuronGene(i, NeuronType.SENSOR));
-			}
+			super(0, ret.numberOfCells(), 5);
 		}
 
 		public Brain brainPhenotype()

@@ -19,6 +19,19 @@ public class NetworkGenome
 		public int compareTo(NeuronGene o) {
 			return id - o.id;
 		}
+
+		@Override
+		public String toString()
+		{
+			String typeStr;
+			switch (type){
+				case HIDDEN: typeStr = "HIDDEN"; break;
+				case SENSOR: typeStr = "SENSOR"; break;
+				case OUTPUT: typeStr = "OUTPUT"; break;
+				default: typeStr = "UNKNOWN";
+			}
+			return String.format("Neuron, id:%d, type:%s", id, typeStr);
+		}
 	}
 	
 	public class SynapseGene implements Comparable<SynapseGene>
@@ -33,6 +46,13 @@ public class NetworkGenome
 		public int compareTo(SynapseGene g) {
 			return innovation - g.innovation;
 		}
+
+		@Override
+		public String toString()
+		{
+			return String.format("Synapse, innov:%d, in:%d, out:%d, w:%.2f, disabled:%b",
+					innovation, in.id, out.id, weight, disabled);
+		}
 	}
 	
 	private Set<NeuronGene> neurons;
@@ -40,12 +60,23 @@ public class NetworkGenome
 	private Random random;
 	private double mutationChance = 0.05;
 	private double fitness;
-	
-	public NetworkGenome()
-	{	
-		neurons = new HashSet<NeuronGene>();
+
+	public NetworkGenome(long seed)
+	{
+		neurons = new TreeSet<NeuronGene>();
 		synapses = new TreeSet<SynapseGene>();
-		random = new Random();
+		random = new Random(0);
+	}
+
+	public NetworkGenome(long seed, int numInputs, int numOutputs)
+	{	
+		neurons = new TreeSet<NeuronGene>();
+		for (int i = 0; i < numInputs; i++)
+			neurons.add(new NeuronGene(i, NeuronType.SENSOR));
+		for (int i = numInputs; i < numInputs + numOutputs; i++)
+			neurons.add(new NeuronGene(i, NeuronType.OUTPUT));
+		synapses = new TreeSet<SynapseGene>();
+		random = new Random(seed);
 	}
 	
 	private void mutateSynapse(NeuronGene in, NeuronGene out)
@@ -123,7 +154,7 @@ public class NetworkGenome
 	
 	private NetworkGenome crossover(NetworkGenome other)
 	{
-		NetworkGenome G = new NetworkGenome();
+		NetworkGenome G = new NetworkGenome(random.nextLong());
 
 		G.synapses = new TreeSet<>();
 		
@@ -150,34 +181,46 @@ public class NetworkGenome
 		return crossover(other).mutate();
 	}
 
-	protected NeuralNetwork networkPhenotype()
+	public NeuralNetwork networkPhenotype()
 	{
 		Neuron[] ns = new Neuron[neurons.size()];
 		List<Neuron> outputs = new ArrayList<>();
 		for (int i = 0; i < ns.length; i++)
 		{
-			ns[i].id = i;
+			ns[i] = new Neuron(i);
 			List<Neuron> inputs = new ArrayList<>();
 			List<Double> ws = new ArrayList<>();
-			NeuronGene neuronGene = null;
 			for (SynapseGene syn : synapses)
-				if (!syn.disabled && syn.out.id == i) {
-					neuronGene = syn.out;
+				if (!syn.disabled && syn.out.id == i)
+				{
 					inputs.add(ns[syn.in.id]);
 					ws.add(syn.weight);
 				}
 
-			if (neuronGene != null && neuronGene.type == NeuronType.OUTPUT)
-				outputs.add(ns[neuronGene.id]);
-			else if (neuronGene.type == NeuronType.SENSOR)
-				ns[i].setActivation(Neuron.LINEAR);
+			NeuronGene neuronGene = null;
+			for (NeuronGene gene : neurons)
+				if (gene.id == i) {
+					neuronGene = gene;
+					if (neuronGene.type == NeuronType.OUTPUT)
+						outputs.add(ns[neuronGene.id]);
+					else if (neuronGene.type == NeuronType.SENSOR)
+						ns[neuronGene.id].setActivation(Neuron.LINEAR);
+					break;
+				}
 
-			ns[i].inputs = (Neuron[]) inputs.toArray();
+//			ns[i].inputs = (Neuron[]) inputs.toArray();
+			ns[i].inputs = new Neuron[inputs.size()];
+			for (int j = 0; j < inputs.size(); j++)
+				ns[i].inputs[j] = inputs.get(j);
 			ns[i].weights = new double[ws.size()];
 			for (int j = 0; j < ws.size(); j++)
 				ns[i].weights[j] = ws.get(j);
 		}
-		return new NeuralNetwork((Neuron[]) outputs.toArray(), ns);
+
+		Neuron[] out = new Neuron[outputs.size()];
+		for (int j = 0; j < outputs.size(); j++)
+			out[j] = outputs.get(j);
+		return new NeuralNetwork(out, ns);
 	}
 	
 	public int getInnovation()
@@ -202,5 +245,31 @@ public class NetworkGenome
 	
 	public void addSynapse(SynapseGene s) {
 		synapses.add(s);
+	}
+
+	public void addSynapse(int in, int out, double w)
+	{
+		SynapseGene g = new SynapseGene();
+		g.innovation = innovation++;
+		for (NeuronGene gene : neurons)
+		{
+			if (gene.id == in)
+				g.in = gene;
+			if (gene.id == out)
+				g.out = gene;
+		}
+		g.disabled = false;
+		g.weight = w;
+		synapses.add(g);
+	}
+
+	public String toString()
+	{
+		String str = "";
+		for (NeuronGene gene : neurons)
+			str += gene.toString() + "\n";
+		for (SynapseGene gene : synapses)
+			str += gene.toString() + "\n";
+		return str;
 	}
 }

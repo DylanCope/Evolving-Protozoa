@@ -1,6 +1,7 @@
 package tests.neat;
 
 import com.sun.istack.internal.NotNull;
+import neat.NetworkGenome;
 import neat.NeuralNetwork;
 import neat.Neuron;
 import org.junit.Test;
@@ -30,39 +31,60 @@ public class NeuralNetworkTest
     }
 
     @Test
-    public void setInputs() throws Exception
+    public void setState() throws Exception
     {
         NeuralNetwork net = simpleFullyConnected();
-        net.setInputs(new double[]{-5, 4});
-        assertEquals(net.toString(), "0:-5.000000\n" +
-                "1:4.000000\n" +
-                "2:0.000000\n" +
-                "3:0.000000\n" +
-                "4:0.000000\n" +
-                "5:0.000000\n");
+        net.setState(-5, 4);
+        assertEquals(net.toString(), "id:0, state:-5.00, inputs:[]\n" +
+                "id:1, state:4.00, inputs:[]\n" +
+                "id:2, state:0.00, inputs:[(0, 5.0)(1, 1.0)]\n" +
+                "id:3, state:0.00, inputs:[(0, -4.0)(1, 6.0)]\n" +
+                "id:4, state:0.00, inputs:[(0, 9.1)(1, 7.0)]\n" +
+                "id:5, state:0.00, inputs:[(2, 1.0)(3, 4.0)(4, -2.3)]\n");
     }
 
     @Test
     public void tick() throws Exception
     {
         NeuralNetwork net = simpleFullyConnected();
-        net.setInputs(new double[]{-5, 4});
+        net.setState(-5, 4);
         net.tick();
-        assertEquals(net.toString(), "0:0.000000\n" +
-                "1:0.000000\n" +
-                "2:-21.000000\n" +
-                "3:44.000000\n" +
-                "4:-17.500000\n" +
-                "5:0.000000\n");
+        assertEquals(net.toString(), "id:0, state:0.00, inputs:[]\n" +
+                "id:1, state:0.00, inputs:[]\n" +
+                "id:2, state:-21.00, inputs:[(0, 5.0)(1, 1.0)]\n" +
+                "id:3, state:44.00, inputs:[(0, -4.0)(1, 6.0)]\n" +
+                "id:4, state:-17.50, inputs:[(0, 9.1)(1, 7.0)]\n" +
+                "id:5, state:0.00, inputs:[(2, 1.0)(3, 4.0)(4, -2.3)]\n");
     }
 
     @Test
     public void outputs() throws Exception
     {
         NeuralNetwork net = simpleFullyConnected();
-        net.setInputs(new double[]{-5, 4});
+        net.setState(-5, 4);
         double[] expected = {195.25};
         net.tick(); net.tick();
         assertArrayEquals(expected, net.outputs(), 1e-6);
+    }
+
+    @Test
+    public void constructingGenome() throws Exception
+    {
+        NetworkGenome genome = new NetworkGenome(0, 2, 3);
+        genome.addSynapse(0, 2, 0.5);
+        genome.addSynapse(0, 3, 1.2);
+        genome.addSynapse(0, 4, -1.6);
+        genome.addSynapse(1, 2, 0.3);
+        genome.addSynapse(1, 3, -0.9);
+        genome.addSynapse(1, 4, 0.2);
+        System.out.println(genome);
+        NeuralNetwork net = genome.networkPhenotype();
+        net.setState(5, -2);
+        System.out.println(net);
+        net.tick();
+        System.out.println(net);
+        double[] expected = {0.87, 1.00, 0.00};
+        assertArrayEquals(expected, net.outputs(), 1e-2);
+
     }
 }

@@ -12,8 +12,8 @@ public class Neuron
         double transfer(double z);
     }
 
-    public static Activation SIGMOID = (double z) -> 1 / (1 + Math.exp(-z));
-    public static Activation LINEAR = (double z) -> z;
+    public static final Activation SIGMOID = (double z) -> 1 / (1 + Math.exp(-z));
+    public static final Activation LINEAR = (double z) -> z;
 
     Neuron[] inputs;
     double[] weights;
@@ -50,5 +50,15 @@ public class Neuron
     {
         state = next_state;
         next_state = 0;
+    }
+
+    @Override
+    public String toString()
+    {
+        String connections = "[";
+        for (int i = 0; i < inputs.length; i++)
+            connections += "(" + inputs[i].id + ", " + weights[i] + ")";
+        connections += "]";
+        return String.format("id:%d, state:%.2f, inputs:%s", id, state, connections );
     }
 }

@@ -11,16 +11,18 @@ import java.util.stream.Collectors;
 /**
  * Created by dylan on 26/05/2017.
  */
-public class Neuron implements Comparable<Neuron> {
-
-    public interface Activation extends Function<Double, Double> {
+public class Neuron implements Comparable<Neuron>
+{
+    public interface Activation extends Function<Double, Double>
+	{
 
         Activation SIGMOID = z -> 1 / (1 + Math.exp(-z));
         Activation LINEAR = z -> z;
         Activation TANH = Math::tanh;
     }
 
-    public enum Type {
+    public enum Type
+	{
         SENSOR("SENSOR"), HIDDEN("HIDDEN"), OUTPUT("OUTPUT");
 
         private String value;

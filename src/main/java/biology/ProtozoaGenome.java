@@ -42,7 +42,7 @@ public class ProtozoaGenome extends NetworkGenome
                 }
                 network.setInput(inputs);
                 network.tick();
-                outputs = network.outputs();
+                outputs = network.getOutputs();
             }
 
             @Override

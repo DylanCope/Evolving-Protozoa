@@ -9,8 +9,6 @@ import java.util.stream.Stream;
 public class NetworkGenome
 {
 	private static int innovation = 0;
-
-	
 	private Set<NeuronGene> neuronGenes;
 	private SortedSet<SynapseGene> synapseGenes;
 	private Random random;

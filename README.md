@@ -19,10 +19,10 @@ Create an environment where protozoa-like entities can evolve their controllers.
   will be less complex (which may impact survival).
 
 * Energy consumption should determine how quickly an protozoa dies. 
-	- Larger brains increase energy consumption.
-	- Larger bodies increase energy consumption.
-	- Moving faster increases energy consumption.
-	- More retina cells increases energy consumption.
+    - Larger brains increase energy consumption.
+    - Larger bodies increase energy consumption.
+    - Moving faster increases energy consumption.
+    - More retina cells increases energy consumption.
 
 * Eating shouldn't be a instantaneous process, a protozoa should absorb health from it's food
   at some determined rate. ✔
@@ -33,8 +33,11 @@ Create an environment where protozoa-like entities can evolve their controllers.
 * A protozoa's fighting ability should be a result of it's size and health (plus a random element).
 
 * Command line interface: ✔
-	- startsim ?pelletNumber ?protozoaNumber ?parentGenomes
-		  starts new simulation
-		  pelletNumber is the number of pellets in each generation (default = 100)
-		  protozoaNumber is the number of protozoa in each generation (default = 60)
-		  parentGenomes is a file containing a set of parent genomes for generation 0 (if left blank random genomes are used)
+    - startsim ?pelletNumber ?protozoaNumber ?parentGenomes
+          starts new simulation
+          pelletNumber is the number of pellets in each generation (default = 100)
+          protozoaNumber is the number of protozoa in each generation (default = 60)
+          parentGenomes is a file containing a set of parent genomes for generation 0 (if left blank random genomes are used)
+
+* Implement chunking of the tank and change protozoa update to only interact with entities in current and nearby chunks
+* Improve retina see rendering - we shouldn't have to loop through all retina cells to register an entity.

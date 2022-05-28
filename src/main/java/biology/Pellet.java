@@ -1,19 +1,27 @@
 package biology;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collection;
-
-import utils.Vector2;
 import core.Simulation;
+import utils.Vector2;
+
+import java.awt.*;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Pellet extends Entity
 {
 	private static final long serialVersionUID = -5482090072120647315L;
 
-	public Pellet(double radius)
+	private static final double splitRadiusFactor = 1.2;
+	private static final double minSplitRadius = 0.01;
+	private double initialRadius;
+	private double growthRate;
+
+	public Pellet(double radius, double growthRate)
 	{
 		this.setRadius(radius);
+		initialRadius = radius;
+		this.growthRate = growthRate;
 		setVel(new Vector2(
 				(0.5 - Simulation.RANDOM.nextDouble()) / 30.0,
 				(0.5 - Simulation.RANDOM.nextDouble()) / 30.0));
@@ -24,14 +32,35 @@ public class Pellet extends Entity
 		setNutrition(0.25 * radius);
 	}
 
+	public Pellet(double radius)
+	{
+		this(radius, 1.1);
+	}
+
 	@Override
-	public Collection<Entity> update(double delta, Collection<Entity> entities)
+	public Stream<Entity> update(double delta, Stream<Entity> entities)
 	{	
 		if (isDead())
-			return new ArrayList<Entity>();
-		
-		move(getVel().mul(delta), entities);
-		return new ArrayList<Entity>();
+			return Stream.empty();
+
+//		setHealth(getHealth() * growthRate);
+		setRadius(getRadius() * (1 + (growthRate - 1) * delta));
+		if (getRadius() > initialRadius * splitRadiusFactor & getRadius() > minSplitRadius)
+			return splitPellet();
+
+		move(getVel().mul(delta), entities.collect(Collectors.toList()));
+		return Stream.empty();
+	}
+
+	private Stream<Entity> splitPellet() {
+		setDead(true);
+		Random random = new Random();
+		Vector2 dir = new Vector2(2*random.nextDouble() - 1, 2*random.nextDouble() - 1);
+		Pellet pellet1 = new Pellet(getRadius() / 2);
+		Pellet pellet2 = new Pellet(getRadius() / 2);
+		pellet1.setPos(getPos().add(dir.mul(getRadius())));
+		pellet2.setPos(getPos().add(dir.mul(-getRadius())));
+		return Stream.of(pellet1, pellet2);
 	}
 
 	@Override

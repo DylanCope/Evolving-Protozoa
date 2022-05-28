@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.stream.Stream;
 
 import utils.Vector2;
 
@@ -31,7 +32,7 @@ public abstract class Entity implements Serializable
 		colour = new Color(255, 255, 255);
 	}
 	
-	public abstract Collection<Entity> update(double delta, Collection<Entity> entities);
+	public abstract Stream<Entity> update(double delta, Stream<Entity> entities);
 	
 	public void render(Graphics g)
 	{

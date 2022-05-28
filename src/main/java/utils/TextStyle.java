@@ -26,7 +26,7 @@ public class TextStyle {
 		     ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, f));
 		} 
 		catch (IOException|FontFormatException|NullPointerException e) {
-			e.printStackTrace();
+			System.out.println("Could not load bubble sharp font");
 		}
 	}
 

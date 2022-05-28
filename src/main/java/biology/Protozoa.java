@@ -3,7 +3,11 @@ package biology;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import utils.Vector2;
 import core.Simulation;
@@ -92,49 +96,50 @@ public class Protozoa extends Entity
 		setHealth(getHealth() * (1 - deathRate));
 	}
 
-	public Collection<Entity> interact(Collection<Entity> entities)
-	{
-		for (Retina.Cell cell : retina) 
-		{
+	public Stream<Entity> interactWith(Entity other) {
+
+		if (other.equals(this))
+			return Stream.empty();
+
+		see(other);
+
+		Collection<Entity> newEntities = new ArrayList<>();
+		if (canInteractWith(other)) {
+			if (other instanceof Protozoa)
+			{
+				Protozoa p = (Protozoa) other;
+				if (brain.wantToAttack(p))
+					fight(p);
+				else if (brain.wantToMateWith(p) && p.brain.wantToMateWith(this))
+					newEntities.add(genome.reproduce(this, p));
+			}
+			else {
+				eat(other);
+			}
+		}
+		return newEntities.stream();
+	}
+
+	public Stream<Entity> interact(Stream<Entity> entities) {
+		for (Retina.Cell cell : retina) {
 			cell.colour = Color.WHITE;
 			cell.entity = null;
 		}
 
-		Collection<Entity> newEntities = new ArrayList<>();
-		for (Entity e : entities) 
-		{
-			if (e.equals(this))
-				continue;
-			
-			if (canInteractWith(e))
-			{
-				if (e instanceof Protozoa)
-				{
-					Protozoa p = (Protozoa) e;
-					if (brain.wantToAttack(p))
-						fight(p);
-					else if (brain.wantToMateWith(p) && p.brain.wantToMateWith(this))
-						newEntities.add(genome.reproduce(this, p));
-				}
-				else {
-					eat(e);
-				}
-			}
-			
-			see(e);
-		}
-		return newEntities;
+		return entities.flatMap(this::interactWith);
 	}
-	
+
 	@Override
-	public Collection<Entity> update(double delta, Collection<Entity> entities)
+	public Stream<Entity> update(double delta, Stream<Entity> entities)
 	{
 		if (isDead())
-			return new ArrayList<>();
+			return Stream.empty();
 
 		think(delta);
-		Collection<Entity> newEntities = interact(entities);
-		move(getVel().mul(delta), entities);
+		Collection<Entity> entityCollection = entities.collect(Collectors.toList());
+		Stream<Entity> newEntities = interact(entityCollection.stream());
+		move(getVel().mul(delta), entityCollection);
+
 		return newEntities;
 	}
 	

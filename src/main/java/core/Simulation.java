@@ -35,15 +35,15 @@ public class Simulation implements Runnable, ActionListener
 	{
 		tank = new Tank();
 
-		int creatures = 40;
-		int pellets = 300;
+		int creatures = 300;
+		int pellets = 500;
 		
 		for (int i = 0; i < creatures; i++) 
 		{
 			double radius = (RANDOM.nextInt(5) + 5) / 500.0;
 //			ProtozoaGenome genome = new ProtozoaGenome(10, radius);
 //			tank.addEntity(genome.phenotype());
-			tank.addEntity(new Protozoa(Brain.RANDOM, new Retina(60), radius));
+			tank.addEntity(new Protozoa(Brain.RANDOM, new Retina(30), radius));
 		}
 		
 		for (int i = creatures; i <  creatures + pellets; i++) 

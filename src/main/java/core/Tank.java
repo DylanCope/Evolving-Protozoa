@@ -4,8 +4,10 @@ import java.awt.Graphics;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import utils.Vector2;
 import biology.Entity;
@@ -15,14 +17,15 @@ import biology.Protozoa;
 public class Tank implements Iterable<Entity>, Serializable
 {
 	private static final long serialVersionUID = 2804817237950199223L;
-	private ArrayList<Entity> entities;
-	private double radius = 1;
-	private int protozoaNumber = 0;
-	private int pelletNumber = 0;
-	
+	private final double radius = 2;
+	private HashMap<Class<? extends Entity>, Integer> entityCounts;
+	private final ChunkManager chunkManager;
+
 	public Tank() 
 	{
-		entities = new ArrayList<Entity>();
+		double chunkSize = 2 * radius / 10;
+		chunkManager = new ChunkManager(-radius, radius, -radius, radius, chunkSize);
+		entityCounts = new HashMap<>();
 	}
 	
 	public void addEntity(Entity e) {
@@ -33,59 +36,56 @@ public class Tank implements Iterable<Entity>, Serializable
 					rad * (1 - r*r) * Math.cos(t),
 					rad * (1 - r*r) * Math.sin(t)
 				));
-		entities.add(e);
-		
-		if (e instanceof Protozoa)
-			protozoaNumber++;
-		else if (e instanceof Pellet)
-			pelletNumber++;
+		chunkManager.add(e);
+
+		if (!entityCounts.containsKey(e.getClass()))
+			entityCounts.put(e.getClass(), 0);
+		else
+			entityCounts.put(e.getClass(), 1 + entityCounts.get(e.getClass()));
 	}
-	
+
+	public Stream<Entity> updateEntity(Entity e, double delta) {
+
+		Stream<Entity> newEntities = e.update(delta, chunkManager.getNearbyEntities(e));
+
+		if (e.getPos().len() - e.getRadius() > radius)
+			e.setPos(e.getPos().mul(-0.98));
+
+		if (e.isDead())
+			entityCounts.put(e.getClass(), -1 + entityCounts.get(e.getClass()));
+
+		return newEntities;
+	}
+
 	public void update(double delta) 
 	{
-		Collection<Entity> newEntities = new ArrayList<>();
-		for(Entity e : entities) {
-			newEntities.addAll(e.update(delta, entities));
-			
-			if (e.getPos().len() - e.getRadius() > radius) {
-				e.setPos(e.getPos().mul(-0.98));
-			}
-		}
-		entities.addAll(newEntities);
-		
-		// Remove dead entities
-		entities.removeIf((Entity e) -> {
-			if (e.isDead()) {
-				if (e instanceof Protozoa)
-					protozoaNumber--;
-				else if (e instanceof Pellet)
-					pelletNumber--;
-				return true;
-			}
-			return false;
-		});
+		Collection<Entity> newEntities = chunkManager.getAllEntities()
+				.flatMap(e -> updateEntity(e, delta))
+				.collect(Collectors.toList());
+
+		newEntities.forEach(chunkManager::add);
+		chunkManager.update();
 	}
 	
 	public void render(Graphics g)
 	{
-		for (Entity e : entities)
-			e.render(g);
+		chunkManager.forEachEntity(e -> e.render(g));
 	}
 
 	public Collection<Entity> getEntities() {
-		return entities;
+		return chunkManager.getAllEntities().collect(Collectors.toList());
 	}
 	
 	public int numberOfProtozoa() {
-		return protozoaNumber;
+		return entityCounts.get(Protozoa.class);
 	}
 	
 	public int numberOfPellets() {
-		return pelletNumber;
+		return entityCounts.get(Pellet.class);
 	}
 
 	@Override
 	public Iterator<Entity> iterator() {
-		return entities.iterator();
+		return chunkManager.getAllEntities().iterator();
 	}
 }

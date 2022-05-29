@@ -34,22 +34,23 @@ public class Pellet extends Entity
 
 	public Pellet(double radius)
 	{
-		this(radius, 1.1);
+		this(radius, 1.01);
 	}
 
 	@Override
 	public Stream<Entity> update(double delta, Stream<Entity> entities)
-	{	
+	{
+		Stream<Entity> newEntities = super.update(delta, entities);
 		if (isDead())
-			return Stream.empty();
+			return newEntities;
 
-//		setHealth(getHealth() * growthRate);
 		setRadius(getRadius() * (1 + (growthRate - 1) * delta));
 		if (getRadius() > initialRadius * splitRadiusFactor & getRadius() > minSplitRadius)
 			return splitPellet();
 
 		move(getVel().mul(delta), entities.collect(Collectors.toList()));
-		return Stream.empty();
+
+		return newEntities;
 	}
 
 	private Stream<Entity> splitPellet() {

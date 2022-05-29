@@ -9,6 +9,7 @@ import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.image.BufferStrategy;
+import java.util.stream.Stream;
 
 import utils.Vector2;
 import utils.Window;
@@ -22,15 +23,20 @@ public class Renderer extends Canvas
 	private static final long serialVersionUID = 1L;
 	
 	double time = 0;
-	private Vector2 tankRenderCoords;
-	private double tankRenderRadius;
+	private final Vector2 tankRenderCoords;
+	private final double tankRenderRadius;
 	private Vector2 pan;
-	private double zoom, targetZoom, initialZoom = 2, rotate = 0;
+	private double zoom;
+	private double targetZoom;
+	private final double initialZoom = 2;
+	private final double rotate = 0;
+	private double lastRenderTime = 0;
+	private double fps = 0;
 	private Entity track;
-	private UI ui;
+	private final UI ui;
 	
-	private Simulation simulation;
-	private Window window;
+	private final Simulation simulation;
+	private final Window window;
 	
 	public Renderer(Simulation simulation, Window window)
 	{
@@ -48,6 +54,7 @@ public class Renderer extends Canvas
 		
 		requestFocus();
 		setFocusable(true);
+		lastRenderTime = getTime();
 	}
 	
 	public void retina(Graphics2D g, Protozoa p)
@@ -161,7 +168,6 @@ public class Renderer extends Canvas
 	{
 		Vector2 pos = toRenderSpace(p.getPos());
 		double r = toRenderSpace(p.getRadius());
-
 		
 		if (pos.getX() + r > window.getWidth())
 			return;
@@ -180,6 +186,7 @@ public class Renderer extends Canvas
 				(int)(2*r));
 		
 		g.setColor(p.getColor().darker());
+
 		Stroke s = g.getStroke();
 		g.setStroke(new BasicStroke((int) (0.7*zoom)));
 		g.drawOval(
@@ -250,10 +257,23 @@ public class Renderer extends Canvas
 		graphics.setColor(backgroundColour);
 
 		graphics.fillRect(0, 0, window.getWidth(), window.getHeight());
+
+		if (simulation.inDebugMode()) {
+			graphics.setColor(new Color(255, 255, 0));
+			ChunkManager chunkManager = simulation.getTank().getChunkManager();
+			int w = (int) toRenderSpace(chunkManager.getChunkSize());
+			Stream<Vector2> chunkCoords = chunkManager
+					.getAllChunks()
+					.map(chunk -> toRenderSpace(chunk.getTankCoords()));
+			chunkCoords.forEach(pos -> graphics.drawRect((int) pos.getX(), (int) pos.getY(), w, w));
+		}
 	}
 	
 	public void render()
 	{
+		fps = 1 / (getTime() - lastRenderTime);
+		lastRenderTime = getTime();
+
 		BufferStrategy bs = this.getBufferStrategy();
 		
 		if (bs == null) 
@@ -321,6 +341,14 @@ public class Renderer extends Canvas
 		else if (track != null)
 			pan = track.getPos().mul(tankRenderRadius);
 		track = e;
+	}
+
+	public double getFPS() {
+		return fps;
+	}
+
+	private double getTime() {
+		return System.currentTimeMillis() / 1000.0;
 	}
 
 	public double getZoom() {

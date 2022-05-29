@@ -17,6 +17,7 @@ public class UI
 	private Simulation simulation;
 	private TextObject title;
 	private ArrayList<TextObject> info;
+	private ArrayList<TextObject> debugInfo;
 
 	public UI(Window window, Simulation simulation)
 	{
@@ -26,32 +27,42 @@ public class UI
 		title = new TextObject("Microbial Evolution", 
 				"bubble sharp", 
 				window.getHeight() / 20, 
-				new Vector2(10, window.getHeight() / 20));
+				new Vector2(10, window.getHeight() / 20f));
 		title.setColor(Color.WHITE);
 		
-		info = new ArrayList<TextObject>();
+		info = new ArrayList<>();
 
 		TextObject pelletText = new TextObject("Number of pellets: ", 
 				"bubble sharp", 
 				window.getHeight() / 30, 
-				new Vector2(10, 3*window.getHeight() / 20));
+				new Vector2(10, 3*window.getHeight() / 20f));
 		pelletText.setColor(Color.WHITE.darker());
 
 		TextObject protozoaText = new TextObject("Number of protozoa: ", 
 				"bubble sharp", 
 				window.getHeight() / 30, 
-				new Vector2(10, 4.1*window.getHeight() / 20));
+				new Vector2(10, 4.1*window.getHeight() / 20f));
 		protozoaText.setColor(Color.WHITE.darker());
 
 		TextObject trackingFitness = new TextObject("", 
 				"bubble sharp", 
 				window.getHeight() / 30, 
-				new Vector2(10, 4.1*window.getHeight() / 20));
+				new Vector2(10, 4.1*window.getHeight() / 20f));
 		trackingFitness.setColor(Color.WHITE.darker());
-		
+
+
 		info.add(protozoaText);
 		info.add(pelletText);
 		info.add(trackingFitness);
+
+		TextObject fpsText = new TextObject("FPS: ",
+				"bubble sharp",
+				window.getHeight() / 30,
+				new Vector2(window.getWidth() * 0.9, window.getHeight() / 20f));
+		fpsText.setColor(Color.YELLOW.darker());
+
+		debugInfo = new ArrayList<>();
+		debugInfo.add(fpsText);
 	}
 	
 	public void render(Graphics2D g, Renderer renderer)
@@ -67,13 +78,18 @@ public class UI
 		info.get(1).setText("Number of protozoa: " + simulation.getTank().numberOfProtozoa());
 		info.get(1).render(g);
 		Entity tracked = renderer.getTracked();
-		if (tracked != null && tracked instanceof Protozoa) {
+		if (tracked instanceof Protozoa) {
 			String fit = TextStyle.toString(((Protozoa) tracked).getFitness(), 2);
-			info.get(2).setText("Tracked's fitness: " + fit);
+			info.get(2).setText("Tracked entity's fitness: " + fit);
 			info.get(2).render(g);
 		}
 		else {
 			info.get(2).setText("");
+		}
+
+		if (simulation.inDebugMode()) {
+			debugInfo.get(0).setText("FPS: " + (int) renderer.getFPS());
+			debugInfo.get(0).render(g);
 		}
 	}
 }

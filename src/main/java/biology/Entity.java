@@ -32,7 +32,10 @@ public abstract class Entity implements Serializable
 		colour = new Color(255, 255, 255);
 	}
 	
-	public abstract Stream<Entity> update(double delta, Stream<Entity> entities);
+	public Stream<Entity> update(double delta, Stream<Entity> entities) {
+		timeAlive += delta;
+		return Stream.empty();
+	}
 	
 	public void render(Graphics g)
 	{
@@ -47,7 +50,6 @@ public abstract class Entity implements Serializable
 	public boolean tick(double delta)
 	{
 		thinkTime += delta;
-		timeAlive += delta;
 
 		if (thinkTime >= maxThinkTime) {
 			thinkTime = 0;

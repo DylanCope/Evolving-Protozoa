@@ -19,7 +19,8 @@ public class Simulation implements Runnable, ActionListener
 	private double elapsedTime = 0, timeDilation = 1;
 	
 	public static Random RANDOM;
-	
+	private boolean debug = true;
+
 	public Simulation(long seed)
 	{
 		RANDOM = new Random(seed);
@@ -36,20 +37,20 @@ public class Simulation implements Runnable, ActionListener
 		tank = new Tank();
 
 		int creatures = 300;
-		int pellets = 500;
+		int pellets = 600;
 		
 		for (int i = 0; i < creatures; i++) 
 		{
 			double radius = (RANDOM.nextInt(5) + 5) / 500.0;
 //			ProtozoaGenome genome = new ProtozoaGenome(10, radius);
 //			tank.addEntity(genome.phenotype());
-			tank.addEntity(new Protozoa(Brain.RANDOM, new Retina(30), radius));
+			tank.addRandomEntity(new Protozoa(Brain.RANDOM, new Retina(30), radius));
 		}
 		
 		for (int i = creatures; i <  creatures + pellets; i++) 
 		{
 			double radius = (RANDOM.nextInt(3) + 2) / 500.0;
-			tank.addEntity(new Pellet(radius));
+			tank.addRandomEntity(new Pellet(radius));
 		}
 
 		for (Entity e : tank.getEntities())
@@ -89,4 +90,16 @@ public class Simulation implements Runnable, ActionListener
 	public double getTimeDilation() { return timeDilation; }
 
 	public void setTimeDilation(double td) { timeDilation = td; }
+
+	public void close() {
+
+	}
+
+	public void toggleDebug() {
+		debug = !debug;
+	}
+
+	public boolean inDebugMode() {
+		return debug;
+	}
 }

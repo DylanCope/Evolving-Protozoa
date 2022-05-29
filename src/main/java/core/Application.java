@@ -11,7 +11,7 @@ public class Application
 	public static Simulation simulation;
 	public static Window window;
 	
-	public static final float refreshDelay = 1000 / 20f;
+	public static final float refreshDelay = 1000 / 120f;
 	
 	public static void main(String[] args)
 	{

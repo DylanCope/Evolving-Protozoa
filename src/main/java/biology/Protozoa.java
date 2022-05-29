@@ -3,9 +3,7 @@ package biology;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,6 +20,8 @@ public class Protozoa extends Entity
 	private ProtozoaGenome genome;
 	private Retina retina;
 	private Brain brain;
+
+	private double shieldFactor = 1.3;
 
 	public Protozoa(ProtozoaGenome genome)
 	{
@@ -73,21 +73,25 @@ public class Protozoa extends Entity
 		setHealth(getHealth() + e.getNutrition());
 		e.setHealth(e.getHealth() - e.getNutrition());
 	}
+
+	public void damage(double damage) {
+		setHealth(getHealth() - damage);
+	}
 	
 	public void fight(Protozoa p)
 	{
-		double attack1 = 2*getHealth()   + 3*getRadius()/10.0   + 2*Simulation.RANDOM.nextDouble();
-		double attack2 = 2*p.getHealth() + 3*p.getRadius()/10.0 + 2*Simulation.RANDOM.nextDouble();
-		if (attack1 > 1.3*attack2)
-			eat(p);
-		else if (1.3*attack1 < attack2)
-			p.eat(this);
+		double myAttack = 2*getHealth()   + 3*getRadius()/10.0   + 2*Simulation.RANDOM.nextDouble();
+		double theirAttack = 2*p.getHealth() + 3*p.getRadius()/10.0 + 2*Simulation.RANDOM.nextDouble();
+		if (myAttack > p.shieldFactor * theirAttack)
+			damage(myAttack - p.shieldFactor * theirAttack);
+		else if (theirAttack > shieldFactor * myAttack)
+			p.damage(theirAttack - shieldFactor * myAttack);
 	}
 	
 	public void think(double delta)
 	{
 		brain.tick(this);
-		if(super.tick(delta))
+		if (super.tick(delta))
 		{
 			rotate(brain.turn(this));
 			setSpeed(brain.speed(this));
@@ -96,7 +100,8 @@ public class Protozoa extends Entity
 		setHealth(getHealth() * (1 - deathRate));
 	}
 
-	public Stream<Entity> interactWith(Entity other) {
+	public Stream<Entity> interact(Entity other) {
+		// Add delta to this method to adjust interactions with time
 
 		if (other.equals(this))
 			return Stream.empty();
@@ -120,13 +125,11 @@ public class Protozoa extends Entity
 		return newEntities.stream();
 	}
 
-	public Stream<Entity> interact(Stream<Entity> entities) {
+	public void resetRetina() {
 		for (Retina.Cell cell : retina) {
 			cell.colour = Color.WHITE;
 			cell.entity = null;
 		}
-
-		return entities.flatMap(this::interactWith);
 	}
 
 	@Override
@@ -135,12 +138,11 @@ public class Protozoa extends Entity
 		if (isDead())
 			return Stream.empty();
 
+		resetRetina();
 		think(delta);
 		Collection<Entity> entityCollection = entities.collect(Collectors.toList());
-		Stream<Entity> newEntities = interact(entityCollection.stream());
 		move(getVel().mul(delta), entityCollection);
-
-		return newEntities;
+		return entityCollection.stream().flatMap(this::interact);
 	}
 	
 	public void render(Graphics g)
@@ -161,7 +163,7 @@ public class Protozoa extends Entity
 					(int)(getPos().getY() + (y*getRadius()*r0)/len), 
 					(int)(getPos().getX() + (x*getRadius()*r2)/len),
 					(int)(getPos().getY() + (y*getRadius()*r2)/len)
-					);
+			);
 		}
 	}
 	
@@ -172,11 +174,8 @@ public class Protozoa extends Entity
 
 	@Override
 	public boolean isEdible() {
-		return true;
+		return false;
 	}
-
-	@Override
-	public void setDead(boolean dead) { super.setDead(dead); }
 
 	public Retina getRetina() {
 		return retina;
@@ -190,6 +189,16 @@ public class Protozoa extends Entity
 		return totalConsumption;
 	}
 
-	public ProtozoaGenome getGenome() { return genome; }
-	
+	public ProtozoaGenome getGenome() {
+		return genome;
+	}
+
+
+	public double getShieldFactor() {
+		return shieldFactor;
+	}
+
+	public void setShieldFactor(double shieldFactor) {
+		this.shieldFactor = shieldFactor;
+	}
 }

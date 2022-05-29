@@ -52,6 +52,12 @@ public class ChunkManager implements Serializable {
         return new Vector2(chunkX, chunkY);
     }
 
+    public Vector2 toTankCoords(Vector2 chunkCoords) {
+        double x = (chunkCoords.getX() - 1) * chunkSize + xMin;
+        double y = (chunkCoords.getY() - 1) * chunkSize + yMin;
+        return new Vector2(x, y);
+    }
+
     public Chunk getChunk(Entity e) {
         Vector2 chunkCoords = this.toChunkCoords(e.getPos());
         return getChunk(chunkCoords);

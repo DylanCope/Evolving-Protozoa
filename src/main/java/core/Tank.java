@@ -2,7 +2,6 @@ package core;
 
 import java.awt.Graphics;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,12 +22,12 @@ public class Tank implements Iterable<Entity>, Serializable
 
 	public Tank() 
 	{
-		double chunkSize = 2 * radius / 10;
+		double chunkSize = 2 * radius / 20;
 		chunkManager = new ChunkManager(-radius, radius, -radius, radius, chunkSize);
 		entityCounts = new HashMap<>();
 	}
 	
-	public void addEntity(Entity e) {
+	public void addRandomEntity(Entity e) {
 		double rad 	= radius - 2*e.getRadius();
 		double t 	= 2 * Math.PI * Simulation.RANDOM.nextDouble();
 		double r 	= Simulation.RANDOM.nextDouble();
@@ -36,20 +35,19 @@ public class Tank implements Iterable<Entity>, Serializable
 					rad * (1 - r*r) * Math.cos(t),
 					rad * (1 - r*r) * Math.sin(t)
 				));
-		chunkManager.add(e);
+		registerNewEntity(e);
+	}
 
-		if (!entityCounts.containsKey(e.getClass()))
-			entityCounts.put(e.getClass(), 0);
-		else
-			entityCounts.put(e.getClass(), 1 + entityCounts.get(e.getClass()));
+	public void handleTankEdge(Entity e) {
+		if (e.getPos().len() - e.getRadius() > radius)
+			e.setPos(e.getPos().mul(-0.98));
 	}
 
 	public Stream<Entity> updateEntity(Entity e, double delta) {
 
 		Stream<Entity> newEntities = e.update(delta, chunkManager.getNearbyEntities(e));
 
-		if (e.getPos().len() - e.getRadius() > radius)
-			e.setPos(e.getPos().mul(-0.98));
+		handleTankEdge(e);
 
 		if (e.isDead())
 			entityCounts.put(e.getClass(), -1 + entityCounts.get(e.getClass()));
@@ -63,8 +61,19 @@ public class Tank implements Iterable<Entity>, Serializable
 				.flatMap(e -> updateEntity(e, delta))
 				.collect(Collectors.toList());
 
-		newEntities.forEach(chunkManager::add);
+		newEntities.forEach(this::registerNewEntity);
 		chunkManager.update();
+	}
+
+	private void registerNewEntity(Entity e) {
+
+		chunkManager.add(e);
+
+		if (!entityCounts.containsKey(e.getClass()))
+			entityCounts.put(e.getClass(), 0);
+		else
+			entityCounts.put(e.getClass(), 1 + entityCounts.get(e.getClass()));
+
 	}
 	
 	public void render(Graphics g)
@@ -83,6 +92,8 @@ public class Tank implements Iterable<Entity>, Serializable
 	public int numberOfPellets() {
 		return entityCounts.get(Pellet.class);
 	}
+
+	public ChunkManager getChunkManager() { return chunkManager; }
 
 	@Override
 	public Iterator<Entity> iterator() {

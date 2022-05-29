@@ -13,12 +13,14 @@ public class REPL
     public REPL(Simulation simulation)
     {
         this.simulation = simulation;
+        System.out.println("Starting REPL...");
         BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
         while (true)
         {
             String line;
             try
             {
+                System.out.print("> ");
                 line = bufferRead.readLine();
                 String[] args = line.split(" ");
                 String cmd = args[0];
@@ -28,6 +30,8 @@ public class REPL
                         System.out.println("commands - help, quit, stats, settime, gettime");
                         break;
                     case "quit":
+                        System.out.println("Closing simulation");
+                        simulation.close();
                         Application.exit();
                         break;
                     case "stats":
@@ -41,6 +45,10 @@ public class REPL
                         break;
                     case "gettime":
                         System.out.println(simulation.getTimeDilation());
+                        break;
+                    case "toggledebug":
+                        System.out.println("Toggling debug mode.");
+                        simulation.toggleDebug();
                         break;
                 }
             }

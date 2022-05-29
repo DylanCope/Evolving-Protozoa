@@ -5,7 +5,6 @@ import utils.Vector2;
 
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class Chunk implements Serializable {
@@ -31,6 +30,14 @@ public class Chunk implements Serializable {
         int entityX = (int) chunkCoords.getX();
         int entityY = (int) chunkCoords.getY();
         return entityX == x & entityY == y;
+    }
+
+    public Vector2 getChunkCoords() {
+        return new Vector2((float) x, (float) y);
+    }
+
+    public Vector2 getTankCoords() {
+        return this.chunkManager.toTankCoords(getChunkCoords());
     }
 
     private boolean shouldRemove(Entity e) {

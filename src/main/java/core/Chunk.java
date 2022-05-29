@@ -5,6 +5,8 @@ import utils.Vector2;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Chunk implements Serializable {
@@ -22,6 +24,7 @@ public class Chunk implements Serializable {
     }
 
     public void update() {
+        entities.addAll(entities.stream().flatMap(Entity::handleDeath).collect(Collectors.toSet()));
         entities.removeIf(this::shouldRemove);
     }
 

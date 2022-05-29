@@ -114,11 +114,18 @@ public abstract class Entity implements Serializable
 		int r = healthyColour.getRed();
 		int g = healthyColour.getGreen();
 		int b = healthyColour.getBlue();
-		
+
+		double p = 0.7;
+		double colourDecay = 1 + p * (health - 1);
 		colour = new Color(
-				(int)(health * r), 
-				(int)(health * g), 
-				(int)(health * b));
+				(int) (colourDecay * r),
+				(int) (colourDecay * g),
+				(int) (colourDecay * b)
+		);
+	}
+
+	public Stream<Entity> handleDeath() {
+		return Stream.empty();
 	}
 
 	public void setMaxThinkTime(double maxThinkTime) { this.maxThinkTime = maxThinkTime; }
@@ -179,6 +186,8 @@ public abstract class Entity implements Serializable
 	}
 
 	public void setSpeed(double speed) { this.speed = speed; }
+
+	public double getSpeed() { return speed; }
 
 	public Color getColor() {
 		return colour;

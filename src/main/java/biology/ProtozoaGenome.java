@@ -6,6 +6,7 @@ import neat.NeuralNetwork;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Created by dylan on 28/05/2017.
@@ -49,7 +50,7 @@ public class ProtozoaGenome extends NetworkGenome
             public double turn(Protozoa p)
             {
                 double x = outputs.get(0);
-                return x < maxTurn ? x : maxTurn;
+                return Math.min(x, maxTurn);
             }
 
             @Override
@@ -92,14 +93,14 @@ public class ProtozoaGenome extends NetworkGenome
         return new Protozoa(this);
     }
 
-    public Protozoa reproduce(Protozoa a, Protozoa b)
+    public Stream<Protozoa> reproduce(Protozoa a, Protozoa b)
     {
         NetworkGenome ng = super.reproduce((NetworkGenome) b.getGenome());
         ProtozoaGenome pg = new ProtozoaGenome(this.retinaSize, this.radius);
         pg.setProperties(ng);
         Protozoa offspring = new Protozoa(pg);
         offspring.setPos(a.getPos().add(b.getPos()).mul(0.5));
-        return offspring;
+        return Stream.of(offspring);
     }
 
     @Override

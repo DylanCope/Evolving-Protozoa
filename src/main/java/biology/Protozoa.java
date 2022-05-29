@@ -4,9 +4,12 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Random;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Streams;
 import utils.Vector2;
 import core.Simulation;
 
@@ -22,6 +25,9 @@ public class Protozoa extends Entity
 	private Brain brain;
 
 	private double shieldFactor = 1.3;
+	private double attackFactor = 50;
+	private double consumeFactor = 15;
+	private boolean hasReleasedFood = false;
 
 	public Protozoa(ProtozoaGenome genome)
 	{
@@ -31,7 +37,10 @@ public class Protozoa extends Entity
 
 	public Protozoa(Brain brain, Retina retina, double radius)
 	{
-		setHealthyColour(new Color(200, 200, 255));
+		setHealthyColour(new Color(
+				100 + Simulation.RANDOM.nextInt(20),
+				80 + Simulation.RANDOM.nextInt(50),
+				150  + Simulation.RANDOM.nextInt(100)));
 		setColor(getHealthyColour());
 		this.brain = brain;
 		this.retina = retina;
@@ -67,25 +76,35 @@ public class Protozoa extends Entity
 		}
 	}
 	
-	public void eat(Entity e) 
+	public void eat(Entity e, double delta)
 	{
-		totalConsumption += e.getNutrition();
-		setHealth(getHealth() + e.getNutrition());
-		e.setHealth(e.getHealth() - e.getNutrition());
+		double consumed = consumeFactor * delta * e.getNutrition();
+		totalConsumption += consumed;
+		setHealth(getHealth() + consumed);
+		e.setHealth(e.getHealth() - consumed);
 	}
 
 	public void damage(double damage) {
 		setHealth(getHealth() - damage);
 	}
 	
-	public void fight(Protozoa p)
+	public Stream<Entity> fight(Protozoa p, double delta)
 	{
-		double myAttack = 2*getHealth()   + 3*getRadius()/10.0   + 2*Simulation.RANDOM.nextDouble();
-		double theirAttack = 2*p.getHealth() + 3*p.getRadius()/10.0 + 2*Simulation.RANDOM.nextDouble();
-		if (myAttack > p.shieldFactor * theirAttack)
-			damage(myAttack - p.shieldFactor * theirAttack);
-		else if (theirAttack > shieldFactor * myAttack)
-			p.damage(theirAttack - shieldFactor * myAttack);
+		double myAttack = 2*getHealth() + 0.3*getRadius() + 2*Simulation.RANDOM.nextDouble();
+		double theirAttack = 2*p.getHealth() + 0.3*p.getRadius() + 2*Simulation.RANDOM.nextDouble();
+
+		if (myAttack > p.shieldFactor * theirAttack) {
+			damage(delta * attackFactor * (myAttack - p.shieldFactor * theirAttack));
+			if (isDead())
+				return handleDeath();
+		}
+		else if (theirAttack > shieldFactor * myAttack) {
+			p.damage(delta * attackFactor * (theirAttack - shieldFactor * myAttack));
+			if (p.isDead())
+				return p.handleDeath();
+		}
+
+		return Stream.empty();
 	}
 	
 	public void think(double delta)
@@ -96,33 +115,31 @@ public class Protozoa extends Entity
 			rotate(brain.turn(this));
 			setSpeed(brain.speed(this));
 		}
-		double deathRate = getRadius() * delta * 2.5;
+		double deathRate = getRadius() * getSpeed() * delta * 200.5;
 		setHealth(getHealth() * (1 - deathRate));
 	}
 
-	public Stream<Entity> interact(Entity other) {
-		// Add delta to this method to adjust interactions with time
+	public Stream<Entity> interact(Entity other, double delta) {
 
-		if (other.equals(this))
+		if (other.equals(this) | isDead())
 			return Stream.empty();
 
 		see(other);
 
-		Collection<Entity> newEntities = new ArrayList<>();
 		if (canInteractWith(other)) {
 			if (other instanceof Protozoa)
 			{
 				Protozoa p = (Protozoa) other;
 				if (brain.wantToAttack(p))
-					fight(p);
+					return fight(p, delta);
 				else if (brain.wantToMateWith(p) && p.brain.wantToMateWith(this))
-					newEntities.add(genome.reproduce(this, p));
+					return genome.reproduce(this, p).map(Function.identity());
 			}
 			else {
-				eat(other);
+				eat(other, delta);
 			}
 		}
-		return newEntities.stream();
+		return Stream.empty();
 	}
 
 	public void resetRetina() {
@@ -132,17 +149,47 @@ public class Protozoa extends Entity
 		}
 	}
 
+	private Stream<Entity> breakIntoPellets() {
+		if (hasReleasedFood)
+			return Stream.empty();
+
+		hasReleasedFood = true;
+		double angle = Simulation.RANDOM.nextDouble() * Math.PI * 2;
+		Vector2 dir = new Vector2(Math.cos(angle), Math.sin(angle));
+
+		Pellet pellet1 = new Pellet(getRadius() / 2);
+		Pellet pellet2 = new Pellet(getRadius() / 2);
+		pellet1.setPos(getPos().add(dir.mul(getRadius())));
+		pellet2.setPos(getPos().add(dir.mul(-getRadius())));
+
+		pellet1.setHealthyColour(new Color(
+				150 + Simulation.RANDOM.nextInt(105),
+				10  + Simulation.RANDOM.nextInt(100),
+				10  + Simulation.RANDOM.nextInt(100)));
+
+		pellet2.setHealthyColour(new Color(
+				150 + Simulation.RANDOM.nextInt(105),
+				10  + Simulation.RANDOM.nextInt(100),
+				10  + Simulation.RANDOM.nextInt(100)));
+		return Stream.of(pellet1, pellet2);
+	}
+
+	public Stream<Entity> handleDeath() {
+		return breakIntoPellets();
+	}
+
 	@Override
 	public Stream<Entity> update(double delta, Stream<Entity> entities)
 	{
-		if (isDead())
-			return Stream.empty();
-
 		resetRetina();
 		think(delta);
+
+		if (isDead())
+			return handleDeath();
+
 		Collection<Entity> entityCollection = entities.collect(Collectors.toList());
 		move(getVel().mul(delta), entityCollection);
-		return entityCollection.stream().flatMap(this::interact);
+		return entityCollection.stream().flatMap(e -> interact(e, delta));
 	}
 	
 	public void render(Graphics g)

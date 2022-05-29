@@ -17,6 +17,10 @@ public class Pellet extends Entity
 	private double initialRadius;
 	private double growthRate;
 
+	/**
+	 * @param radius Radius of pellet
+	 * @param growthRate percentage increase in size per second
+	 */
 	public Pellet(double radius, double growthRate)
 	{
 		this.setRadius(radius);
@@ -25,16 +29,17 @@ public class Pellet extends Entity
 		setVel(new Vector2(
 				(0.5 - Simulation.RANDOM.nextDouble()) / 30.0,
 				(0.5 - Simulation.RANDOM.nextDouble()) / 30.0));
-		setColor(new Color(
-				150 + Simulation.RANDOM.nextInt(105), 
-				10  + Simulation.RANDOM.nextInt(100), 
+		setHealthyColour(new Color(
+				30 + Simulation.RANDOM.nextInt(105),
+				150  + Simulation.RANDOM.nextInt(100),
 				10  + Simulation.RANDOM.nextInt(100)));
+		setColor(getHealthyColour());
 		setNutrition(0.25 * radius);
 	}
 
 	public Pellet(double radius)
 	{
-		this(radius, 1.01);
+		this(radius, 0.01);
 	}
 
 	@Override
@@ -44,7 +49,7 @@ public class Pellet extends Entity
 		if (isDead())
 			return newEntities;
 
-		setRadius(getRadius() * (1 + (growthRate - 1) * delta));
+		setRadius(getRadius() * (1 + growthRate * delta));
 		if (getRadius() > initialRadius * splitRadiusFactor & getRadius() > minSplitRadius)
 			return splitPellet();
 

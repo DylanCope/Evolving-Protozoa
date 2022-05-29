@@ -251,9 +251,9 @@ public class Renderer extends Canvas
 		zoom = targetZoom;
 		time += 0.1;
 		Color backgroundColour = new Color(
-				10 + (int)(5 *Math.cos(time/100.0)), 
-				50 + (int)(30*Math.sin(time/100.0)), 
-				30 + (int)(15*Math.cos(time/100.0 + 1)));
+				30 + (int)(5 *Math.cos(time/100.0)),
+				50 + (int)(30*Math.sin(time/100.0)),
+				45 + (int)(15*Math.cos(time/100.0 + 1)));
 		graphics.setColor(backgroundColour);
 
 		graphics.fillRect(0, 0, window.getWidth(), window.getHeight());

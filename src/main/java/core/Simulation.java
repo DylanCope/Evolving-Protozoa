@@ -19,7 +19,7 @@ public class Simulation implements Runnable, ActionListener
 	private double elapsedTime = 0, timeDilation = 1;
 	
 	public static Random RANDOM;
-	private boolean debug = true;
+	private boolean debug = false;
 
 	public Simulation(long seed)
 	{

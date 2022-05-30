@@ -5,26 +5,25 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import biology.*;
 import utils.Vector2;
-import biology.Entity;
-import biology.Pellet;
-import biology.Protozoa;
 
 public class Tank implements Iterable<Entity>, Serializable
 {
 	private static final long serialVersionUID = 2804817237950199223L;
 	private final double radius = 1.0;
-	private HashMap<Class<? extends Entity>, Integer> entityCounts;
+	private ConcurrentHashMap<Class<? extends Entity>, Integer> entityCounts;
 	private final ChunkManager chunkManager;
 
 	public Tank() 
 	{
 		double chunkSize = 2 * radius / 20;
 		chunkManager = new ChunkManager(-radius, radius, -radius, radius, chunkSize);
-		entityCounts = new HashMap<>();
+		entityCounts = new ConcurrentHashMap<>();
 	}
 	
 	public void addRandomEntity(Entity e) {
@@ -93,11 +92,18 @@ public class Tank implements Iterable<Entity>, Serializable
 	}
 	
 	public int numberOfProtozoa() {
-		return entityCounts.get(Protozoa.class);
+		if (entityCounts.containsKey(Protozoa.class))
+			return entityCounts.get(Protozoa.class);
+		return 0;
 	}
 	
 	public int numberOfPellets() {
-		return entityCounts.get(Pellet.class);
+		int nPellets = 0;
+		if (entityCounts.containsKey(PlantPellet.class))
+			nPellets += entityCounts.get(PlantPellet.class);
+		if (entityCounts.containsKey(MeatPellet.class))
+			nPellets += entityCounts.get(MeatPellet.class);
+		return nPellets;
 	}
 
 	public ChunkManager getChunkManager() { return chunkManager; }

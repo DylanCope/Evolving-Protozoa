@@ -100,7 +100,27 @@ public abstract class Entity implements Serializable
 		
 		return true;
 	}
-	
+
+	/**
+	 * @param p maximum proportion of colour that can be lost
+	 * @return how much colour to loose
+	 */
+	public double getColourDecay(double p) {
+		return 1 + p * (health - 1);
+	}
+
+	public Color degradedHealthColour() {
+		int r = healthyColour.getRed();
+		int g = healthyColour.getGreen();
+		int b = healthyColour.getBlue();
+		double colourDecay = getColourDecay(0.7);
+		return new Color(
+				(int) (colourDecay * r),
+				(int) (colourDecay * g),
+				(int) (colourDecay * b)
+		);
+	}
+
 	public void setHealth(double h)
 	{
 		health = h;
@@ -111,18 +131,8 @@ public abstract class Entity implements Serializable
 			setDead(true);
 			return;
 		}
-		
-		int r = healthyColour.getRed();
-		int g = healthyColour.getGreen();
-		int b = healthyColour.getBlue();
 
-		double p = 0.7;
-		double colourDecay = 1 + p * (health - 1);
-		colour = new Color(
-				(int) (colourDecay * r),
-				(int) (colourDecay * g),
-				(int) (colourDecay * b)
-		);
+		setColor(degradedHealthColour());
 	}
 
 	public Stream<Entity> handleDeath() {

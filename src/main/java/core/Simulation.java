@@ -36,8 +36,8 @@ public class Simulation implements Runnable, ActionListener
 	{
 		tank = new Tank();
 
-		int creatures = 300;
-		int pellets = 600;
+		int creatures = 100;
+		int pellets = 100;
 		
 		for (int i = 0; i < creatures; i++) 
 		{
@@ -50,7 +50,7 @@ public class Simulation implements Runnable, ActionListener
 		for (int i = creatures; i <  creatures + pellets; i++) 
 		{
 			double radius = (RANDOM.nextInt(3) + 2) / 500.0;
-			tank.addRandomEntity(new Pellet(radius));
+			tank.addRandomEntity(new PlantPellet(radius));
 		}
 
 		for (Entity e : tank.getEntities())

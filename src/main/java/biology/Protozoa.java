@@ -4,6 +4,8 @@ import core.Simulation;
 import utils.Vector2;
 
 import java.awt.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.function.Function;
@@ -112,8 +114,6 @@ public class Protozoa extends Entity
 			rotate(brain.turn(this));
 			setSpeed(brain.speed(this));
 		}
-		double deathRate = getRadius() * getSpeed() * delta * 200;
-		setHealth(getHealth() * (1 - deathRate));
 	}
 
 	public Stream<Entity> interact(Entity other, double delta) {
@@ -151,27 +151,19 @@ public class Protozoa extends Entity
 			return Stream.empty();
 
 		hasReleasedFood = true;
-		double angle = Simulation.RANDOM.nextDouble() * Math.PI * 2;
-		Vector2 dir = new Vector2(Math.cos(angle), Math.sin(angle));
+		double angle = 2 * Math.PI * Simulation.RANDOM.nextDouble();
+		int nPellets = 2 + Simulation.RANDOM.nextInt(3);
+		ArrayList<Entity> pellets = new ArrayList<>();
+		for (int i = 0; i < nPellets; i++) {
+			Vector2 dir = new Vector2(Math.cos(angle), Math.sin(angle));
+			double p = 0.3 + 0.7 * Simulation.RANDOM.nextDouble() / nPellets;
+			Pellet pellet = new MeatPellet(getRadius() * p);
+			pellet.setPos(getPos().add(dir.mul(2*pellet.getRadius())));
+			pellets.add(pellet);
+			angle += 2 * Math.PI / nPellets;
+		}
 
-		Pellet pellet1 = new Pellet(getRadius() / 2);
-		Pellet pellet2 = new Pellet(getRadius() / 2);
-		pellet1.setPos(getPos().add(dir.mul(getRadius())));
-		pellet2.setPos(getPos().add(dir.mul(-getRadius())));
-
-		pellet1.setHealthyColour(new Color(
-				150 + Simulation.RANDOM.nextInt(105),
-				10  + Simulation.RANDOM.nextInt(100),
-				10  + Simulation.RANDOM.nextInt(100)));
-		pellet1.setColor(pellet1.getHealthyColour());
-
-		pellet2.setHealthyColour(new Color(
-				150 + Simulation.RANDOM.nextInt(105),
-				10  + Simulation.RANDOM.nextInt(100),
-				10  + Simulation.RANDOM.nextInt(100)));
-		pellet2.setColor(pellet2.getHealthyColour());
-
-		return Stream.of(pellet1, pellet2);
+		return pellets.stream();
 	}
 
 	public Stream<Entity> handleDeath() {
@@ -190,14 +182,21 @@ public class Protozoa extends Entity
 		return stats;
 	}
 
+	public void age(double delta) {
+		double deathRate = getRadius() * getSpeed() * delta * 200;
+		setHealth(getHealth() * (1 - deathRate));
+	}
+
+
 	@Override
 	public Stream<Entity> update(double delta, Stream<Entity> entities)
 	{
-		resetRetina();
-		think(delta);
-
+		age(delta);
 		if (isDead())
 			return handleDeath();
+
+		resetRetina();
+		think(delta);
 
 		Collection<Entity> entityCollection = entities.collect(Collectors.toList());
 		move(getVel().mul(delta), entityCollection);

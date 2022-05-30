@@ -4,7 +4,7 @@
 
 Create an environment where protozoa-like entities can evolve their controllers.
 
-![png](/screenshots/tank_old.png)
+![png](/screenshots/tank.png)
 
 ## Notes and TODOs
 

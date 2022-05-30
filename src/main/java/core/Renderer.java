@@ -291,8 +291,9 @@ public class Renderer extends Canvas
 		
 		background(graphics);
 		entities(graphics, simulation.getTank());
-		maskTank(graphics, tankRenderCoords, tankRenderRadius, 200);
-		maskTank(graphics, toRenderSpace(new Vector2(0, 0)), tankRenderRadius*zoom, 255);
+		maskTank(graphics, tankRenderCoords, tankRenderRadius, simulation.inDebugMode() ? 50 : 200);
+		maskTank(graphics, toRenderSpace(new Vector2(0, 0)),
+				tankRenderRadius*zoom, simulation.inDebugMode() ? 100 : 255);
 		
 		ui.render(graphics, this);
 		

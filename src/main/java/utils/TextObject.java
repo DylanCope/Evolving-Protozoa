@@ -1,7 +1,6 @@
 package utils;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics2D;
+
+import java.awt.*;
 import java.awt.font.FontRenderContext;
 
 
@@ -13,38 +12,15 @@ public class TextObject {
 	
 	private int m_size, m_style;
 	private Color m_colour;
-	
-	public TextObject()
-	{
-		m_text = "";
-		m_position = new Vector2(0, 0);
-		m_size = 20;
-		m_font = "Times New Roman";
-		m_style = Font.PLAIN;
-		m_colour = Color.BLACK;
-		
-	}
-	
-	public TextObject(String text, Vector2 pos, TextStyle textStyle)
-	{
-		m_text = text;
-		m_position = pos;
-		m_size = textStyle.getSize();
-		m_font = textStyle.getFont();
-		m_colour = textStyle.getColor();
-		m_style = textStyle.getStyle();
-	}
-	
-	public TextObject(String text, Vector2 position)
-	{
-		m_text = text;
-		m_position = position;
-		
-		m_size = 12;
-		m_font = "Times New Roman";
-		m_style = Font.PLAIN;
-		m_colour = Color.BLACK;
 
+	public TextObject(String text, int size)
+	{
+		this(text, TextStyle.fontName, size, new Vector2(0f, 0f));
+	}
+
+	public TextObject(String text, int size, Vector2 position)
+	{
+		this(text, TextStyle.fontName, size, position);
 	}
 
 	public TextObject(String text, String font, int size, Vector2 position)
@@ -57,16 +33,6 @@ public class TextObject {
 		m_style = Font.PLAIN;
 		m_colour = Color.BLACK;
 
-	}
-	
-	public TextObject(String text, String font, int size, int style, Vector2 position)
-	{
-		m_position = position;
-		m_size = size;
-		m_style = style;
-		m_text = text;
-		
-		m_colour = Color.BLACK;
 	}
 	
 	public void render(Graphics2D g)

@@ -10,9 +10,10 @@ public class Controller
 {
 	private Input input;
 	
-	public Controller(Input input)
+	public Controller(Input input, Simulation simulation)
 	{
 		this.input = input;
+		input.registerOnPressHandler(KeyEvent.VK_F3, simulation::toggleDebug);
 	}
 
 	public void update(Simulation simulation, Renderer renderer) 

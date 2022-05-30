@@ -9,6 +9,11 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class Input implements KeyListener, FocusListener,
 				MouseListener, MouseMotionListener, MouseWheelListener 
@@ -18,13 +23,23 @@ public class Input implements KeyListener, FocusListener,
 	private boolean[] keys 			= new boolean[65536];
 	private boolean[] mouseButtons 	= new boolean[4];
 	private boolean[] mouseJustDown = new boolean[4];
+
+	private final HashMap<Integer, Runnable> onPressHandlers = new HashMap<>();
+
+	public void registerOnPressHandler(int key, Runnable handler) {
+		onPressHandlers.put(key, handler);
+	}
+
+	public void unregisterOnPressHandler(int key) {
+		onPressHandlers.remove(key);
+	}
 	
 	private int mouseWheelRotation = 0;
 	
 	public boolean getKey(int key) {
 		return keys[key];
 	}
-	
+
 	public boolean getMouse(int button) {
 		return mouseButtons[button];
 	}
@@ -107,25 +122,27 @@ public class Input implements KeyListener, FocusListener,
 	}
 
 	@Override
-	public void focusLost(FocusEvent event) {
-		
-		for (int i = 0; i < keys.length; i++)
-			keys[i] = false;
-		
-		for (int i = 0; i < mouseButtons.length; i++)
-			mouseButtons[i] = false;
-		
+	public void focusLost(FocusEvent event)
+	{
+		Arrays.fill(keys, false);
+		Arrays.fill(mouseButtons, false);
 	}
 
 	@Override
 	public void keyPressed(KeyEvent event) 
 	{
-
 		int key = event.getKeyCode();
 		
-		if (0 < key && key < keys.length)
+		if (0 < key && key < keys.length) {
+			if (!keys[key] & onPressHandlers.containsKey(key)) {
+				try {
+					onPressHandlers.get(key).run();
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
 			keys[key] = true;
-		
+		}
 	}
 
 	@Override

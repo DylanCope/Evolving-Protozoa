@@ -49,7 +49,7 @@ public class Window extends Canvas implements Runnable, ActionListener
 		frame.setVisible(true);
 		
 		input = new Input();
-		controller = new Controller(input);
+		controller = new Controller(input, simulation);
 		
 		renderer.addKeyListener(input);
 		renderer.addMouseListener(input);

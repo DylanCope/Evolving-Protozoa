@@ -24,7 +24,6 @@ public class Chunk implements Serializable {
     }
 
     public void update() {
-        entities.addAll(entities.stream().flatMap(Entity::handleDeath).collect(Collectors.toSet()));
         entities.removeIf(this::shouldRemove);
     }
 

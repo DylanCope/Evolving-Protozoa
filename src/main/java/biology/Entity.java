@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.stream.Stream;
 
 import utils.Vector2;
@@ -132,7 +133,19 @@ public abstract class Entity implements Serializable
 
 	public Color getHealthyColour() { return healthyColour; }
 
-	public void setHealthyColour(Color healthyColour) { this.healthyColour = healthyColour; }
+	public void setHealthyColour(Color healthyColour) {
+		this.healthyColour = healthyColour;
+	}
+
+	public abstract String getPrettyName();
+
+	public HashMap<String, Double> getStats() {
+		HashMap<String, Double> stats = new HashMap<>();
+		stats.put("Health", getHealth());
+		stats.put("Size", getRadius());
+		stats.put("Speed", getSpeed());
+		return stats;
+	}
 	
 	public double getHealth() 
 	{

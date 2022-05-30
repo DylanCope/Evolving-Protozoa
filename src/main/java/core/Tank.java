@@ -16,7 +16,7 @@ import biology.Protozoa;
 public class Tank implements Iterable<Entity>, Serializable
 {
 	private static final long serialVersionUID = 2804817237950199223L;
-	private final double radius = 2;
+	private final double radius = 1.0;
 	private HashMap<Class<? extends Entity>, Integer> entityCounts;
 	private final ChunkManager chunkManager;
 
@@ -49,9 +49,6 @@ public class Tank implements Iterable<Entity>, Serializable
 
 		handleTankEdge(e);
 
-		if (e.isDead())
-			entityCounts.put(e.getClass(), -1 + entityCounts.get(e.getClass()));
-
 		return newEntities;
 	}
 
@@ -62,7 +59,17 @@ public class Tank implements Iterable<Entity>, Serializable
 				.collect(Collectors.toList());
 
 		newEntities.forEach(this::registerNewEntity);
+
+		chunkManager.getAllEntities().filter(Entity::isDead)
+				.flatMap(this::handleEntityDeath)
+				.forEach(chunkManager::add);
+
 		chunkManager.update();
+	}
+
+	private Stream<Entity> handleEntityDeath(Entity e) {
+		entityCounts.put(e.getClass(), -1 + entityCounts.get(e.getClass()));
+		return e.handleDeath();
 	}
 
 	private void registerNewEntity(Entity e) {
@@ -98,5 +105,9 @@ public class Tank implements Iterable<Entity>, Serializable
 	@Override
 	public Iterator<Entity> iterator() {
 		return chunkManager.getAllEntities().iterator();
+	}
+
+	public double getRadius() {
+		return radius;
 	}
 }

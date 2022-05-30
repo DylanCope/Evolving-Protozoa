@@ -12,6 +12,8 @@ public class TextStyle {
 	private int m_size, m_style;
 	private Color m_colour;
 	private String m_font;
+
+	public static String fontName = "Fira Code Retina";
 	
 	public static String toString(double d, int dp) {
 		double ten = Math.pow(10, dp);
@@ -22,11 +24,11 @@ public class TextStyle {
 	{
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		try {
-		     File f = new File("resources/fonts/bubble_sharp.ttf");
+		     File f = new File("resources/fonts/FiraCode-Retina.ttf");
 		     ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, f));
 		} 
 		catch (IOException|FontFormatException|NullPointerException e) {
-			System.out.println("Could not load bubble sharp font");
+			System.out.println("Could not load FiraCode-Retina font");
 		}
 	}
 

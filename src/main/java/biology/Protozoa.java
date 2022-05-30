@@ -1,17 +1,14 @@
 package biology;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.util.ArrayList;
+import core.Simulation;
+import utils.Vector2;
+
+import java.awt.*;
 import java.util.Collection;
-import java.util.Random;
+import java.util.HashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.google.common.collect.Streams;
-import utils.Vector2;
-import core.Simulation;
 
 public class Protozoa extends Entity 
 {
@@ -115,7 +112,7 @@ public class Protozoa extends Entity
 			rotate(brain.turn(this));
 			setSpeed(brain.speed(this));
 		}
-		double deathRate = getRadius() * getSpeed() * delta * 200.5;
+		double deathRate = getRadius() * getSpeed() * delta * 200;
 		setHealth(getHealth() * (1 - deathRate));
 	}
 
@@ -166,16 +163,31 @@ public class Protozoa extends Entity
 				150 + Simulation.RANDOM.nextInt(105),
 				10  + Simulation.RANDOM.nextInt(100),
 				10  + Simulation.RANDOM.nextInt(100)));
+		pellet1.setColor(pellet1.getHealthyColour());
 
 		pellet2.setHealthyColour(new Color(
 				150 + Simulation.RANDOM.nextInt(105),
 				10  + Simulation.RANDOM.nextInt(100),
 				10  + Simulation.RANDOM.nextInt(100)));
+		pellet2.setColor(pellet2.getHealthyColour());
+
 		return Stream.of(pellet1, pellet2);
 	}
 
 	public Stream<Entity> handleDeath() {
 		return breakIntoPellets();
+	}
+
+	@Override
+	public String getPrettyName() {
+		return "Protozoan";
+	}
+
+	@Override
+	public HashMap<String, Double> getStats() {
+		HashMap<String, Double> stats = super.getStats();
+		stats.put("Fitness", getFitness());
+		return stats;
 	}
 
 	@Override
@@ -239,7 +251,6 @@ public class Protozoa extends Entity
 	public ProtozoaGenome getGenome() {
 		return genome;
 	}
-
 
 	public double getShieldFactor() {
 		return shieldFactor;

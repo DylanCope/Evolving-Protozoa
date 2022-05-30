@@ -26,9 +26,11 @@ public class Pellet extends Entity
 		this.setRadius(radius);
 		initialRadius = radius;
 		this.growthRate = growthRate;
+
 		setVel(new Vector2(
 				(0.5 - Simulation.RANDOM.nextDouble()) / 30.0,
 				(0.5 - Simulation.RANDOM.nextDouble()) / 30.0));
+
 		setHealthyColour(new Color(
 				30 + Simulation.RANDOM.nextInt(105),
 				150  + Simulation.RANDOM.nextInt(100),
@@ -73,7 +75,12 @@ public class Pellet extends Entity
 	public boolean isEdible() {
 		return true;
 	}
-	
+
+	@Override
+	public String getPrettyName() {
+		return "Plant Pellet";
+	}
+
 	@Override
 	public double getNutrition() {
 		return 10 * getRadius();

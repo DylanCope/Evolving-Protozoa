@@ -14,20 +14,28 @@ public class SynapseGene implements Comparable<SynapseGene>
     public SynapseGene(NeuronGene in, NeuronGene out) {
         this.in = in;
         this.out = out;
-        this.weight = Simulation.RANDOM.nextDouble();
+        this.weight = 2*Simulation.RANDOM.nextDouble() - 1;
         disabled = false;
         innovation = 0;
     }
 
     @Override
     public int compareTo(SynapseGene g) {
-        return innovation - g.innovation;
+        if (!equals(g)) {
+            return innovation - g.innovation;
+        }
+        return -1;
     }
 
     @Override
     public boolean equals(Object o) {
         if (o instanceof SynapseGene) {
-            return ((SynapseGene) o).getId() == id;
+            SynapseGene otherSynGene = ((SynapseGene) o);
+            NeuronGene otherIn = otherSynGene.in;
+            NeuronGene otherOut = otherSynGene.out;
+            return in.equals(otherIn)
+                    && out.equals(otherOut)
+                    && innovation == otherSynGene.getInnovation();
         }
         return false;
     }

@@ -18,6 +18,7 @@ public class Neuron implements Comparable<Neuron> {
         Activation SIGMOID = z -> 1 / (1 + Math.exp(-z));
         Activation LINEAR = z -> z;
         Activation TANH = Math::tanh;
+
     }
 
     public enum Type {
@@ -39,7 +40,7 @@ public class Neuron implements Comparable<Neuron> {
     private Type type;
     private int id;
     private double state = 0;
-    private double next_state = 0;
+    private double nextState = 0;
     private double learningRate = 0;
     private Activation activation = Activation.TANH;
 
@@ -59,7 +60,7 @@ public class Neuron implements Comparable<Neuron> {
 
     void tick()
     {
-        next_state = Streams.zip(
+        nextState = Streams.zip(
                 inputs.stream().map(Neuron::getState),
                 weights.stream(),
                 (x, y) -> x * y)
@@ -70,7 +71,7 @@ public class Neuron implements Comparable<Neuron> {
 
     void update()
     {
-        state = next_state;
+        state = nextState;
     }
 
     @Override

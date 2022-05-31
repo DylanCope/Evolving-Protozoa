@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import core.Settings;
 import core.Simulation;
 import utils.Vector2;
 
@@ -25,6 +26,7 @@ public abstract class Entity implements Serializable
 	private double maxThinkTime;
 	private double timeAlive = 0;
 	private double health = 1;
+	private double growthRate = 0.0;
 	
 	private boolean dead = false;
 	private double nutrition;
@@ -39,8 +41,21 @@ public abstract class Entity implements Serializable
 	public Stream<Entity> update(double delta, Stream<Entity> entities) {
 		timeAlive += delta;
 		crowdingFactor = 0;
+		grow(delta);
 		move(delta);
 		return entities.flatMap(e -> interact(e, delta));
+	}
+
+	public void grow(double delta) {
+		setRadius(getRadius() * (1 + getGrowthRate() * delta));
+	}
+
+	public void setGrowthRate(double gr) {
+		growthRate = gr;
+	}
+
+	public double getGrowthRate() {
+		return growthRate;
 	}
 	
 	public void render(Graphics g)
@@ -142,9 +157,10 @@ public abstract class Entity implements Serializable
 
 	public HashMap<String, Double> getStats() {
 		HashMap<String, Double> stats = new HashMap<>();
-		stats.put("Health", getHealth());
-		stats.put("Size", getRadius());
-		stats.put("Speed", getSpeed());
+		stats.put("Age", 100 * timeAlive);
+		stats.put("Health", 100 * getHealth());
+		stats.put("Size", Settings.statsDistanceScalar * getRadius());
+		stats.put("Speed", Settings.statsDistanceScalar * getSpeed());
 		stats.put("Crowding Factor", getCrowdingFactor());
 		return stats;
 	}
@@ -255,6 +271,9 @@ public abstract class Entity implements Serializable
 	}
 
 	protected Stream<Entity> burst(Function<Double, ? extends Entity> createChild) {
+		setDead(true);
+		hasHandledDeath = true;
+
 		double angle = 2 * Math.PI * Simulation.RANDOM.nextDouble();
 		int nChildren = 2 + Simulation.RANDOM.nextInt(3);
 

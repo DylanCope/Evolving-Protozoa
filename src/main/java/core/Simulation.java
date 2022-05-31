@@ -36,24 +36,12 @@ public class Simulation implements Runnable, ActionListener
 	{
 		tank = new Tank();
 
-		int creatures = 300;
-		int pellets = 1000;
+		for (int i = 0; i < Settings.numInitialProtozoa; i++)
+			tank.addRandom(new Protozoa());
 
-		for (int i = 0; i < creatures; i++)
-		{
-			double radius = (RANDOM.nextInt(5) + 5) / 500.0;
-			ProtozoaGenome genome = new ProtozoaGenome(30, radius);
-			Protozoa p = genome.phenotype();
-			p.setPos(tank.randomPosition(radius));
-			tank.add(p);
-//			tank.addRandomEntity(new Protozoa(Brain.RANDOM, new Retina(30), radius));
-		}
-		
-		for (int i = 0; i < pellets; i++)
-		{
-			double radius = (RANDOM.nextInt(3) + 2) / 500.0;
-			tank.addRandomEntity(new PlantPellet(radius));
-		}
+		for (int i = 0; i < Settings.numInitialPlantPellets; i++)
+			tank.addRandom(new PlantPellet());
+
 	}
 	
 	public void loadTank(String filename)
@@ -70,7 +58,8 @@ public class Simulation implements Runnable, ActionListener
 	@Override
 	public void actionPerformed(ActionEvent e) 
 	{
-		double delta = timeDilation * timer.getDelay() / 1000.0;
+//		double delta = timeDilation * timer.getDelay() / 1000.0;
+		double delta = timeDilation * Settings.simulationUpdateDelta;
 		elapsedTime += delta;
 		tank.update(delta);
 		

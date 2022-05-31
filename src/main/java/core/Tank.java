@@ -14,22 +14,17 @@ import utils.Vector2;
 public class Tank implements Iterable<Entity>, Serializable
 {
 	private static final long serialVersionUID = 2804817237950199223L;
-	private final double radius = 1.0;
+	private final double radius = Settings.tankRadius;
 	private final ConcurrentHashMap<Class<? extends Entity>, Integer> entityCounts;
 	private final ChunkManager chunkManager;
 
 	public Tank() 
 	{
-		double chunkSize = 2 * radius / 20;
+		double chunkSize = 2 * radius / Settings.numChunkBreaks;
 		chunkManager = new ChunkManager(-radius, radius, -radius, radius, chunkSize);
 		entityCounts = new ConcurrentHashMap<>();
 	}
 	
-	public void addRandomEntity(Entity e) {
-		e.setPos(randomPosition(e.getRadius()));
-		add(e);
-	}
-
 	public Vector2 randomPosition(double entityRadius) {
 		double rad = radius - 2*entityRadius;
 		double t = 2 * Math.PI * Simulation.RANDOM.nextDouble();
@@ -63,9 +58,11 @@ public class Tank implements Iterable<Entity>, Serializable
 
 		newEntities.forEach(this::add);
 
-		chunkManager.getAllEntities().filter(Entity::isDead)
+		Collection<Entity> entitiesFromDeaths = chunkManager.getAllEntities().filter(Entity::isDead)
 				.flatMap(this::handleEntityDeath)
-				.forEach(chunkManager::add);
+				.collect(Collectors.toSet());
+
+		entitiesFromDeaths.forEach(this::add);
 
 		chunkManager.update();
 	}
@@ -120,4 +117,9 @@ public class Tank implements Iterable<Entity>, Serializable
 	public double getRadius() {
 		return radius;
 	}
+
+    public void addRandom(Entity e) {
+		e.setPos(randomPosition(e.getRadius()));
+		add(e);
+    }
 }

@@ -1,6 +1,7 @@
 package biology;
 
 import com.google.common.collect.Streams;
+import core.Settings;
 import core.Simulation;
 import utils.Vector2;
 
@@ -22,13 +23,21 @@ public class Protozoa extends Entity
 	private final Brain brain;
 
 	private double shieldFactor = 1.3;
-	private double attackFactor = 10;
-	private double consumeFactor = 15;
+	private final double attackFactor = 10;
+	private final double consumeFactor = 15;
+
+	private double splitRadius = Double.MAX_VALUE; // No splitting by default.
 
 	public Protozoa(ProtozoaGenome genome)
 	{
 		this(genome.brain(), genome.retina(), genome.getRadius());
 		this.genome = genome;
+		setGrowthRate(genome.getGrowthRate());
+		splitRadius = genome.getSplitRadius();
+	}
+
+	public Protozoa() {
+		this(new ProtozoaGenome());
 	}
 
 	public Protozoa(Brain brain, Retina retina, double radius)
@@ -108,16 +117,27 @@ public class Protozoa extends Entity
 	public void think(double delta)
 	{
 		brain.tick(this);
-//		if (super.tick(delta))
-//		{
 		rotate(brain.turn(this));
 		setSpeed(brain.speed(this));
-//		}
+	}
+
+	private boolean shouldSplit() {
+		return getRadius() > splitRadius && getHealth() > Settings.minHealthToSplit;
+	}
+
+	private Protozoa createSplitChild(double r) {
+		double stuntingFactor = r / getRadius();
+		Protozoa child = genome.createChild();
+		child.setRadius(stuntingFactor * child.getRadius());
+		return child;
 	}
 
 	public Stream<Entity> interact(Entity other, double delta) {
 		if (isDead())
 			return handleDeath();
+
+		if (shouldSplit())
+			return super.burst(this::createSplitChild);
 
 		see(other);
 
@@ -132,10 +152,11 @@ public class Protozoa extends Entity
 				if (brain.wantToAttack(p))
 					return Streams.concat(newEntities, fight(p, delta));
 
-				else if (brain.wantToMateWith(p) && p.brain.wantToMateWith(this)) {
-					Stream<Entity> children = genome.reproduce(this, p).map(Function.identity());
-					return Streams.concat(newEntities, children);
-				}
+//				else if (brain.wantToMateWith(p) && p.brain.wantToMateWith(this)) {
+//					// Add some negative consequences of mating?
+//					Stream<Entity> children = genome.reproduce(this, p).map(Function.identity());
+//					return Streams.concat(newEntities, children);
+//				}
 			}
 			else if (other.isEdible())
 				eat(other, delta);
@@ -172,6 +193,8 @@ public class Protozoa extends Entity
 	public HashMap<String, Double> getStats() {
 		HashMap<String, Double> stats = super.getStats();
 		stats.put("Fitness", getFitness());
+		stats.put("Growth Rate", getGrowthRate());
+		stats.put("Split Radius", splitRadius);
 		return stats;
 	}
 

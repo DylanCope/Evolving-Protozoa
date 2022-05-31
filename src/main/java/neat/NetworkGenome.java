@@ -1,11 +1,11 @@
 package neat;
 
-import biology.Entity;
+import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
+import core.Settings;
 import core.Simulation;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -13,19 +13,17 @@ public class NetworkGenome
 {
 	private static int innovation = 0;
 
-	
-	private Set<NeuronGene> neuronGenes;
-	private SortedSet<SynapseGene> synapseGenes;
-	private Random random;
-	private double mutationChance = 0.05;
-	private Neuron.Activation defaultActivation;
-	private double fitness;
+	private Set<NeuronGene> neuronGenes = new TreeSet<>();
+	private Set<SynapseGene> synapseGenes = new TreeSet<>();
+	private Random random = Simulation.RANDOM;
+	private double mutationChance = Settings.globalMutationChance;
+	private Neuron.Activation defaultActivation = Neuron.Activation.LINEAR;
+	private double fitness = 0.0;
 
-	public NetworkGenome()
-	{
-		neuronGenes = new TreeSet<>();
-		synapseGenes = new TreeSet<>();
-		random = Simulation.RANDOM;
+	public NetworkGenome() {}
+
+	public NetworkGenome(NetworkGenome other) {
+		setProperties(other);
 	}
 
 	public void setProperties(NetworkGenome other)
@@ -34,38 +32,43 @@ public class NetworkGenome
 		this.synapseGenes = other.synapseGenes;
 		this.random = other.random;
 		this.mutationChance = other.mutationChance;
+		this.defaultActivation = other.defaultActivation;
+		this.fitness = other.fitness;
 	}
 
-	public NetworkGenome(long seed, int numInputs, int numOutputs)
+	public NetworkGenome(int numInputs, int numOutputs)
 	{
-		this(seed, numInputs, numOutputs, Neuron.Activation.SIGMOID);
+		this(numInputs, numOutputs, Neuron.Activation.SIGMOID);
 	}
 
-	public NetworkGenome(long seed, int numInputs, int numOutputs, Neuron.Activation defaultActivation)
+	public NetworkGenome(int numInputs, int numOutputs, Neuron.Activation defaultActivation)
 	{
-		neuronGenes = new TreeSet<>();
-
 		for (int i = 0; i < numInputs; i++)
 			neuronGenes.add(new NeuronGene(i, Neuron.Type.SENSOR, Neuron.Activation.LINEAR));
 
 		for (int i = numInputs; i < numInputs + numOutputs; i++)
 			neuronGenes.add(new NeuronGene(i, Neuron.Type.OUTPUT, defaultActivation));
 
-		synapseGenes = neurons(Neuron.Type.SENSOR)
-				.flatMap(inGene -> neurons(Neuron.Type.OUTPUT).map(outGene -> new SynapseGene(inGene, outGene)))
-				.collect(Collectors.toCollection(TreeSet::new));
+		Set<List<NeuronGene>> neuronGenePairs = Sets.cartesianProduct(
+				neurons(Neuron.Type.SENSOR).collect(Collectors.toSet()),
+				neurons(Neuron.Type.OUTPUT).collect(Collectors.toSet())
+		);
 
-		random = new Random(seed);
+		synapseGenes = neuronGenePairs.stream()
+				.map(pair -> new SynapseGene(pair.get(0), pair.get(1)))
+				.collect(Collectors.toSet());
+
 		this.defaultActivation = defaultActivation;
 	}
 	
-	private void mutateSynapse(NeuronGene in, NeuronGene out)
+	private Optional<SynapseGene> mutateSynapse(NeuronGene in, NeuronGene out)
 	{
 		if (random.nextDouble() <= mutationChance) {
 			SynapseGene g = new SynapseGene(in, out);
 			g.setInnovation(innovation++);
-			synapseGenes.add(g);
+			return Optional.of(g);
 		}
+		return Optional.empty();
 	}
 	
 	private NetworkGenome mutateNeuron(NeuronGene in, NeuronGene out)
@@ -77,8 +80,8 @@ public class NetworkGenome
 					neuronGenes.size(), Neuron.Type.HIDDEN, defaultActivation
 				);
 				neuronGenes.add(n);
-				mutateSynapse(in, n);
-				mutateSynapse(n, out);
+				mutateSynapse(in, n).ifPresent(synapseGenes::add);
+				mutateSynapse(n, out).ifPresent(synapseGenes::add);;
 
 				for (SynapseGene g : synapseGenes)
 					if (g.getIn().equals(in) && g.getOut().equals(out))
@@ -95,18 +98,23 @@ public class NetworkGenome
 		return neuronGenes.stream().filter(n -> n.getType().equals(type));
 	}
 	
-	private NetworkGenome mutate()
+	public NetworkGenome mutate()
 	{
 		Streams.zip(neurons(Neuron.Type.SENSOR), neurons(Neuron.Type.HIDDEN), this::mutateNeuron);
 		Streams.zip(neurons(Neuron.Type.SENSOR), neurons(Neuron.Type.OUTPUT), this::mutateNeuron);
-		
-		for (SynapseGene g : synapseGenes)
-			mutateSynapse(g.getIn(), g.getOut());
+
+		Set<SynapseGene> newSynapseGenes = synapseGenes.stream()
+				.map(g -> mutateSynapse(g.getIn(), g.getOut()))
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.collect(Collectors.toSet());
+
+		synapseGenes.addAll(newSynapseGenes);
 
 		return this;
 	}
 	
-	private NetworkGenome crossover(NetworkGenome other)
+	public NetworkGenome crossover(NetworkGenome other)
 	{
 		NetworkGenome G = new NetworkGenome();
 
@@ -130,12 +138,12 @@ public class NetworkGenome
 		return G;
 	}
 
-	protected NetworkGenome reproduce(NetworkGenome other)
+	public NetworkGenome reproduce(NetworkGenome other)
 	{
 		return crossover(other).mutate();
 	}
 
-	public NeuralNetwork networkPhenotype()
+	public NeuralNetwork phenotype()
 	{
         Map<Integer, Neuron> neurons = neuronGenes.stream()
                 .collect(Collectors.toMap(
@@ -144,6 +152,9 @@ public class NetworkGenome
                 ));
 
         for (SynapseGene gene : synapseGenes) {
+			if (gene.isDisabled())
+				continue;
+
             Neuron postSynapticNeuron = neurons.get(gene.getOut().getId());
             Neuron preSynapticNeuron = neurons.get(gene.getIn().getId());
             postSynapticNeuron.addInput(preSynapticNeuron, gene.getWeight());
@@ -187,4 +198,5 @@ public class NetworkGenome
 			str += gene.toString() + "\n";
 		return str;
 	}
+
 }

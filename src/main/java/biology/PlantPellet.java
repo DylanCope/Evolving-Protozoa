@@ -1,25 +1,22 @@
 package biology;
 
+import core.Settings;
 import core.Simulation;
-import utils.Vector2;
 
 import java.awt.*;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Random;
 import java.util.stream.Stream;
 
 public class PlantPellet extends Pellet {
 
-    private static double maxRadius = 0.02;
-    private static final double minMaxRadius = 0.015;
-    private static final double minSplitRadius = 0.01;
-    private double growthRate;
+    private final double maxRadius;
 
     public PlantPellet(double radius) {
         super(radius);
-        growthRate = 0.01 + 0.04 * Simulation.RANDOM.nextDouble();
-        maxRadius = minMaxRadius + (maxRadius - minMaxRadius) * Simulation.RANDOM.nextDouble();
+        setGrowthRate(Settings.minPlantGrowth + Settings.plantGrowthRange * Simulation.RANDOM.nextDouble());
+
+        double range = Settings.maxPlantRadius - Settings.minMaxPlantRadius;
+        maxRadius = Settings.minMaxPlantRadius + range * Simulation.RANDOM.nextDouble();
 
         setHealthyColour(new Color(
                 30 + Simulation.RANDOM.nextInt(105),
@@ -28,22 +25,32 @@ public class PlantPellet extends Pellet {
         );
     }
 
-    private Stream<Entity> splitPellet() {
-        setDead(true);
-        return burst(PlantPellet::new);
+    private static double randomPlantRadius() {
+        double range = Settings.maxPlantBirthRadius - Settings.minPlantBirthRadius;
+        return Settings.minPlantBirthRadius + range * Simulation.RANDOM.nextDouble();
+    }
+
+    public PlantPellet() {
+        this(randomPlantRadius());
+    }
+
+    private boolean shouldSplit() {
+        return getRadius() > maxRadius &&
+                getCrowdingFactor() < 4 &&
+                getHealth() > Settings.minHealthToSplit;
     }
 
     @Override
     public Stream<Entity> update(double delta, Stream<Entity> entities) {
         Stream<Entity> newEntities = super.update(delta, entities);
-        setRadius(getRadius() * (1 + getGrowthRate() * delta));
-        if (getRadius() > maxRadius & getRadius() > minSplitRadius & getCrowdingFactor() < 4)
-            return Stream.concat(newEntities, splitPellet());
+        if (shouldSplit())
+            return burst(PlantPellet::new);
+
         return newEntities;
     }
-
-    private double getGrowthRate() {
-        return growthRate * Math.exp(-getCrowdingFactor());
+    @Override
+    public double getGrowthRate() {
+        return super.getGrowthRate() * Math.exp(-getCrowdingFactor());
     }
 
     public HashMap<String, Double> getStats() {

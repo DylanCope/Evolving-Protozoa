@@ -16,7 +16,7 @@ public class NetworkGenomeTest
     @Test
     public void constructingGenome()
     {
-        NetworkGenome genome = new NetworkGenome(0, 2, 3);
+        NetworkGenome genome = new NetworkGenome(2, 3);
         genome.addSynapse(0, 2, 0.5);
         genome.addSynapse(0, 3, 1.2);
         genome.addSynapse(0, 4, -1.6);
@@ -24,7 +24,7 @@ public class NetworkGenomeTest
         genome.addSynapse(1, 3, -0.9);
         genome.addSynapse(1, 4, 0.2);
         System.out.println(genome);
-        NeuralNetwork net = genome.networkPhenotype();
+        NeuralNetwork net = genome.phenotype();
         net.setInput(5.0, -2.0);
         System.out.println(net);
         net.tick();
@@ -38,7 +38,7 @@ public class NetworkGenomeTest
 
     @Test
     public void mutateNode() {
-        NetworkGenome genome = new NetworkGenome(0, 2, 3);
+        NetworkGenome genome = new NetworkGenome(2, 3);
         System.out.println(genome);
     }
 }

@@ -1,8 +1,11 @@
 package neat;
 
+import biology.Entity;
 import com.google.common.collect.Streams;
+import core.Simulation;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,14 +18,14 @@ public class NetworkGenome
 	private SortedSet<SynapseGene> synapseGenes;
 	private Random random;
 	private double mutationChance = 0.05;
-	private double fitness;
 	private Neuron.Activation defaultActivation;
+	private double fitness;
 
-	public NetworkGenome(long seed)
+	public NetworkGenome()
 	{
 		neuronGenes = new TreeSet<>();
 		synapseGenes = new TreeSet<>();
-		random = new Random(0);
+		random = Simulation.RANDOM;
 	}
 
 	public void setProperties(NetworkGenome other)
@@ -41,11 +44,17 @@ public class NetworkGenome
 	public NetworkGenome(long seed, int numInputs, int numOutputs, Neuron.Activation defaultActivation)
 	{
 		neuronGenes = new TreeSet<>();
+
 		for (int i = 0; i < numInputs; i++)
 			neuronGenes.add(new NeuronGene(i, Neuron.Type.SENSOR, Neuron.Activation.LINEAR));
+
 		for (int i = numInputs; i < numInputs + numOutputs; i++)
 			neuronGenes.add(new NeuronGene(i, Neuron.Type.OUTPUT, defaultActivation));
-		synapseGenes = new TreeSet<>();
+
+		synapseGenes = neurons(Neuron.Type.SENSOR)
+				.flatMap(inGene -> neurons(Neuron.Type.OUTPUT).map(outGene -> new SynapseGene(inGene, outGene)))
+				.collect(Collectors.toCollection(TreeSet::new));
+
 		random = new Random(seed);
 		this.defaultActivation = defaultActivation;
 	}
@@ -53,12 +62,8 @@ public class NetworkGenome
 	private void mutateSynapse(NeuronGene in, NeuronGene out)
 	{
 		if (random.nextDouble() <= mutationChance) {
-			SynapseGene g = new SynapseGene();
+			SynapseGene g = new SynapseGene(in, out);
 			g.setInnovation(innovation++);
-			g.setIn(in);
-			g.setOut(out);
-			g.setDisabled(false);
-			g.setWeight(random.nextDouble());
 			synapseGenes.add(g);
 		}
 	}
@@ -69,7 +74,8 @@ public class NetworkGenome
 			if (random.nextBoolean())
 			{
 				NeuronGene n = new NeuronGene(
-						neuronGenes.size(), Neuron.Type.HIDDEN, defaultActivation);
+					neuronGenes.size(), Neuron.Type.HIDDEN, defaultActivation
+				);
 				neuronGenes.add(n);
 				mutateSynapse(in, n);
 				mutateSynapse(n, out);
@@ -102,7 +108,7 @@ public class NetworkGenome
 	
 	private NetworkGenome crossover(NetworkGenome other)
 	{
-		NetworkGenome G = new NetworkGenome(random.nextLong());
+		NetworkGenome G = new NetworkGenome();
 
 		G.synapseGenes = new TreeSet<>();
 		
@@ -153,18 +159,21 @@ public class NetworkGenome
 		return 0;
 	}
 
-	public void addSynapse(int in, int out, double w)
+	public void addSynapse(int inID, int outID, double w)
 	{
-		SynapseGene g = new SynapseGene();
-		g.setInnovation(innovation++);
+		NeuronGene inGene = null, outGene = null;
 		for (NeuronGene gene : neuronGenes)
 		{
-			if (gene.getId() == in)
-				g.setIn(gene);
-			if (gene.getId() == out)
-				g.setOut(gene);
+			if (gene.getId() == inID)
+				inGene = gene;
+			if (gene.getId() == outID)
+				outGene = gene;
 		}
-		g.setDisabled(false);
+		if (inGene == null | outGene == null)
+			throw new RuntimeException("Could not find neuron genes to initialise synapse...");
+
+		SynapseGene g = new SynapseGene(inGene, outGene);
+		g.setInnovation(innovation++);
 		g.setWeight(w);
 		synapseGenes.add(g);
 	}

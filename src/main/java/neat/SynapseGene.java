@@ -1,6 +1,8 @@
 package neat;
 
 
+import core.Simulation;
+
 public class SynapseGene implements Comparable<SynapseGene>
 {
     private int id;
@@ -8,6 +10,14 @@ public class SynapseGene implements Comparable<SynapseGene>
     private NeuronGene in, out;
     private double weight;
     private boolean disabled;
+
+    public SynapseGene(NeuronGene in, NeuronGene out) {
+        this.in = in;
+        this.out = out;
+        this.weight = Simulation.RANDOM.nextDouble();
+        disabled = false;
+        innovation = 0;
+    }
 
     @Override
     public int compareTo(SynapseGene g) {

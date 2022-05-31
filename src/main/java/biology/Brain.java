@@ -6,14 +6,14 @@ import core.Simulation;
 
 public interface Brain extends Serializable
 {
-	public void tick(Protozoa p);
-	public double turn(Protozoa p);
-	public double speed(Protozoa p);
-	public boolean wantToAttack(Protozoa p);
-	public boolean wantToMateWith(Protozoa p);
-	public double energyConsumption();
+	void tick(Protozoa p);
+	double turn(Protozoa p);
+	double speed(Protozoa p);
+	boolean wantToAttack(Protozoa p);
+	boolean wantToMateWith(Protozoa p);
+	double energyConsumption();
 	
-	public Brain RANDOM = new Brain()
+	Brain RANDOM = new Brain()
 	{
 		private static final long serialVersionUID = 1648484737904226314L;
 

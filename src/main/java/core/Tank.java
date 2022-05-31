@@ -3,7 +3,6 @@ package core;
 import java.awt.Graphics;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -16,7 +15,7 @@ public class Tank implements Iterable<Entity>, Serializable
 {
 	private static final long serialVersionUID = 2804817237950199223L;
 	private final double radius = 1.0;
-	private ConcurrentHashMap<Class<? extends Entity>, Integer> entityCounts;
+	private final ConcurrentHashMap<Class<? extends Entity>, Integer> entityCounts;
 	private final ChunkManager chunkManager;
 
 	public Tank() 
@@ -27,24 +26,29 @@ public class Tank implements Iterable<Entity>, Serializable
 	}
 	
 	public void addRandomEntity(Entity e) {
-		double rad 	= radius - 2*e.getRadius();
-		double t 	= 2 * Math.PI * Simulation.RANDOM.nextDouble();
-		double r 	= Simulation.RANDOM.nextDouble();
-		e.setPos(new Vector2(
-					rad * (1 - r*r) * Math.cos(t),
-					rad * (1 - r*r) * Math.sin(t)
-				));
-		registerNewEntity(e);
+		e.setPos(randomPosition(e.getRadius()));
+		add(e);
+	}
+
+	public Vector2 randomPosition(double entityRadius) {
+		double rad = radius - 2*entityRadius;
+		double t = 2 * Math.PI * Simulation.RANDOM.nextDouble();
+		double r = Simulation.RANDOM.nextDouble();
+		return new Vector2(
+			rad * (1 - r*r) * Math.cos(t),
+			rad * (1 - r*r) * Math.sin(t)
+		);
 	}
 
 	public void handleTankEdge(Entity e) {
 		if (e.getPos().len() - e.getRadius() > radius)
-			e.setPos(e.getPos().mul(-0.98));
+			e.setPos(e.getPos().setLength(-0.98 * radius));
 	}
 
 	public Stream<Entity> updateEntity(Entity e, double delta) {
 
-		Stream<Entity> newEntities = e.update(delta, chunkManager.getNearbyEntities(e));
+		Stream<Entity> nearbyEntities = chunkManager.getNearbyEntities(e);
+		Stream<Entity> newEntities = e.update(delta, nearbyEntities);
 
 		handleTankEdge(e);
 
@@ -57,7 +61,7 @@ public class Tank implements Iterable<Entity>, Serializable
 				.flatMap(e -> updateEntity(e, delta))
 				.collect(Collectors.toList());
 
-		newEntities.forEach(this::registerNewEntity);
+		newEntities.forEach(this::add);
 
 		chunkManager.getAllEntities().filter(Entity::isDead)
 				.flatMap(this::handleEntityDeath)
@@ -71,12 +75,12 @@ public class Tank implements Iterable<Entity>, Serializable
 		return e.handleDeath();
 	}
 
-	private void registerNewEntity(Entity e) {
+	public void add(Entity e) {
 
 		chunkManager.add(e);
 
 		if (!entityCounts.containsKey(e.getClass()))
-			entityCounts.put(e.getClass(), 0);
+			entityCounts.put(e.getClass(), 1);
 		else
 			entityCounts.put(e.getClass(), 1 + entityCounts.get(e.getClass()));
 

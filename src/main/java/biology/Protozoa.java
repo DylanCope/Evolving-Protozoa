@@ -1,15 +1,13 @@
 package biology;
 
+import com.google.common.collect.Streams;
 import core.Simulation;
 import utils.Vector2;
 
 import java.awt.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Protozoa extends Entity 
@@ -21,12 +19,11 @@ public class Protozoa extends Entity
 	
 	private ProtozoaGenome genome;
 	private Retina retina;
-	private Brain brain;
+	private final Brain brain;
 
 	private double shieldFactor = 1.3;
-	private double attackFactor = 50;
+	private double attackFactor = 10;
 	private double consumeFactor = 15;
-	private boolean hasReleasedFood = false;
 
 	public Protozoa(ProtozoaGenome genome)
 	{
@@ -37,17 +34,19 @@ public class Protozoa extends Entity
 	public Protozoa(Brain brain, Retina retina, double radius)
 	{
 		setHealthyColour(new Color(
-				100 + Simulation.RANDOM.nextInt(20),
-				80 + Simulation.RANDOM.nextInt(50),
-				150  + Simulation.RANDOM.nextInt(100)));
-		setColor(getHealthyColour());
+			100 + Simulation.RANDOM.nextInt(20),
+			80 + Simulation.RANDOM.nextInt(50),
+			150  + Simulation.RANDOM.nextInt(100)
+		));
+
 		this.brain = brain;
 		this.retina = retina;
 		setPos(new Vector2(0, 0));
 		double t = 2 * Math.PI * Simulation.RANDOM.nextDouble();
 		setVel(new Vector2(
 				0.1 * Math.cos(t),
-				0.1 * Math.sin(t)));
+				0.1 * Math.sin(t)
+		));
 		this.setRadius(radius);
 		setMaxThinkTime(0.2);
 	}
@@ -109,34 +108,41 @@ public class Protozoa extends Entity
 	public void think(double delta)
 	{
 		brain.tick(this);
-		if (super.tick(delta))
-		{
-			rotate(brain.turn(this));
-			setSpeed(brain.speed(this));
-		}
+//		if (super.tick(delta))
+//		{
+		rotate(brain.turn(this));
+		setSpeed(brain.speed(this));
+//		}
 	}
 
 	public Stream<Entity> interact(Entity other, double delta) {
-
-		if (other.equals(this) | isDead())
-			return Stream.empty();
+		if (isDead())
+			return handleDeath();
 
 		see(other);
 
-		if (canInteractWith(other)) {
+		Stream<Entity> newEntities = super.interact(other, delta);
+
+		if (isTouching(other)) {
+
 			if (other instanceof Protozoa)
 			{
 				Protozoa p = (Protozoa) other;
+
 				if (brain.wantToAttack(p))
-					return fight(p, delta);
-				else if (brain.wantToMateWith(p) && p.brain.wantToMateWith(this))
-					return genome.reproduce(this, p).map(Function.identity());
+					return Streams.concat(newEntities, fight(p, delta));
+
+				else if (brain.wantToMateWith(p) && p.brain.wantToMateWith(this)) {
+					Stream<Entity> children = genome.reproduce(this, p).map(Function.identity());
+					return Streams.concat(newEntities, children);
+				}
 			}
-			else {
+			else if (other.isEdible())
 				eat(other, delta);
-			}
+
 		}
-		return Stream.empty();
+
+		return newEntities;
 	}
 
 	public void resetRetina() {
@@ -147,27 +153,14 @@ public class Protozoa extends Entity
 	}
 
 	private Stream<Entity> breakIntoPellets() {
-		if (hasReleasedFood)
-			return Stream.empty();
-
-		hasReleasedFood = true;
-		double angle = 2 * Math.PI * Simulation.RANDOM.nextDouble();
-		int nPellets = 2 + Simulation.RANDOM.nextInt(3);
-		ArrayList<Entity> pellets = new ArrayList<>();
-		for (int i = 0; i < nPellets; i++) {
-			Vector2 dir = new Vector2(Math.cos(angle), Math.sin(angle));
-			double p = 0.3 + 0.7 * Simulation.RANDOM.nextDouble() / nPellets;
-			Pellet pellet = new MeatPellet(getRadius() * p);
-			pellet.setPos(getPos().add(dir.mul(2*pellet.getRadius())));
-			pellets.add(pellet);
-			angle += 2 * Math.PI / nPellets;
-		}
-
-		return pellets.stream();
+		return burst(MeatPellet::new);
 	}
 
 	public Stream<Entity> handleDeath() {
-		return breakIntoPellets();
+		if (!hasHandledDeath) {
+			return Streams.concat(super.handleDeath(), breakIntoPellets());
+		}
+		return Stream.empty();
 	}
 
 	@Override
@@ -198,9 +191,7 @@ public class Protozoa extends Entity
 		resetRetina();
 		think(delta);
 
-		Collection<Entity> entityCollection = entities.collect(Collectors.toList());
-		move(getVel().mul(delta), entityCollection);
-		return entityCollection.stream().flatMap(e -> interact(e, delta));
+		return super.update(delta, entities);
 	}
 	
 	public void render(Graphics g)
@@ -214,13 +205,13 @@ public class Protozoa extends Entity
 			double x = Math.cos(cell.angle + getVel().angle());
 			double y = Math.sin(cell.angle + getVel().angle());
 			double len = Math.sqrt(x*x + y*y);
-			double r2 = r1;// + 0.5*(1 - r1)*(1 + Math.cos(2*Math.PI*cell.angle));
+			double r2 = r1;// + 0.5 * (1 - r1) * (1 + Math.cos(2*Math.PI*cell.angle));
 			g.setColor(cell.colour);
 			g.drawLine(
-					(int)(getPos().getX() + (x*getRadius()*r0)/len), 
-					(int)(getPos().getY() + (y*getRadius()*r0)/len), 
-					(int)(getPos().getX() + (x*getRadius()*r2)/len),
-					(int)(getPos().getY() + (y*getRadius()*r2)/len)
+					(int) (getPos().getX() + (x * getRadius() * r0) / len),
+					(int) (getPos().getY() + (y * getRadius() * r0) / len),
+					(int) (getPos().getX() + (x * getRadius() * r2) / len),
+					(int) (getPos().getY() + (y * getRadius() * r2) / len)
 			);
 		}
 	}
@@ -257,5 +248,9 @@ public class Protozoa extends Entity
 
 	public void setShieldFactor(double shieldFactor) {
 		this.shieldFactor = shieldFactor;
+	}
+
+	public Brain getBrain() {
+		return brain;
 	}
 }

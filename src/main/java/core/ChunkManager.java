@@ -108,7 +108,7 @@ public class ChunkManager implements Serializable {
         Vector2 chunkCoords = toChunkCoords(e.getPos());
         List<Chunk> nearbyChunks = getNearbyChunks(chunkCoords, n);
         Stream<Stream<Entity>> entityStream = nearbyChunks.stream().map(Chunk::getEntities);
-        return entityStream.flatMap(Function.identity());
+        return entityStream.flatMap(Function.identity()).filter(other -> !e.equals(other));
     }
 
     public Stream<Entity> getNearbyEntities(Entity e) {

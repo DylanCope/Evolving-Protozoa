@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.w3c.dom.Text;
+import biology.NNBrain;
+import neat.NeuralNetwork;
+import neat.Neuron;
 import utils.TextObject;
 import utils.Vector2;
 import utils.Window;
@@ -104,6 +106,11 @@ public class UI
 				statText.setColor(Color.WHITE.darker());
 				statText.render(g);
 			}
+
+			if (tracked instanceof Protozoa && ((Protozoa) tracked).getBrain() instanceof NNBrain) {
+				NNBrain brain = (NNBrain) ((Protozoa) tracked).getBrain();
+				renderBrainNetwork(brain.network, g);
+			}
 		}
 		else {
 			info.get(2).setText("");
@@ -113,5 +120,22 @@ public class UI
 			debugInfo.get(0).setText("FPS: " + (int) renderer.getFPS());
 			debugInfo.get(0).render(g);
 		}
+	}
+
+	private void renderBrainNetwork(NeuralNetwork nn, Graphics2D g) {
+		int networkDepth = nn.getDepth();
+		int boxWidth = 2 * window.getWidth() / 10;
+		int boxHeight = 2 * window.getHeight() / 3;
+
+		int boxXStart = window.getWidth() - (int) (boxWidth * 1.05);
+		int boxYStart = (window.getHeight() - boxHeight) / 2;
+
+		if (simulation.inDebugMode()) {
+			g.setColor(Color.YELLOW.darker());
+			g.drawRect(boxXStart, boxYStart, boxWidth, boxHeight);
+		}
+
+		HashMap<Neuron, Vector2> neuronPositions = new HashMap<>();
+
 	}
 }

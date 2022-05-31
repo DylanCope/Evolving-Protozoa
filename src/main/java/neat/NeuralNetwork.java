@@ -10,6 +10,7 @@ public class NeuralNetwork
     private List<Neuron> outputs;
     private List<Neuron> inputs;
     private Set<Neuron> neurons;
+    private int depth;
 
     public NeuralNetwork(Collection<Neuron> neurons) {
         this.neurons = new HashSet<>(neurons);
@@ -23,6 +24,23 @@ public class NeuralNetwork
                 .filter(n -> n.getType().equals(Neuron.Type.OUTPUT))
                 .collect(Collectors.toList());
         outputs.sort(Comparator.comparingInt(Neuron::getId));
+
+        depth = calculateDepth();
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
+    private int calculateDepth() {
+        return calculateDepth(0, outputs);
+    }
+
+    private int calculateDepth(int depth, Collection<Neuron> explore) {
+        int maxDepth = depth;
+        for (Neuron n : explore)
+            maxDepth = Math.max(maxDepth, calculateDepth(depth + 1, n.getInputs()));
+        return maxDepth;
     }
 
     public void setInput(Double ... values) {

@@ -259,7 +259,7 @@ public class Renderer extends Canvas
 		graphics.fillRect(0, 0, window.getWidth(), window.getHeight());
 
 		if (simulation.inDebugMode()) {
-			graphics.setColor(new Color(255, 255, 0));
+			graphics.setColor(Color.YELLOW.darker());
 			ChunkManager chunkManager = simulation.getTank().getChunkManager();
 			int w = (int) toRenderSpace(chunkManager.getChunkSize());
 			Stream<Vector2> chunkCoords = chunkManager
@@ -285,13 +285,13 @@ public class Renderer extends Canvas
 		Graphics2D graphics = (Graphics2D) bs.getDrawGraphics();
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-		if (track != null) {
+//		if (track != null) {
 //			rotate = rotate + (- 0.5*Math.PI - track.getVel().angle() - rotate) * 0.05;
-		}
+//		}
 		
 		background(graphics);
 		entities(graphics, simulation.getTank());
-		maskTank(graphics, tankRenderCoords, tankRenderRadius, simulation.inDebugMode() ? 50 : 200);
+		maskTank(graphics, tankRenderCoords, tankRenderRadius, simulation.inDebugMode() ? 150 : 200);
 		maskTank(graphics, toRenderSpace(new Vector2(0, 0)),
 				tankRenderRadius*zoom, simulation.inDebugMode() ? 100 : 255);
 		

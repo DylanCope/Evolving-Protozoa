@@ -1,6 +1,5 @@
 package biology;
 
-import core.Simulation;
 import neat.NetworkGenome;
 import neat.NeuralNetwork;
 
@@ -25,57 +24,7 @@ public class ProtozoaGenome extends NetworkGenome
 
     public Brain brain()
     {
-        return new Brain()
-        {
-            private NeuralNetwork network = networkPhenotype();
-            private List<Double> outputs;
-            private double maxTurn = Math.toRadians(35);
-            private double maxVel = 0.1;
-
-            @Override
-            public void tick(Protozoa p)
-            {
-                ArrayList<Double> inputs = new ArrayList<>();
-                for (Retina.Cell cell : p.getRetina()) {
-                    inputs.add(cell.colour.getRed() / 255.0);
-                    inputs.add(cell.colour.getGreen() / 255.0);
-                    inputs.add(cell.colour.getBlue() / 255.0);
-                }
-                network.setInput(inputs);
-                network.tick();
-                outputs = network.outputs();
-            }
-
-            @Override
-            public double turn(Protozoa p)
-            {
-                double x = outputs.get(0);
-                return Math.min(x, maxTurn);
-            }
-
-            @Override
-            public double speed(Protozoa p)
-            {
-                double x = outputs.get(1);
-                return x < maxVel ? x : maxVel;
-            }
-
-            @Override
-            public boolean wantToAttack(Protozoa p) {
-                return Simulation.RANDOM.nextBoolean();
-            }
-
-            @Override
-            public boolean wantToMateWith(Protozoa p) {
-                return Simulation.RANDOM.nextBoolean();
-            }
-
-            @Override
-            public double energyConsumption() {
-                return 0;
-            }
-
-        };
+        return new NNBrain(networkPhenotype());
     }
 
     public Retina retina()
@@ -95,7 +44,7 @@ public class ProtozoaGenome extends NetworkGenome
 
     public Stream<Protozoa> reproduce(Protozoa a, Protozoa b)
     {
-        NetworkGenome ng = super.reproduce((NetworkGenome) b.getGenome());
+        NetworkGenome ng = super.reproduce(b.getGenome());
         ProtozoaGenome pg = new ProtozoaGenome(this.retinaSize, this.radius);
         pg.setProperties(ng);
         Protozoa offspring = new Protozoa(pg);

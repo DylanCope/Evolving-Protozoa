@@ -3,11 +3,7 @@ package biology;
 import core.Simulation;
 import utils.Vector2;
 
-import java.awt.*;
 import java.util.HashMap;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class Pellet extends Entity
 {
@@ -26,18 +22,6 @@ public abstract class Pellet extends Entity
 		));
 
 		setNutrition(0.25 * radius);
-	}
-
-	@Override
-	public Stream<Entity> update(double delta, Stream<Entity> entities)
-	{
-		Stream<Entity> newEntities = super.update(delta, entities);
-		if (isDead())
-			return newEntities;
-
-		move(getVel().mul(delta), entities.collect(Collectors.toList()));
-
-		return newEntities;
 	}
 
 	@Override

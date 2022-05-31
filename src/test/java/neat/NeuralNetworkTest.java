@@ -1,6 +1,5 @@
 package neat;
 
-import com.sun.istack.internal.NotNull;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -15,7 +14,6 @@ import static org.junit.Assert.assertEquals;
  */
 public class NeuralNetworkTest
 {
-    @NotNull
     private NeuralNetwork simpleFullyConnected()
     {
         Neuron n1, n2, n3, n4, n5, n6;

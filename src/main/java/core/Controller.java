@@ -18,8 +18,10 @@ public class Controller
 
 	public void update(Simulation simulation, Renderer renderer) 
 	{
-		if (input.getKey(KeyEvent.VK_ESCAPE)) 
+		if (input.getKey(KeyEvent.VK_ESCAPE)) {
+			simulation.close();
 			Application.exit();
+		}
 		
 //		if (input.getKey(KeyEvent.VK_UP))
 //			renderer.setZoom(renderer.getZoom() * 2);

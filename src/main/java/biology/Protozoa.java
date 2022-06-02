@@ -193,9 +193,17 @@ public class Protozoa extends Entity
 	public HashMap<String, Double> getStats() {
 		HashMap<String, Double> stats = super.getStats();
 		stats.put("Fitness", getFitness());
-		stats.put("Growth Rate", getGrowthRate());
-		stats.put("Split Radius", splitRadius);
+		stats.put("Growth Rate", Settings.statsDistanceScalar * getGrowthRate());
+		stats.put("Split Radius", Settings.statsDistanceScalar * splitRadius);
 		return stats;
+	}
+
+	@Override
+	public double getGrowthRate() {
+		double growthRate = super.getGrowthRate();
+		if (getRadius() > splitRadius)
+			growthRate *= getHealth() * splitRadius / (5 * getRadius());
+		return growthRate;
 	}
 
 	public void age(double delta) {

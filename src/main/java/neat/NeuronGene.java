@@ -1,6 +1,8 @@
 package neat;
 
-public class NeuronGene implements Comparable<NeuronGene>
+import java.io.Serializable;
+
+public class NeuronGene implements Comparable<NeuronGene>, Serializable
 {
 
     private int id;

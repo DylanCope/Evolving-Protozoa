@@ -17,8 +17,8 @@ public final class Settings {
     public static final double minHealthToSplit = 0.8;
     public static final double maxProtozoanSplitRadius = 0.03;
     public static final double minProtozoanSplitRadius = 0.025;
-    public static final double minProtozoanGrowthRate = 0.01;
-    public static final double maxProtozoanGrowthRate = 0.03;
+    public static final double minProtozoanGrowthRate = 0.03;
+    public static final double maxProtozoanGrowthRate = 0.06;
 
     public static final double globalMutationChance = 0.05;
 
@@ -33,6 +33,6 @@ public final class Settings {
 
     // Stats
 
-    public static final double statsDistanceScalar = 10.0;
-    public static final double statsTimeScalar = 10.0;
+    public static final double statsDistanceScalar = 100.0;
+    public static final double statsTimeScalar = 100.0;
 }

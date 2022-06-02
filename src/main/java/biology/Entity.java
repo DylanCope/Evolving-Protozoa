@@ -3,8 +3,7 @@ package biology;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -27,11 +26,14 @@ public abstract class Entity implements Serializable
 	private double timeAlive = 0;
 	private double health = 1;
 	private double growthRate = 0.0;
+	private int generation = 1;
 	
 	private boolean dead = false;
 	private double nutrition;
 	private double crowdingFactor;
 	protected boolean hasHandledDeath = false;
+
+	private ArrayList<Entity> children = new ArrayList<>();
 
 	public Entity()
 	{
@@ -122,7 +124,8 @@ public abstract class Entity implements Serializable
 
 	public void move(double delta)
 	{
-		setPos(getPos().add(getVel().mul(delta)));
+		getPos().translate(getVel().mul(delta));
+//		setPos(getPos().add(getVel().mul(delta)));
 	}
 
 	/**
@@ -162,14 +165,14 @@ public abstract class Entity implements Serializable
 		stats.put("Size", Settings.statsDistanceScalar * getRadius());
 		stats.put("Speed", Settings.statsDistanceScalar * getSpeed());
 		stats.put("Crowding Factor", getCrowdingFactor());
+		stats.put("Generation", (double) getGeneration());
 		return stats;
 	}
 
 	public HashMap<String, Double> getDebugStats() {
 		HashMap<String, Double> stats = new HashMap<>();
-		stats.put("Position X", getPos().getX());
-		stats.put("Position Y", getPos().getY());
-		stats.put("Crowding Factor", getCrowdingFactor());
+		stats.put("Position X", Settings.statsDistanceScalar * getPos().getX());
+		stats.put("Position Y", Settings.statsDistanceScalar * getPos().getY());
 		return stats;
 	}
 	
@@ -270,6 +273,14 @@ public abstract class Entity implements Serializable
 		this.nutrition = nutrition;
 	}
 
+	public int getGeneration() {
+		return generation;
+	}
+
+	public void setGeneration(int generation) {
+		this.generation = generation;
+	}
+
 	protected Stream<Entity> burst(Function<Double, ? extends Entity> createChild) {
 		setDead(true);
 		hasHandledDeath = true;
@@ -277,16 +288,29 @@ public abstract class Entity implements Serializable
 		double angle = 2 * Math.PI * Simulation.RANDOM.nextDouble();
 		int nChildren = 2 + Simulation.RANDOM.nextInt(3);
 
-		ArrayList<Entity> children = new ArrayList<>();
 		for (int i = 0; i < nChildren; i++) {
 			Vector2 dir = new Vector2(Math.cos(angle), Math.sin(angle));
 			double p = 0.3 + 0.7 * Simulation.RANDOM.nextDouble() / nChildren;
 			Entity e = createChild.apply(getRadius() * p);
 			e.setPos(getPos().add(dir.mul(2*e.getRadius())));
+			e.setGeneration(getGeneration() + 1);
 			children.add(e);
 			angle += 2 * Math.PI / nChildren;
 		}
 
 		return children.stream();
 	}
+
+	public Collection<Entity> getChildren() {
+		return children;
+	}
+
+//	@Override
+//	public boolean equals(Object o) {
+//		if (o instanceof Entity) {
+//			Entity e = (Entity) o;
+//			return e.hashCode() == hashCode();
+//		}
+//		return false;
+//	}
 }

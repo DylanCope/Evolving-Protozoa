@@ -43,6 +43,9 @@ public class PlantPellet extends Pellet {
     @Override
     public Stream<Entity> update(double delta, Stream<Entity> entities) {
         Stream<Entity> newEntities = super.update(delta, entities);
+        if (getHealth() < 1.0)
+            setHealth(getHealth() + (1 - getHealth()) * getGrowthRate());
+
         if (shouldSplit())
             return burst(PlantPellet::new);
 
@@ -50,7 +53,10 @@ public class PlantPellet extends Pellet {
     }
     @Override
     public double getGrowthRate() {
-        return super.getGrowthRate() * Math.exp(-getCrowdingFactor());
+        double growthRate = super.getGrowthRate() * Math.exp(-getCrowdingFactor());
+        if (getRadius() > maxRadius)
+            growthRate *= getHealth() * maxRadius / (2 * getRadius());
+        return growthRate;
     }
 
     public HashMap<String, Double> getStats() {

@@ -18,6 +18,8 @@ public class Window extends Canvas implements Runnable, ActionListener
 {
 
 	private static final long serialVersionUID = -2111860594941368902L;
+
+	private JFrame frame;
 	private Input input;
 	private Renderer renderer;
 	private Simulation simulation;
@@ -35,7 +37,7 @@ public class Window extends Canvas implements Runnable, ActionListener
 		this.simulation = simulation;
 		renderer = new Renderer(simulation, this);
 
-		JFrame frame = new JFrame(title);
+		frame = new JFrame(title);
 		frame.setPreferredSize(new Dimension(width, height));
 		frame.setMaximumSize(new Dimension(width, height));
 		frame.setMinimumSize(new Dimension(width, height));
@@ -90,5 +92,9 @@ public class Window extends Canvas implements Runnable, ActionListener
 
 	public Vector2 getDimensions() {
 		return new Vector2(width, height);
+	}
+
+	public JFrame getFrame() {
+		return frame;
 	}
 }

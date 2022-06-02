@@ -22,6 +22,22 @@ public class Vector2 implements Serializable
 	public double len(){
 		return Math.sqrt(x*x + y*y);
 	}
+
+	public Vector2 copy() {
+		return new Vector2(x, y);
+	}
+
+	public Vector2 translate(Vector2 dv) {
+		x += dv.getX();
+		y += dv.getY();
+		return this;
+	}
+
+	public Vector2 scale(double s) {
+		x *= s;
+		y *= s;
+		return this;
+	}
 	
 	public Vector2 add(Vector2 b){
 		return new Vector2(getX() + b.getX(), getY() + b.getY());
@@ -78,9 +94,12 @@ public class Vector2 implements Serializable
 		this.y = y;
 	}
 
-	public Vector2 setLength(double len)
+	public Vector2 setLength(double targetLen)
 	{
-		return unit().mul(len);
+		double currentLen = len();
+		x *= targetLen / currentLen;
+		y *= targetLen / currentLen;
+		return this;
 	}
 	
 	public Vector2 setDir(Vector2 other)
@@ -97,5 +116,13 @@ public class Vector2 implements Serializable
 	{
 		double a = len2(), b = other.len2();
 		return Math.acos(dot(other) / Math.sqrt(a*b));
+	}
+
+	public boolean equals(Object o) {
+		if (o instanceof Vector2) {
+			Vector2 v = (Vector2) o;
+			return v.getX() == getX() && v.getY() == getY();
+		}
+		return false;
 	}
 }

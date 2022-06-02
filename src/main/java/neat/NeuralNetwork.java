@@ -1,29 +1,30 @@
 package neat;
 
-import com.google.common.collect.Streams;
-
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class NeuralNetwork
+public class NeuralNetwork implements Serializable
 {
-    private List<Neuron> outputs;
-    private List<Neuron> inputs;
-    private Set<Neuron> neurons;
-    private int depth;
+    private static final long serialVersionUID = 1L;
+
+    private final List<Neuron> outputNeurons;
+    private final List<Neuron> inputNeurons;
+    private final Collection<Neuron> neurons;
+    private final int depth;
 
     public NeuralNetwork(Collection<Neuron> neurons) {
-        this.neurons = new HashSet<>(neurons);
+        this.neurons = neurons;
 
-        inputs = neurons.stream()
+        inputNeurons = neurons.stream()
                 .filter(n -> n.getType().equals(Neuron.Type.SENSOR))
                 .collect(Collectors.toList());
-        inputs.sort(Comparator.comparingInt(Neuron::getId));
+        inputNeurons.sort(Comparator.comparingInt(Neuron::getId));
 
-        outputs = neurons.stream()
+        outputNeurons = neurons.stream()
                 .filter(n -> n.getType().equals(Neuron.Type.OUTPUT))
                 .collect(Collectors.toList());
-        outputs.sort(Comparator.comparingInt(Neuron::getId));
+        outputNeurons.sort(Comparator.comparingInt(Neuron::getId));
 
         depth = calculateDepth();
     }
@@ -33,7 +34,7 @@ public class NeuralNetwork
     }
 
     private int calculateDepth() {
-        return calculateDepth(0, outputs);
+        return calculateDepth(0, outputNeurons);
     }
 
     private int calculateDepth(int depth, Collection<Neuron> explore) {
@@ -47,11 +48,10 @@ public class NeuralNetwork
         setInput(Arrays.asList(values));
     }
 
-    public NeuralNetwork setInput(List<Double> input)
+    public void setInput(List<Double> inputValues)
     {
-        inputs = Streams.zip(inputs.stream(), input.stream(), Neuron::setState)
-                        .collect(Collectors.toList());
-        return this;
+        for (int i = 0; i < inputValues.size(); i++)
+            inputNeurons.get(i).setState(inputValues.get(i));
     }
 
     public void tick()
@@ -62,7 +62,7 @@ public class NeuralNetwork
 
     public List<Double> outputs()
     {
-        return outputs.stream()
+        return outputNeurons.stream()
                 .map(Neuron::getState)
                 .collect(Collectors.toList());
     }

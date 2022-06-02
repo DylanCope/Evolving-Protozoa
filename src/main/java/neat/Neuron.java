@@ -2,6 +2,7 @@ package neat;
 
 import com.google.common.collect.Streams;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -11,9 +12,9 @@ import java.util.stream.Collectors;
 /**
  * Created by dylan on 26/05/2017.
  */
-public class Neuron implements Comparable<Neuron> {
+public class Neuron implements Comparable<Neuron>, Serializable {
 
-    public interface Activation extends Function<Double, Double> {
+    public interface Activation extends Function<Double, Double>, Serializable {
 
         Activation SIGMOID = z -> 1 / (1 + Math.exp(-z));
         Activation LINEAR = z -> z;
@@ -21,7 +22,7 @@ public class Neuron implements Comparable<Neuron> {
 
     }
 
-    public enum Type {
+    public enum Type implements Serializable {
         SENSOR("SENSOR"), HIDDEN("HIDDEN"), OUTPUT("OUTPUT");
 
         private String value;
@@ -34,6 +35,8 @@ public class Neuron implements Comparable<Neuron> {
             return value;
         }
     }
+
+    private static final long serialVersionUID = 1L;
 
     private List<Neuron> inputs;
     private List<Double> weights;
@@ -60,13 +63,17 @@ public class Neuron implements Comparable<Neuron> {
 
     void tick()
     {
-        nextState = Streams.zip(
-                inputs.stream().map(Neuron::getState),
-                weights.stream(),
-                (x, y) -> x * y)
-            .reduce(Double::sum)
-            .map(activation)
-            .orElse(0.0);
+//        nextState = Streams.zip(
+//                inputs.stream().map(Neuron::getState),
+//                weights.stream(),
+//                (x, y) -> x * y)
+//            .reduce(Double::sum)
+//            .map(activation)
+//            .orElse(0.0);
+        nextState = 0.0;
+        for (int i = 0; i < inputs.size(); i++)
+            nextState += inputs.get(i).getState() * weights.get(i);
+        nextState = activation.apply(nextState);
     }
 
     void update()

@@ -17,6 +17,7 @@ public class Tank implements Iterable<Entity>, Serializable
 	private final double radius = Settings.tankRadius;
 	private final ConcurrentHashMap<Class<? extends Entity>, Integer> entityCounts;
 	private final ChunkManager chunkManager;
+	private int generation = 1;
 
 	public Tank() 
 	{
@@ -76,6 +77,9 @@ public class Tank implements Iterable<Entity>, Serializable
 
 		chunkManager.add(e);
 
+		if (e instanceof Protozoa)
+			generation = Math.max(generation, e.getGeneration());
+
 		if (!entityCounts.containsKey(e.getClass()))
 			entityCounts.put(e.getClass(), 1);
 		else
@@ -117,6 +121,8 @@ public class Tank implements Iterable<Entity>, Serializable
 	public double getRadius() {
 		return radius;
 	}
+
+	public int getGeneration() { return generation; }
 
     public void addRandom(Entity e) {
 		e.setPos(randomPosition(e.getRadius()));

@@ -73,9 +73,9 @@ public class UI
 		int textAwayFromEdge = window.getWidth() / 60;
 
 		int lineNumber;
-		for (lineNumber = 0; lineNumber < info.size(); lineNumber++) {
+		for (lineNumber = 0; lineNumber < info.size(); lineNumber++)
 			info.get(lineNumber).setPosition(new Vector2(textAwayFromEdge, getYPos(lineNumber)));
-		}
+
 		
 		info.get(0).setText("Number of pellets: " + simulation.getTank().numberOfPellets());
 		info.get(0).render(g);
@@ -83,6 +83,10 @@ public class UI
 		info.get(1).render(g);
 		Entity tracked = renderer.getTracked();
 		if (tracked != null) {
+			if (tracked.isDead() && !tracked.getChildren().isEmpty()) {
+				tracked = tracked.getChildren().iterator().next();
+			}
+
 			lineNumber++;
 			TextObject statsTitle = new TextObject(
 					tracked.getPrettyName() + " Stats",
@@ -93,9 +97,6 @@ public class UI
 			statsTitle.render(g);
 
 			HashMap<String, Double> stats = tracked.getStats();
-			if (tracked.isDead()) {
-				stats.put("Alive", 0.0);
-			}
 			for (Map.Entry<String, Double> entityStat : stats.entrySet()) {
 				lineNumber++;
 				String text = entityStat.getKey() + ": " + TextStyle.toString(entityStat.getValue(), 2);
@@ -112,9 +113,9 @@ public class UI
 				renderBrainNetwork(brain.network, g);
 			}
 		}
-		else {
+		else
 			info.get(2).setText("");
-		}
+
 
 		if (simulation.inDebugMode()) {
 			debugInfo.get(0).setText("FPS: " + (int) renderer.getFPS());
@@ -133,6 +134,8 @@ public class UI
 		if (simulation.inDebugMode()) {
 			g.setColor(Color.YELLOW.darker());
 			g.drawRect(boxXStart, boxYStart, boxWidth, boxHeight);
+			for (int yHeight = boxYStart; yHeight < boxYStart + boxHeight; yHeight += yHeight / networkDepth)
+				g.drawLine(boxXStart, yHeight, boxXStart + boxWidth, yHeight);
 		}
 
 		HashMap<Neuron, Vector2> neuronPositions = new HashMap<>();

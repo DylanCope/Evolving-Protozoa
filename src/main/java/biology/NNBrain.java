@@ -9,7 +9,7 @@ public class NNBrain implements Brain {
 
     public final NeuralNetwork network;
     private List<Double> outputs;
-    private final double maxTurn = Math.toRadians(35);
+    private final double maxTurn = Math.toRadians(15);
     private final double maxVel = 0.2;
 
     public NNBrain(NeuralNetwork network) {
@@ -41,7 +41,7 @@ public class NNBrain implements Brain {
     @Override
     public double speed(Protozoa p)
     {
-        return Math.min(outputs.get(1), maxVel);
+        return Math.min(maxVel * outputs.get(1), maxVel);
     }
 
     @Override

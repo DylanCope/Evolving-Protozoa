@@ -17,13 +17,20 @@ public class Application
 	{
 		TextStyle.loadFonts();
 		simulation = new Simulation(1);
-//		simulation.loadTank("test");
-		simulation.initDefaultTank();
-//		FileIO.save(simulation.getTank(), "test");
-		window = new Window("Evolving Protozoa", simulation);
-		SwingUtilities.invokeLater(window);
-		new Thread(simulation).run();
-		new REPL(simulation);
+		simulation.loadTank("saves/2022.06.01.11.47.48");
+		try {
+			if (!(args.length > 0 && args[0].equals("noui"))) {
+				window = new Window("Evolving Protozoa", simulation);
+				SwingUtilities.invokeLater(window);
+			} else {
+				simulation.shouldWaitBetweenTicks(false);
+			}
+			new Thread(simulation).start();
+			new REPL(simulation, window);
+		} catch (Exception e) {
+			simulation.close();
+			throw e;
+		}
 	}
 	
 	public static void exit()

@@ -5,11 +5,12 @@ import com.google.common.collect.Streams;
 import core.Settings;
 import core.Simulation;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class NetworkGenome
+public class NetworkGenome implements Serializable
 {
 	private static int innovation = 0;
 

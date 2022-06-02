@@ -3,7 +3,9 @@ package neat;
 
 import core.Simulation;
 
-public class SynapseGene implements Comparable<SynapseGene>
+import java.io.Serializable;
+
+public class SynapseGene implements Comparable<SynapseGene>, Serializable
 {
     private int id;
     private int innovation;

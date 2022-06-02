@@ -2,12 +2,13 @@ package core;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Random;
 
 import javax.swing.Timer;
 
 import biology.*;
-import utils.Vector2;
 import utils.FileIO;
 
 public class Simulation implements Runnable, ActionListener
@@ -15,7 +16,6 @@ public class Simulation implements Runnable, ActionListener
 	private Tank tank;
 	private boolean simulate;
 	private final Timer timer = new Timer((int) Application.refreshDelay, this);
-	private int generation = 0;
 	private double elapsedTime = 0, timeDilation = 1;
 	
 	public static Random RANDOM;
@@ -46,7 +46,19 @@ public class Simulation implements Runnable, ActionListener
 	
 	public void loadTank(String filename)
 	{
-		tank = (Tank) FileIO.load(filename);
+		try {
+			tank = (Tank) FileIO.load(filename);
+		} catch (IOException | ClassNotFoundException e) {
+			System.out.println("Unable to load tank at " + filename + " because: " + e.getMessage());
+			initDefaultTank();
+		}
+	}
+
+	public void shouldWaitBetweenTicks(boolean ticking) {
+		if (ticking)
+			timer.setDelay((int) Application.refreshDelay);
+		else
+			timer.setDelay(0);
 	}
 	
 	@Override
@@ -71,7 +83,7 @@ public class Simulation implements Runnable, ActionListener
 
 	public Tank getTank() { return tank; }
 
-	public int getGeneration() { return generation; }
+	public int getGeneration() { return tank.getGeneration(); }
 
 	public double getElapsedTime() { return elapsedTime; }
 
@@ -80,7 +92,10 @@ public class Simulation implements Runnable, ActionListener
 	public void setTimeDilation(double td) { timeDilation = td; }
 
 	public void close() {
-
+		System.out.println();
+		System.out.println("Closing simulation.");
+		String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new java.util.Date());
+		FileIO.save(tank, "saves/" + timeStamp);
 	}
 
 	public void toggleDebug() {

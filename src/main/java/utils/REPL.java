@@ -8,13 +8,16 @@ import core.Simulation;
 
 public class REPL
 {
-    private Simulation simulation;
+    private final Simulation simulation;
+    private final Window window;
 
-    public REPL(Simulation simulation)
+    public REPL(Simulation simulation, Window window)
     {
         this.simulation = simulation;
+        this.window = window;
         System.out.println("Starting REPL...");
         BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+
         while (true)
         {
             String line;
@@ -30,7 +33,6 @@ public class REPL
                         System.out.println("commands - help, quit, stats, settime, gettime");
                         break;
                     case "quit":
-                        System.out.println("Closing simulation");
                         simulation.close();
                         Application.exit();
                         break;
@@ -49,6 +51,14 @@ public class REPL
                     case "toggledebug":
                         System.out.println("Toggling debug mode.");
                         simulation.toggleDebug();
+                        break;
+                    case "toggleui":
+                        System.out.println("Toggling UI.");
+                        window.getFrame().setVisible(!window.getFrame().isVisible());
+                        simulation.shouldWaitBetweenTicks(window.getFrame().isVisible());
+                        break;
+                    default:
+                        System.out.println("Command not recognised.");
                         break;
                 }
             }

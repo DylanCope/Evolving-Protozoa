@@ -4,12 +4,13 @@ import core.Settings;
 import core.Simulation;
 import neat.NetworkGenome;
 
+import java.io.Serializable;
 import java.util.stream.Stream;
 
 /**
  * Created by dylan on 28/05/2017.
  */
-public class ProtozoaGenome
+public class ProtozoaGenome implements Serializable
 {
     private final NetworkGenome networkGenome;
     private final int retinaSize;

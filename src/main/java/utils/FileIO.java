@@ -1,10 +1,6 @@
 package utils;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
 public class FileIO 
 {
@@ -14,30 +10,23 @@ public class FileIO
 		try
 	    {
 			FileOutputStream fileOut =
-			new FileOutputStream("resources/data/" + filename + ".dat");
+			new FileOutputStream(filename + ".dat");
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 			out.writeObject(object);
 			out.close();
 			fileOut.close();
-			System.out.println("Serialized data saved to resources/data/" + filename + ".dat" );
+			System.out.println("Serialized data saved to:" + filename + ".dat" );
 		} catch(IOException i) {
 	    	i.printStackTrace();
 	    }
 	}
 	
-	public static Object load(String filename)
-	{
-		Object result = null;
-		try 
-		{
-			FileInputStream fileIn = new FileInputStream("resources/data/" + filename + ".dat");
-			ObjectInputStream in = new ObjectInputStream(fileIn);
-			result = in.readObject();
-			in.close();
-			fileIn.close();
-		} catch (IOException|ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+	public static Object load(String filename) throws IOException, ClassNotFoundException {
+		FileInputStream fileIn = new FileInputStream(filename + ".dat");
+		ObjectInputStream in = new ObjectInputStream(fileIn);
+		Object result = in.readObject();
+		in.close();
+		fileIn.close();
 		return result;
 	}
 }

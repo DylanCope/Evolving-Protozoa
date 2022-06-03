@@ -17,7 +17,7 @@ public class Application
 	{
 		TextStyle.loadFonts();
 		simulation = new Simulation(1);
-		simulation.loadTank("saves/2022-06-03-01-17-43");
+		simulation.loadTank("saves/2022-06-03-16-18-42");
 		try {
 			if (!(args.length > 0 && args[0].equals("noui"))) {
 				window = new Window("Evolving Protozoa", simulation);

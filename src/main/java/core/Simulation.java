@@ -16,7 +16,7 @@ public class Simulation implements Runnable, ActionListener
 	private Tank tank;
 	private boolean simulate;
 	private final Timer timer = new Timer((int) Application.refreshDelay, this);
-	private double elapsedTime = 0, timeDilation = 1;
+	private double elapsedTime = 0, timeDilation = 1, timeSinceSave = 0;
 	
 	public static Random RANDOM;
 	private boolean debug = false;
@@ -72,8 +72,15 @@ public class Simulation implements Runnable, ActionListener
 	{
 //		double delta = timeDilation * timer.getDelay() / 1000.0;
 		double delta = timeDilation * Settings.simulationUpdateDelta;
+
 		elapsedTime += delta;
 		tank.update(delta);
+
+		timeSinceSave += delta;
+		if (timeSinceSave > Settings.timeBetweenSaves) {
+			timeSinceSave = 0;
+			saveTank();
+		}
 		
 		if (simulate)
 			timer.restart();
@@ -94,6 +101,10 @@ public class Simulation implements Runnable, ActionListener
 	public void close() {
 		System.out.println();
 		System.out.println("Closing simulation.");
+		saveTank();
+	}
+
+	public void saveTank() {
 		String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new java.util.Date());
 		FileIO.save(tank, "saves/" + timeStamp);
 	}

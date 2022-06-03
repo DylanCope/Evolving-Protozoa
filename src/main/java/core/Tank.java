@@ -126,6 +126,9 @@ public class Tank implements Iterable<Entity>, Serializable
 
     public void addRandom(Entity e) {
 		e.setPos(randomPosition(e.getRadius()));
-		add(e);
+		for (int i = 0; i < 5 && chunkManager.getAllEntities().anyMatch(e::isCollidingWith); i++)
+			e.setPos(randomPosition(e.getRadius()));
+		if (chunkManager.getAllEntities().noneMatch(e::isCollidingWith))
+			add(e);
     }
 }

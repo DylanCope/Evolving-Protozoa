@@ -161,7 +161,7 @@ public class NetworkGenome implements Serializable
             postSynapticNeuron.addInput(preSynapticNeuron, gene.getWeight());
         }
 
-		return new NeuralNetwork(neurons.values());
+		return new NeuralNetwork(new ArrayList<>(neurons.values()));
 	}
 
 	public double distance(NetworkGenome other)

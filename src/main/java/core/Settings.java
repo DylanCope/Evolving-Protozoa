@@ -3,6 +3,7 @@ package core;
 public final class Settings {
     // Simulation settings
     public static final double simulationUpdateDelta = 5.0 / 1000.0;
+    public static final double maxVel = 1.0;
 
     // Tank settings
     public static final int numInitialProtozoa = 300;

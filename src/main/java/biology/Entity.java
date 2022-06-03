@@ -84,14 +84,14 @@ public abstract class Entity implements Serializable
 	
 	public boolean isCollidingWith(Entity other)
 	{
-		double dist = getPos().sub(other.getPos()).len2();
-		return dist < Math.pow(getRadius() + other.getRadius(), 2);
+		double r = getRadius() + other.getRadius();
+		return other.getPos().squareDistanceTo(getPos()) < r*r;
 	}
 	
 	protected boolean isTouching(Entity other)
 	{
-		Vector2 ds = other.getPos().sub(getPos());
-		return 0.95 * ds.len() <= getRadius() + other.getRadius();
+		double r = getRadius() + other.getRadius();
+		return 0.95 * other.getPos().distanceTo(getPos()) < r;
 	}
 	
 	public abstract boolean isEdible();
@@ -107,18 +107,20 @@ public abstract class Entity implements Serializable
 
 	public void handlePotentialCollision(Entity e) {
 
-		Vector2 dx = getPos().sub(e.getPos());
+		double sqDist = e.getPos().squareDistanceTo(getPos());
 
-		if (dx.len2() < Math.pow(3 * getRadius(), 2)) {
-			crowdingFactor += e.getRadius() / (getRadius() + dx.len2());
+		if (sqDist < Math.pow(3 * getRadius(), 2)) {
+			crowdingFactor += e.getRadius() / (getRadius() + sqDist);
 		}
 
-		if (isCollidingWith(e))
+		double r = getRadius() + e.getRadius();
+
+		if (sqDist < r*r)
 		{
-			if (e.getVel().len()*e.getRadius() > getVel().len()*getRadius())
-				setPos(e.getPos().add(dx.setLength(e.getRadius() + getRadius())));
+			if (e.getVel().len2()*e.getRadius() > getVel().len2()*getRadius())
+				getPos().moveAway(e.getPos(), r);
 			else
-				e.setPos(getPos().sub(dx.setLength(e.getRadius() + getRadius())));
+				e.getPos().moveAway(getPos(), r);
 		}
 	}
 

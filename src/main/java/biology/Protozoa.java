@@ -74,7 +74,7 @@ public class Protozoa extends Entity
 			
 			boolean isBlocked = false;
 			if (cell.entity != null) 
-				isBlocked = dr.len2() > cell.entity.getPos().sub(getPos()).len2();
+				isBlocked = dr.len2() > cell.entity.getPos().squareDistanceTo(getPos());
 			
 			if (inView && !isBlocked) {
 				cell.entity = e;

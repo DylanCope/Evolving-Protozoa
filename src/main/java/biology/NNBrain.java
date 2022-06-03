@@ -1,5 +1,6 @@
 package biology;
 
+import core.Settings;
 import neat.NeuralNetwork;
 
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ public class NNBrain implements Brain {
     public final NeuralNetwork network;
     private List<Double> outputs;
     private final double maxTurn = Math.toRadians(15);
-    private final double maxVel = 0.2;
 
     public NNBrain(NeuralNetwork network) {
         this.network = network;
@@ -41,7 +41,7 @@ public class NNBrain implements Brain {
     @Override
     public double speed(Protozoa p)
     {
-        return Math.min(maxVel * outputs.get(1), maxVel);
+        return Math.min(Settings.maxVel * outputs.get(1), Settings.maxVel);
     }
 
     @Override

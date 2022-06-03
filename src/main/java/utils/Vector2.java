@@ -118,11 +118,31 @@ public class Vector2 implements Serializable
 		return Math.acos(dot(other) / Math.sqrt(a*b));
 	}
 
+	public double distanceTo(Vector2 other) {
+		double dx = getX() - other.getX();
+		double dy = getY() - other.getY();
+		return Math.sqrt(dx*dx + dy*dy);
+	}
+
+	public double squareDistanceTo(Vector2 other) {
+		double dx = getX() - other.getX();
+		double dy = getY() - other.getY();
+		return dx*dx + dy*dy;
+	}
+
 	public boolean equals(Object o) {
 		if (o instanceof Vector2) {
 			Vector2 v = (Vector2) o;
 			return v.getX() == getX() && v.getY() == getY();
 		}
 		return false;
+	}
+
+	public void moveAway(Vector2 other, double amount) {
+		double dx = getX() - other.getX();
+		double dy = getY() - other.getY();
+		double l = Math.sqrt(dx*dx + dy*dy);
+		x = other.getX() + dx * amount / l;
+		y = other.getY() + dy * amount / l;
 	}
 }

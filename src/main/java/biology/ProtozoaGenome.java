@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  */
 public class ProtozoaGenome implements Serializable
 {
-    private final NetworkGenome networkGenome;
+//    private final NetworkGenome networkGenome;
     private final int retinaSize;
     private double radius;
     private double growthRate;
@@ -24,7 +24,7 @@ public class ProtozoaGenome implements Serializable
     public ProtozoaGenome(ProtozoaGenome parentGenome) {
         retinaSize = parentGenome.retinaSize;
         radius = parentGenome.radius;
-        networkGenome = parentGenome.networkGenome;
+//        networkGenome = parentGenome.networkGenome;
         mutationChance = parentGenome.mutationChance;
         splitSize = parentGenome.splitSize;
         growthRate = parentGenome.growthRate;
@@ -36,18 +36,18 @@ public class ProtozoaGenome implements Serializable
         radius = randomProtozoanRadius();
         splitSize = randomSplitSize();
         growthRate = randomGrowthRate();
-        networkGenome = new NetworkGenome(3 * retinaSize, actionSpaceSize);
+//        networkGenome = new NetworkGenome(3 * retinaSize, actionSpaceSize);
     }
 
     public ProtozoaGenome(int retinaSize,
                           double radius,
                           double growthRate,
-                          double splitSize,
-                          NetworkGenome networkGenome)
+                          double splitSize)
+//                          NetworkGenome networkGenome)
     {
         this.retinaSize = retinaSize;
         this.radius = radius;
-        this.networkGenome = networkGenome;
+//        this.networkGenome = networkGenome;
         this.growthRate = growthRate;
         this.splitSize = splitSize;
     }
@@ -69,7 +69,7 @@ public class ProtozoaGenome implements Serializable
 
 
     public ProtozoaGenome mutate() {
-        networkGenome.mutate();
+//        networkGenome.mutate();
         if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
             radius = randomProtozoanRadius();
         }
@@ -78,7 +78,8 @@ public class ProtozoaGenome implements Serializable
 
     public Brain brain()
     {
-        return new NNBrain(networkGenome.phenotype());
+//        return new NNBrain(networkGenome.phenotype());
+        return Brain.RANDOM;
     }
 
     public Retina retina()
@@ -105,25 +106,25 @@ public class ProtozoaGenome implements Serializable
         return new Protozoa(this);
     }
 
-    public Stream<ProtozoaGenome> crossover(ProtozoaGenome other) {
-        NetworkGenome childNetGenome = networkGenome.crossover(other.networkGenome);
-        int childRetinaSize = Simulation.RANDOM.nextBoolean() ? retinaSize : other.retinaSize;
-        double childRadius = Simulation.RANDOM.nextBoolean() ? radius : other.radius;
-        double childSplitSize = Simulation.RANDOM.nextBoolean() ? splitSize : other.splitSize;
-        double childGrowthRate = Simulation.RANDOM.nextBoolean() ? growthRate : other.growthRate;
-        return Stream.of(new ProtozoaGenome(
-                childRetinaSize, childRadius, childGrowthRate, childSplitSize, childNetGenome
-        ));
-    }
+//    public Stream<ProtozoaGenome> crossover(ProtozoaGenome other) {
+//        NetworkGenome childNetGenome = networkGenome.crossover(other.networkGenome);
+//        int childRetinaSize = Simulation.RANDOM.nextBoolean() ? retinaSize : other.retinaSize;
+//        double childRadius = Simulation.RANDOM.nextBoolean() ? radius : other.radius;
+//        double childSplitSize = Simulation.RANDOM.nextBoolean() ? splitSize : other.splitSize;
+//        double childGrowthRate = Simulation.RANDOM.nextBoolean() ? growthRate : other.growthRate;
+//        return Stream.of(new ProtozoaGenome(
+//                childRetinaSize, childRadius, childGrowthRate, childSplitSize, childNetGenome
+//        ));
+//    }
 
-    public Stream<ProtozoaGenome> reproduce(ProtozoaGenome other)
-    {
-        return crossover(other).map(ProtozoaGenome::mutate);
-    }
+//    public Stream<ProtozoaGenome> reproduce(ProtozoaGenome other)
+//    {
+//        return crossover(other).map(ProtozoaGenome::mutate);
+//    }
 
     public Protozoa createChild()
     {
         ProtozoaGenome childGenome = new ProtozoaGenome(this);
-        return new Protozoa(childGenome.mutate());
+        return childGenome.mutate().phenotype();
     }
 }

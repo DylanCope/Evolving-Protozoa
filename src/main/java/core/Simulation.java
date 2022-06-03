@@ -94,7 +94,7 @@ public class Simulation implements Runnable, ActionListener
 	public void close() {
 		System.out.println();
 		System.out.println("Closing simulation.");
-		String timeStamp = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new java.util.Date());
+		String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new java.util.Date());
 		FileIO.save(tank, "saves/" + timeStamp);
 	}
 

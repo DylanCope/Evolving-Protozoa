@@ -69,9 +69,11 @@ public class Window extends Canvas implements Runnable, ActionListener
 	@Override
 	public void actionPerformed(ActionEvent event)
 	{
-		controller.update(simulation, renderer);
-		renderer.render();
-		timer.restart();
+		if (frame.isVisible()) {
+			controller.update(simulation, renderer);
+			renderer.render();
+			timer.restart();
+		}
 	}
 	
 	public Input getInput() {

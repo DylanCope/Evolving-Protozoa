@@ -11,23 +11,24 @@ public class Application
 	public static Simulation simulation;
 	public static Window window;
 	
-	public static final float refreshDelay = 1000 / 120f;
+	public static final float refreshDelay = 1000 / 30f;
 	
 	public static void main(String[] args)
 	{
-		TextStyle.loadFonts();
-		simulation = new Simulation(1);
-		simulation.loadTank("saves/2022-06-03-16-18-42");
+		simulation = new Simulation(Settings.simulationSeed);
 		try {
 			if (!(args.length > 0 && args[0].equals("noui"))) {
+				TextStyle.loadFonts();
 				window = new Window("Evolving Protozoa", simulation);
 				SwingUtilities.invokeLater(window);
-			} else {
-				simulation.shouldWaitBetweenTicks(false);
 			}
-			new Thread(simulation).start();
-			new REPL(simulation, window);
-		} catch (Exception e) {
+			else {
+				simulation.setUpdateDelay(0);
+			}
+			new Thread(new REPL(simulation, window)).start();
+			simulation.simulate();
+		}
+		catch (Exception e) {
 			simulation.close();
 			throw e;
 		}

@@ -9,54 +9,58 @@ import java.util.stream.Stream;
 
 import core.Settings;
 import core.Simulation;
+import core.Tank;
 import utils.Vector2;
 
 public abstract class Entity implements Serializable
 {
 	private static final long serialVersionUID = -4333766895269415282L;
 	private Vector2 pos;
-	private double radius;
-	private double direction = 0;
-	private double speed = 0;
-	private double interactAngle = Math.PI / 8;
+	private float radius;
+	private float direction = 0;
+	private float speed = 0;
+	private float interactAngle = (float) (Math.PI / 8);
 	private Color healthyColour, fullyDegradedColour;
 	
-	private double thinkTime = 0;
-	private double maxThinkTime;
-	private double timeAlive = 0;
-	private double health = 1;
-	private double growthRate = 0.0;
+	private float thinkTime = 0f;
+	private float maxThinkTime;
+	private float timeAlive = 0f;
+	private float health = 1f;
+	private float growthRate = 0.0f;
 	private int generation = 1;
 	
 	private boolean dead = false;
-	private double nutrition;
-	private double crowdingFactor;
+	private float nutrition;
+	private float crowdingFactor;
 	protected boolean hasHandledDeath = false;
 
-	private ArrayList<Entity> children = new ArrayList<>();
+	Tank tank;
 
-	public Entity()
+	private final ArrayList<Entity> children = new ArrayList<>();
+
+	public Entity(Tank tank)
 	{
+		this.tank = tank;
 		healthyColour = new Color(255, 255, 255);
 	}
 	
-	public Stream<Entity> update(double delta, Stream<Entity> entities) {
+	public void update(float delta, Collection<Entity> entities) {
 		timeAlive += delta;
 		crowdingFactor = 0;
 		grow(delta);
 		move(delta);
-		return entities.flatMap(e -> interact(e, delta));
+		entities.forEach(e -> interact(e, delta));
 	}
 
-	public void grow(double delta) {
+	public void grow(float delta) {
 		setRadius(getRadius() * (1 + getGrowthRate() * delta));
 	}
 
-	public void setGrowthRate(double gr) {
+	public void setGrowthRate(float gr) {
 		growthRate = gr;
 	}
 
-	public double getGrowthRate() {
+	public float getGrowthRate() {
 		return growthRate;
 	}
 	
@@ -71,7 +75,7 @@ public abstract class Entity implements Serializable
 		);
 	}
 
-	public boolean tick(double delta)
+	public boolean tick(float delta)
 	{
 		thinkTime += delta;
 
@@ -84,36 +88,36 @@ public abstract class Entity implements Serializable
 	
 	public boolean isCollidingWith(Entity other)
 	{
-		double r = getRadius() + other.getRadius();
+		float r = getRadius() + other.getRadius();
 		return other.getPos().squareDistanceTo(getPos()) < r*r;
 	}
 	
 	protected boolean isTouching(Entity other)
 	{
-		double r = getRadius() + other.getRadius();
+		float r = getRadius() + other.getRadius();
 		return 0.95 * other.getPos().distanceTo(getPos()) < r;
 	}
 	
 	public abstract boolean isEdible();
 
-	public Stream<Entity> interact(Entity e, double delta) {
+	public void interact(Entity e, float delta) {
+		// TODO: optimise to remove repeat interactions
 		handlePotentialCollision(e);
-		return Stream.empty();
 	}
 
-	public double getCrowdingFactor() {
+	public float getCrowdingFactor() {
 		return crowdingFactor;
 	}
 
 	public void handlePotentialCollision(Entity e) {
 
-		double sqDist = e.getPos().squareDistanceTo(getPos());
+		float sqDist = e.getPos().squareDistanceTo(getPos());
 
 		if (sqDist < Math.pow(3 * getRadius(), 2)) {
 			crowdingFactor += e.getRadius() / (getRadius() + sqDist);
 		}
 
-		double r = getRadius() + e.getRadius();
+		float r = getRadius() + e.getRadius();
 
 		if (sqDist < r*r)
 		{
@@ -124,21 +128,12 @@ public abstract class Entity implements Serializable
 		}
 	}
 
-	public void move(double delta)
+	public void move(float delta)
 	{
 		getPos().translate(getVel().mul(delta));
-//		setPos(getPos().add(getVel().mul(delta)));
 	}
 
-	/**
-	 * @param p maximum proportion of colour that can be lost
-	 * @return how much colour to loose
-	 */
-	public double getColourDecay(double p) {
-		return 1 + p * (health - 1);
-	}
-
-	public void setHealth(double h)
+	public void setHealth(float h)
 	{
 		health = h;
 		if (health > 1) 
@@ -149,36 +144,35 @@ public abstract class Entity implements Serializable
 
 	}
 
-	public Stream<Entity> handleDeath() {
+	public void handleDeath() {
 		hasHandledDeath = true;
-		return Stream.empty();
 	}
 
-	public void setMaxThinkTime(double maxThinkTime) {
+	public void setMaxThinkTime(float maxThinkTime) {
 		this.maxThinkTime = maxThinkTime;
 	}
 
 	public abstract String getPrettyName();
 
-	public HashMap<String, Double> getStats() {
-		HashMap<String, Double> stats = new HashMap<>();
+	public HashMap<String, Float> getStats() {
+		HashMap<String, Float> stats = new HashMap<>();
 		stats.put("Age", 100 * timeAlive);
 		stats.put("Health", 100 * getHealth());
 		stats.put("Size", Settings.statsDistanceScalar * getRadius());
 		stats.put("Speed", Settings.statsDistanceScalar * getSpeed());
 		stats.put("Crowding Factor", getCrowdingFactor());
-		stats.put("Generation", (double) getGeneration());
+		stats.put("Generation", (float) getGeneration());
 		return stats;
 	}
 
-	public HashMap<String, Double> getDebugStats() {
-		HashMap<String, Double> stats = new HashMap<>();
+	public HashMap<String, Float> getDebugStats() {
+		HashMap<String, Float> stats = new HashMap<>();
 		stats.put("Position X", Settings.statsDistanceScalar * getPos().getX());
 		stats.put("Position Y", Settings.statsDistanceScalar * getPos().getY());
 		return stats;
 	}
 	
-	public double getHealth() 
+	public float getHealth() 
 	{
 		return health;
 	}
@@ -191,11 +185,11 @@ public abstract class Entity implements Serializable
 		this.pos = pos;
 	}
 
-	public double getRadius() {
+	public float getRadius() {
 		return radius;
 	}
 
-	public void setRadius(double radius) {
+	public void setRadius(float radius) {
 		this.radius = radius;
 	}
 
@@ -208,14 +202,16 @@ public abstract class Entity implements Serializable
 	}
 
 	public Vector2 getDir() {
-		return new Vector2(Math.cos(direction), Math.sin(direction));
+		return new Vector2(
+				(float) Math.cos(direction),
+				(float) Math.sin(direction));
 	}
 
 	public void setDir(Vector2 dir) {
 		this.direction = dir.angle();
 	}
 
-	public void rotate(double theta) {
+	public void rotate(float theta) {
 		this.direction += theta;
 	}
 
@@ -229,9 +225,9 @@ public abstract class Entity implements Serializable
 			setDir(vel.mul(1 / this.speed));
 	}
 
-	public void setSpeed(double speed) { this.speed = speed; }
+	public void setSpeed(float speed) { this.speed = speed; }
 
-	public double getSpeed() { return speed; }
+	public float getSpeed() { return speed; }
 
 	public Color getColor() {
 		Color healthyColour = getHealthyColour();
@@ -261,17 +257,17 @@ public abstract class Entity implements Serializable
 			int r = healthyColour.getRed();
 			int g = healthyColour.getGreen();
 			int b = healthyColour.getBlue();
-			double p = 0.7;
+			float p = 0.7f;
 			return new Color((int) (r*p), (int) (g*p), (int) (b*p));
 		}
 		return fullyDegradedColour;
 	}
 
-	public double getNutrition() {
+	public float getNutrition() {
 		return nutrition;
 	}
 
-	public void setNutrition(double nutrition) {
+	public void setNutrition(float nutrition) {
 		this.nutrition = nutrition;
 	}
 
@@ -283,24 +279,23 @@ public abstract class Entity implements Serializable
 		this.generation = generation;
 	}
 
-	protected Stream<Entity> burst(Function<Double, ? extends Entity> createChild) {
+	protected void burst(Function<Float, ? extends Entity> createChild) {
 		setDead(true);
 		hasHandledDeath = true;
 
-		double angle = 2 * Math.PI * Simulation.RANDOM.nextDouble();
+		float angle = (float) (2 * Math.PI * Simulation.RANDOM.nextDouble());
 		int nChildren = 2 + Simulation.RANDOM.nextInt(3);
 
 		for (int i = 0; i < nChildren; i++) {
-			Vector2 dir = new Vector2(Math.cos(angle), Math.sin(angle));
-			double p = 0.3 + 0.7 * Simulation.RANDOM.nextDouble() / nChildren;
+			Vector2 dir = new Vector2((float) Math.cos(angle), (float) Math.sin(angle));
+			float p = (float) (0.3 + 0.7 * Simulation.RANDOM.nextDouble() / nChildren);
 			Entity e = createChild.apply(getRadius() * p);
 			e.setPos(getPos().add(dir.mul(2*e.getRadius())));
 			e.setGeneration(getGeneration() + 1);
 			children.add(e);
+			tank.add(e);
 			angle += 2 * Math.PI / nChildren;
 		}
-
-		return children.stream();
 	}
 
 	public Collection<Entity> getChildren() {

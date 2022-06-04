@@ -4,6 +4,7 @@ import biology.Entity;
 import utils.Vector2;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -58,8 +59,8 @@ public class Chunk implements Serializable {
         entities.remove(e);
     }
 
-    public Stream<Entity> getEntities() {
-        return entities.stream();
+    public Collection<Entity> getEntities() {
+        return entities;
     }
 
     public void addEntity(Entity e) {

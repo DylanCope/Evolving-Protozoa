@@ -55,15 +55,15 @@ public class UI
 
 		TextObject fpsText = new TextObject("FPS: ",
 				infoTextSize,
-				new Vector2(window.getWidth() * 0.9, window.getHeight() / 20f));
+				new Vector2(window.getWidth() * 0.9f, window.getHeight() / 20f));
 		fpsText.setColor(Color.YELLOW.darker());
 
 		debugInfo = new ArrayList<>();
 		debugInfo.add(fpsText);
 	}
 
-	public double getYPos(int i) {
-		return (1.1*i + 3) * window.getHeight() / 20;
+	public float getYPos(int i) {
+		return (1.1f*i + 3) * window.getHeight() / 20f;
 	}
 	
 	public void render(Graphics2D g, Renderer renderer)
@@ -81,10 +81,12 @@ public class UI
 		info.get(0).render(g);
 		info.get(1).setText("Number of protozoa: " + simulation.getTank().numberOfProtozoa());
 		info.get(1).render(g);
+
 		Entity tracked = renderer.getTracked();
 		if (tracked != null) {
 			if (tracked.isDead() && !tracked.getChildren().isEmpty()) {
-				tracked = tracked.getChildren().iterator().next();
+				renderer.track(tracked.getChildren().iterator().next());
+				tracked = renderer.getTracked();
 			}
 
 			lineNumber++;
@@ -96,8 +98,8 @@ public class UI
 			statsTitle.setColor(Color.WHITE.darker());
 			statsTitle.render(g);
 
-			HashMap<String, Double> stats = tracked.getStats();
-			for (Map.Entry<String, Double> entityStat : stats.entrySet()) {
+			HashMap<String, Float> stats = tracked.getStats();
+			for (Map.Entry<String, Float> entityStat : stats.entrySet()) {
 				lineNumber++;
 				String text = entityStat.getKey() + ": " + TextStyle.toString(entityStat.getValue(), 2);
 				TextObject statText = new TextObject(

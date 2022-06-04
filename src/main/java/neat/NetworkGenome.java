@@ -17,9 +17,9 @@ public class NetworkGenome implements Serializable
 	private Set<NeuronGene> neuronGenes = new TreeSet<>();
 	private Set<SynapseGene> synapseGenes = new TreeSet<>();
 	private Random random = Simulation.RANDOM;
-	private double mutationChance = Settings.globalMutationChance;
+	private float mutationChance = Settings.globalMutationChance;
 	private Neuron.Activation defaultActivation = Neuron.Activation.LINEAR;
-	private double fitness = 0.0;
+	private float fitness = 0.0f;
 
 	public NetworkGenome() {}
 
@@ -89,7 +89,7 @@ public class NetworkGenome implements Serializable
 						g.setDisabled(true);
 			}
 			else
-				addSynapse(in.getId(), out.getId(), random.nextDouble()*2 - 1);
+				addSynapse(in.getId(), out.getId(), (float) (random.nextDouble()*2 - 1));
 
 		return this;
 	}
@@ -164,14 +164,14 @@ public class NetworkGenome implements Serializable
 		return new NeuralNetwork(new ArrayList<>(neurons.values()));
 	}
 
-	public double distance(NetworkGenome other)
+	public float distance(NetworkGenome other)
 	{
 //		int excess = 0;
 //		int disjoint = 0;
 		return 0;
 	}
 
-	public void addSynapse(int inID, int outID, double w)
+	public void addSynapse(int inID, int outID, float w)
 	{
 		NeuronGene inGene = null, outGene = null;
 		for (NeuronGene gene : neuronGenes)
@@ -184,10 +184,18 @@ public class NetworkGenome implements Serializable
 		if (inGene == null | outGene == null)
 			throw new RuntimeException("Could not find neuron genes to initialise synapse...");
 
+		for (SynapseGene g : synapseGenes) {
+			if (g.getIn().getId() == inID && g.getOut().getId() == outID && !g.isDisabled()) {
+				g.setWeight(w);
+				return;
+			}
+		}
+
 		SynapseGene g = new SynapseGene(inGene, outGene);
 		g.setInnovation(innovation++);
 		g.setWeight(w);
 		synapseGenes.add(g);
+
 	}
 
 	public String toString()
@@ -200,4 +208,11 @@ public class NetworkGenome implements Serializable
 		return str;
 	}
 
+	public Collection<SynapseGene> getSynapseGenes() {
+		return synapseGenes;
+	}
+
+	public Collection<NeuronGene> getNeuronGenes() {
+		return neuronGenes;
+	}
 }

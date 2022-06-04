@@ -1,6 +1,7 @@
 package biology;
 
 import core.Simulation;
+import core.Tank;
 import utils.Vector2;
 
 import java.util.HashMap;
@@ -12,21 +13,22 @@ public abstract class Pellet extends Entity
 	/**
 	 * @param radius Radius of pellet
 	 */
-	public Pellet(double radius)
+	public Pellet(float radius, Tank tank)
 	{
+		super(tank);
 		this.setRadius(radius);
 
 		setVel(new Vector2(
-				(0.5 - Simulation.RANDOM.nextDouble()) / 30.0,
-				(0.5 - Simulation.RANDOM.nextDouble()) / 30.0
+				(float) ((0.5 - Simulation.RANDOM.nextDouble()) / 30.0),
+				(float) ((0.5 - Simulation.RANDOM.nextDouble()) / 30.0)
 		));
 
-		setNutrition(0.25 * radius);
+		setNutrition((float) (0.25 * radius));
 	}
 
 	@Override
-	public HashMap<String, Double> getStats() {
-		HashMap<String, Double> stats = super.getStats();
+	public HashMap<String, Float> getStats() {
+		HashMap<String, Float> stats = super.getStats();
 		stats.put("Nutrition", getNutrition());
 		return stats;
 	}
@@ -38,7 +40,7 @@ public abstract class Pellet extends Entity
 	}
 
 	@Override
-	public double getNutrition() {
+	public float getNutrition() {
 		return 10 * getRadius();
 	}
 

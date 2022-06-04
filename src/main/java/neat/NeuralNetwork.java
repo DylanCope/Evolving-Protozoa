@@ -44,11 +44,11 @@ public class NeuralNetwork implements Serializable
         return maxDepth;
     }
 
-    public void setInput(Double ... values) {
+    public void setInput(Float ... values) {
         setInput(Arrays.asList(values));
     }
 
-    public void setInput(List<Double> inputValues)
+    public void setInput(List<Float> inputValues)
     {
         for (int i = 0; i < inputValues.size(); i++)
             inputNeurons.get(i).setState(inputValues.get(i));
@@ -60,7 +60,7 @@ public class NeuralNetwork implements Serializable
         for (Neuron n : neurons) n.update();
     }
 
-    public List<Double> outputs()
+    public List<Float> outputs()
     {
         return outputNeurons.stream()
                 .map(Neuron::getState)

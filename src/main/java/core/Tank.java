@@ -2,133 +2,187 @@ package core;
 
 import java.awt.Graphics;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import biology.*;
+import utils.FileIO;
 import utils.Vector2;
 
 public class Tank implements Iterable<Entity>, Serializable
 {
 	private static final long serialVersionUID = 2804817237950199223L;
-	private final double radius = Settings.tankRadius;
+	private final float radius = Settings.tankRadius;
+	private float elapsedTime;
 	private final ConcurrentHashMap<Class<? extends Entity>, Integer> entityCounts;
 	private final ChunkManager chunkManager;
 	private int generation = 1;
+	private int protozoaBorn = 0;
+	private int totalEntitiesAdded = 0;
+
+	private String genomeFile = null;
+	private final List<String> genomesToWrite = new ArrayList<>();
+
+	private final List<Entity> entitiesToAdd = new ArrayList<>();
 
 	public Tank() 
 	{
-		double chunkSize = 2 * radius / Settings.numChunkBreaks;
+		float chunkSize = 2 * radius / Settings.numChunkBreaks;
 		chunkManager = new ChunkManager(-radius, radius, -radius, radius, chunkSize);
 		entityCounts = new ConcurrentHashMap<>();
+		elapsedTime = 0;
 	}
 	
-	public Vector2 randomPosition(double entityRadius) {
-		double rad = radius - 2*entityRadius;
-		double t = 2 * Math.PI * Simulation.RANDOM.nextDouble();
-		double r = Simulation.RANDOM.nextDouble();
+	public Vector2 randomPosition(float entityRadius) {
+		float rad = radius - 2*entityRadius;
+		float t = (float) (2 * Math.PI * Simulation.RANDOM.nextDouble());
+		float r = (float) Simulation.RANDOM.nextDouble();
 		return new Vector2(
-			rad * (1 - r*r) * Math.cos(t),
-			rad * (1 - r*r) * Math.sin(t)
+				(float) (rad * (1 - r*r) * Math.cos(t)),
+				(float) (rad * (1 - r*r) * Math.sin(t))
 		);
 	}
 
 	public void handleTankEdge(Entity e) {
 		if (e.getPos().len() - e.getRadius() > radius)
-			e.setPos(e.getPos().setLength(-0.98 * radius));
+			e.setPos(e.getPos().setLength(-0.98f * radius));
 	}
 
-	public Stream<Entity> updateEntity(Entity e, double delta) {
+	public void updateEntity(Entity e, float delta) {
 
-		Stream<Entity> nearbyEntities = chunkManager.getNearbyEntities(e);
-		Stream<Entity> newEntities = e.update(delta, nearbyEntities);
+		Collection<Entity> nearbyEntities = chunkManager.getNearbyEntities(e);
+		e.update(delta, nearbyEntities);
 
 		handleTankEdge(e);
-
-		return newEntities;
 	}
 
-	public void update(double delta) 
+	public void update(float delta) 
 	{
-		Collection<Entity> newEntities = chunkManager.getAllEntities()
-				.flatMap(e -> updateEntity(e, delta))
-				.collect(Collectors.toList());
+		elapsedTime += delta;
 
-		newEntities.forEach(this::add);
+		entitiesToAdd.forEach(chunkManager::add);
+		entitiesToAdd.clear();
 
-		Collection<Entity> entitiesFromDeaths = chunkManager.getAllEntities().filter(Entity::isDead)
-				.flatMap(this::handleEntityDeath)
-				.collect(Collectors.toSet());
-
-		entitiesFromDeaths.forEach(this::add);
+		Collection<Entity> entities = chunkManager.getAllEntities();
+		entities.forEach(e -> updateEntity(e, delta));
+		entities.forEach(this::handleDeadEntities);
 
 		chunkManager.update();
 	}
 
-	private Stream<Entity> handleEntityDeath(Entity e) {
+	private void handleDeadEntities(Entity e) {
+		if (!e.isDead())
+			return;
+
 		entityCounts.put(e.getClass(), -1 + entityCounts.get(e.getClass()));
-		return e.handleDeath();
+		e.handleDeath();
+	}
+
+	private void handleNewProtozoa(Protozoa p) {
+		protozoaBorn++;
+		generation = Math.max(generation, p.getGeneration());
+
+		if (genomeFile != null && Settings.writeGenomes) {
+			String genomeStr = p.getGenome().toString();
+			String genomeLine = "generation=" + p.getGeneration() + "," + genomeStr;
+			genomesToWrite.add(genomeLine);
+			List<String> genomeWritesHandled = new ArrayList<>();
+			for (String line : genomesToWrite) {
+				FileIO.appendLine(genomeFile, line);
+				genomeWritesHandled.add(line);
+			}
+
+			genomesToWrite.removeAll(genomeWritesHandled);
+		}
 	}
 
 	public void add(Entity e) {
-
-		chunkManager.add(e);
+		totalEntitiesAdded++;
+		entitiesToAdd.add(e);
 
 		if (e instanceof Protozoa)
-			generation = Math.max(generation, e.getGeneration());
+			handleNewProtozoa((Protozoa) e);
 
 		if (!entityCounts.containsKey(e.getClass()))
 			entityCounts.put(e.getClass(), 1);
 		else
 			entityCounts.put(e.getClass(), 1 + entityCounts.get(e.getClass()));
-
 	}
 	
-	public void render(Graphics g)
-	{
+	public void render(Graphics g) {
 		chunkManager.forEachEntity(e -> e.render(g));
 	}
 
 	public Collection<Entity> getEntities() {
-		return chunkManager.getAllEntities().collect(Collectors.toList());
+		return chunkManager.getAllEntities();
+	}
+
+	public Map<String, Float> getStats() {
+		Map<String, Float> stats = new HashMap<>();
+		stats.put("Number of Protozoa", (float) numberOfProtozoa());
+		stats.put("Number of Plant Pellets", (float) entityCounts.getOrDefault(PlantPellet.class, 0));
+		stats.put("Number of Meat Pellets", (float) entityCounts.getOrDefault(MeatPellet.class, 0));
+		stats.put("Max Generation", (float) generation);
+		stats.put("Time Elapsed", elapsedTime);
+		stats.put("Protozoa Born", (float) protozoaBorn);
+		stats.put("Total Entities Born", (float) totalEntitiesAdded);
+
+		Collection<Entity> entities = chunkManager.getAllEntities();
+		float n = (float) entities.size();
+		for (Entity e : entities) {
+			if (e instanceof Protozoa) {
+				for (Map.Entry<String, Float> stat : e.getStats().entrySet()) {
+					String key = "Mean " + stat.getKey();
+					float currentValue = stats.getOrDefault(key, 0.0f);
+					stats.put(key, stat.getValue() / n + currentValue);
+				}
+			}
+		}
+
+		return stats;
 	}
 	
 	public int numberOfProtozoa() {
-		if (entityCounts.containsKey(Protozoa.class))
-			return entityCounts.get(Protozoa.class);
-		return 0;
+		return entityCounts.getOrDefault(Protozoa.class, 0);
 	}
 	
 	public int numberOfPellets() {
-		int nPellets = 0;
-		if (entityCounts.containsKey(PlantPellet.class))
-			nPellets += entityCounts.get(PlantPellet.class);
-		if (entityCounts.containsKey(MeatPellet.class))
-			nPellets += entityCounts.get(MeatPellet.class);
+		int nPellets = entityCounts.getOrDefault(PlantPellet.class, 0);
+		nPellets += entityCounts.getOrDefault(MeatPellet.class, 0);
 		return nPellets;
 	}
 
-	public ChunkManager getChunkManager() { return chunkManager; }
+	public ChunkManager getChunkManager() {
+		return chunkManager;
+	}
 
 	@Override
 	public Iterator<Entity> iterator() {
 		return chunkManager.getAllEntities().iterator();
 	}
 
-	public double getRadius() {
+	public float getRadius() {
 		return radius;
 	}
 
-	public int getGeneration() { return generation; }
+	public int getGeneration() {
+		return generation;
+	}
 
     public void addRandom(Entity e) {
 		e.setPos(randomPosition(e.getRadius()));
-		for (int i = 0; i < 5 && chunkManager.getAllEntities().anyMatch(e::isCollidingWith); i++)
+		for (int i = 0; i < 5 && chunkManager.getAllEntities().stream().anyMatch(e::isCollidingWith); i++)
 			e.setPos(randomPosition(e.getRadius()));
-		if (chunkManager.getAllEntities().noneMatch(e::isCollidingWith))
+		if (chunkManager.getAllEntities().stream().noneMatch(e::isCollidingWith))
 			add(e);
     }
+
+	public float getElapsedTime() {
+		return elapsedTime;
+	}
+
+	public void setGenomeFile(String genomeFile) {
+		this.genomeFile = genomeFile;
+	}
 }

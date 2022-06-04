@@ -11,6 +11,7 @@ import java.awt.Stroke;
 import java.awt.image.BufferStrategy;
 import java.util.stream.Stream;
 
+import utils.Utils;
 import utils.Vector2;
 import utils.Window;
 import biology.Entity;
@@ -22,14 +23,14 @@ public class Renderer extends Canvas
 {	
 	private static final long serialVersionUID = 1L;
 	
-	double time = 0;
+	float time = 0;
 	private final Vector2 tankRenderCoords;
-	private final double tankRenderRadius;
+	private final float tankRenderRadius;
 	private Vector2 pan;
-	private double zoom;
-	private double targetZoom;
-	private final double initialZoom = 2;
-	private final double rotate = 0;
+	private float zoom;
+	private float targetZoom;
+	private final float initialZoom = 2;
+	private final float rotate = 0;
 	private double lastRenderTime = 0;
 	private double fps = 0;
 	private Entity track;
@@ -43,8 +44,8 @@ public class Renderer extends Canvas
 		this.simulation = simulation;
 		this.window = window;
 		
-		tankRenderRadius = window.getHeight() / 2.0;
-		tankRenderCoords = new Vector2(window.getWidth()*0.5, window.getHeight()*0.5);
+		tankRenderRadius = window.getHeight() / 2.0f;
+		tankRenderCoords = new Vector2(window.getWidth()*0.5f, window.getHeight()*0.5f);
 		pan = new Vector2(0, 0);
 		
 		zoom = 1;
@@ -54,20 +55,20 @@ public class Renderer extends Canvas
 		
 		requestFocus();
 		setFocusable(true);
-		lastRenderTime = getTime();
+		lastRenderTime = Utils.getTimeSeconds();
 	}
 	
 	public void retina(Graphics2D g, Protozoa p)
 	{
 		Vector2 pos = toRenderSpace(p.getPos());
-		double r = toRenderSpace(p.getRadius());
+		float r = toRenderSpace(p.getRadius());
 		
 		Color c = p.getColor();
 
-		double dt 	= p.getRetina().getCellAngle();
-		double fov 	= p.getRetina().getFov();
-		double t0 	= -p.getVel().angle() - 0.5*fov - rotate;
-		double t 	= t0;
+		float dt 	= p.getRetina().getCellAngle();
+		float fov 	= p.getRetina().getFov();
+		float t0 	= -p.getVel().angle() - 0.5f*fov - rotate;
+		float t 	= t0;
 		
 		g.setColor(c.darker());
 		g.fillArc(
@@ -115,7 +116,7 @@ public class Renderer extends Canvas
 	public void protozoa(Graphics2D g, Protozoa p)
 	{
 		Vector2 pos = toRenderSpace(p.getPos());
-		double r = toRenderSpace(p.getRadius());
+		float r = toRenderSpace(p.getRadius());
 		
 		if (pos.getX() + r > window.getWidth())
 			return;
@@ -139,12 +140,12 @@ public class Renderer extends Canvas
 			retina(g, p);
 		
 		Polygon nucleus = new Polygon();
-		double dt = 2*Math.PI / (16.0);
-		double t0 = p.getVel().angle();
-		for (double t = 0; t < 2*Math.PI; t += dt)
+		float dt = (float) (2*Math.PI / (16.0));
+		float t0 = p.getVel().angle();
+		for (float t = 0; t < 2*Math.PI; t += dt)
 		{
-			double percent = ((t*t*p.id) % (1/7.0)) + (2/5.0);
-			double radius = toRenderSpace(percent * p.getRadius()); 
+			float percent = (float) (((t*t*p.id) % (1/7.0)) + (2/5.0));
+			float radius = toRenderSpace(percent * p.getRadius()); 
 			int x = (int) (radius * (0.1 + Math.cos(t + t0)) + pos.getX());
 			int y = (int) (radius * (-0.1 + Math.sin(t + t0)) + pos.getY());
 			nucleus.addPoint(x, y);
@@ -167,7 +168,7 @@ public class Renderer extends Canvas
 	public void pellet(Graphics2D g, Pellet p)
 	{
 		Vector2 pos = toRenderSpace(p.getPos());
-		double r = toRenderSpace(p.getRadius());
+		float r = toRenderSpace(p.getRadius());
 		
 		if (pos.getX() + r > window.getWidth())
 			return;
@@ -207,7 +208,7 @@ public class Renderer extends Canvas
 		}
 	}
 	
-	public void maskTank(Graphics g, Vector2 coords, double r, int alpha)
+	public void maskTank(Graphics g, Vector2 coords, float r, int alpha)
 	{
 		int nPoints = 500;
 		int xPoints[] = new int[nPoints];
@@ -216,7 +217,7 @@ public class Renderer extends Canvas
 		int n = nPoints - 7;
 		for (int i = 0; i < n; i++) 
 		{
-			double t = 2*Math.PI * i / (double) n;
+			float t = (float) (2*Math.PI * i / (float) n);
 			xPoints[i] = (int) (coords.getX() + r * Math.cos(t));
 			yPoints[i] = (int) (coords.getY() + r * Math.sin(t));
 		}
@@ -262,8 +263,7 @@ public class Renderer extends Canvas
 			graphics.setColor(Color.YELLOW.darker());
 			ChunkManager chunkManager = simulation.getTank().getChunkManager();
 			int w = (int) toRenderSpace(chunkManager.getChunkSize());
-			Stream<Vector2> chunkCoords = chunkManager
-					.getAllChunks()
+			Stream<Vector2> chunkCoords = chunkManager.getAllChunks().stream()
 					.map(chunk -> toRenderSpace(chunk.getTankCoords()));
 			chunkCoords.forEach(pos -> graphics.drawRect((int) pos.getX(), (int) pos.getY(), w, w));
 		}
@@ -271,8 +271,8 @@ public class Renderer extends Canvas
 	
 	public void render()
 	{
-		fps = 1 / (getTime() - lastRenderTime);
-		lastRenderTime = getTime();
+		fps = 1 / (Utils.getTimeSeconds() - lastRenderTime);
+		lastRenderTime = Utils.getTimeSeconds();
 
 		BufferStrategy bs = this.getBufferStrategy();
 		
@@ -288,20 +288,22 @@ public class Renderer extends Canvas
 //		if (track != null) {
 //			rotate = rotate + (- 0.5*Math.PI - track.getVel().angle() - rotate) * 0.05;
 //		}
-		
-		background(graphics);
-		entities(graphics, simulation.getTank());
-		maskTank(graphics,
-				tankRenderCoords,
-				getTracked() != null ? 3*tankRenderRadius/4 : tankRenderRadius,
-				simulation.inDebugMode() ? 150 : 200);
 
-		maskTank(graphics,
-				toRenderSpace(new Vector2(0, 0)),
-				tankRenderRadius*zoom,
-				simulation.inDebugMode() ? 100 : 255);
-		
-		ui.render(graphics, this);
+		synchronized (simulation.getTank()) {
+			background(graphics);
+			entities(graphics, simulation.getTank());
+			maskTank(graphics,
+					tankRenderCoords,
+					getTracked() != null ? 3*tankRenderRadius/4 : tankRenderRadius,
+					simulation.inDebugMode() ? 150 : 200);
+
+			maskTank(graphics,
+					toRenderSpace(new Vector2(0, 0)),
+					tankRenderRadius*zoom,
+					simulation.inDebugMode() ? 100 : 255);
+
+			ui.render(graphics, this);
+		}
 		
 		graphics.dispose();
 		bs.show();
@@ -322,16 +324,16 @@ public class Renderer extends Canvas
 				.add(tankRenderCoords);
 	}
 	
-	public double toRenderSpace(double s)
+	public float toRenderSpace(float s)
 	{
 		return zoom * tankRenderRadius * s;
 	}
 
-	public void setZoom(double d) {
-		targetZoom = Math.pow(initialZoom + d, Math.log10(2 + initialZoom + d));
+	public void setZoom(float d) {
+		targetZoom = (float) Math.pow(initialZoom + d, Math.log10(2 + initialZoom + d));
 		if (targetZoom < 0.5) {
 			pan = new Vector2(0, 0);
-			targetZoom = 0.5;
+			targetZoom = 0.5f;
 		}
 		if (targetZoom > 20)
 			targetZoom = 20;
@@ -354,11 +356,7 @@ public class Renderer extends Canvas
 		return fps;
 	}
 
-	private double getTime() {
-		return System.currentTimeMillis() / 1000.0;
-	}
-
-	public double getZoom() {
+	public float getZoom() {
 		return zoom;
 	}
 	

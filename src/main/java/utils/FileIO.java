@@ -1,6 +1,9 @@
 package utils;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 
 public class FileIO 
 {
@@ -29,4 +32,13 @@ public class FileIO
 		fileIn.close();
 		return result;
 	}
+
+	public static void appendLine(String filePath, String line) {
+		try {
+			Files.write(Paths.get(filePath),
+					(line + "\n").getBytes(),
+					StandardOpenOption.APPEND);
+		} catch (IOException ignored) {}
+	}
+
 }

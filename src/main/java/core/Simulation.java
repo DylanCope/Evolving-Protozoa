@@ -1,47 +1,93 @@
 package core;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Random;
-
-import javax.swing.Timer;
-
-import biology.*;
+import biology.PlantPellet;
+import biology.Protozoa;
+import com.github.javafaker.Faker;
+import neat.SynapseGene;
 import utils.FileIO;
+import utils.Utils;
 
-public class Simulation implements Runnable, ActionListener
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class Simulation
 {
 	private Tank tank;
 	private boolean simulate;
-	private final Timer timer = new Timer((int) Application.refreshDelay, this);
-	private double elapsedTime = 0, timeDilation = 1, timeSinceSave = 0;
+	private float timeDilation = 1, timeSinceSave = 0, timeSinceSnapshot = 0;
+	private double updateDelay = Application.refreshDelay / 1000.0, lastUpdateTime = 0;
 	
 	public static Random RANDOM;
 	private boolean debug = false;
+
+	private final String name;
+	private final String genomeFile, historyFile;
+	private List<String> statsNames;
 
 	public Simulation(long seed)
 	{
 		RANDOM = new Random(seed);
 		simulate = true;
+		name = generateSimName();
+		System.out.println("Created new simulation named: " + name);
+		genomeFile = "saves/" + name + "/genomes.csv";
+		historyFile = "saves/" + name + "/history.csv";
+		newSaveDir();
+		initDefaultTank();
+	}
+
+	public Simulation(long seed, String name)
+	{
+		RANDOM = new Random(seed);
+		simulate = true;
+		this.name = name;
+		genomeFile = "saves/" + name + "/genomes.csv";
+		historyFile = "saves/" + name + "/history.csv";
+
+		loadMostRecentTank();
+	}
+
+	private void newSaveDir() {
+		try {
+			Files.createDirectories(Paths.get("saves/" + name));
+			Files.createDirectories(Paths.get("saves/" + name + "/tank"));
+			Files.createFile(Paths.get(genomeFile));
+			Files.createFile(Paths.get(historyFile));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static String generateSimName() {
+		Faker faker = new Faker();
+		return String.format("%s-%s-%s",
+				faker.ancient().primordial().toLowerCase().replaceAll(" ", "-"),
+				faker.pokemon().name().toLowerCase().replaceAll(" ", "-"),
+				faker.lorem().word().toLowerCase().replaceAll(" ", "-"));
 	}
 	
-	public Simulation()
-	{
+	public Simulation() {
 		this(new Random().nextLong());
 	}
 	
 	public void initDefaultTank()
 	{
 		tank = new Tank();
+		tank.setGenomeFile(genomeFile);
 
 		for (int i = 0; i < Settings.numInitialProtozoa; i++)
-			tank.addRandom(new Protozoa());
+			tank.addRandom(new Protozoa(tank));
 
 		for (int i = 0; i < Settings.numInitialPlantPellets; i++)
-			tank.addRandom(new PlantPellet());
+			tank.addRandom(new PlantPellet(tank));
 
+		makeHistorySnapshot();
 	}
 	
 	public void loadTank(String filename)
@@ -54,51 +100,56 @@ public class Simulation implements Runnable, ActionListener
 		}
 	}
 
-	public void shouldWaitBetweenTicks(boolean ticking) {
-		if (ticking)
-			timer.setDelay((int) Application.refreshDelay);
-		else
-			timer.setDelay(0);
-	}
-	
-	@Override
-	public void run() 
-	{
-		timer.start();
+	public void loadMostRecentTank() {
+		Path dir = Paths.get("saves/" + name + "/tank");
+
+		try (Stream<Path> pathStream = Files.list(dir)) {
+			Optional<Path> lastFilePath = pathStream
+					.filter(f -> !Files.isDirectory(f))
+					.max(Comparator.comparingLong(f -> f.toFile().lastModified()));
+
+			lastFilePath.ifPresent(path -> loadTank(path.toString()));
+		} catch (IOException e) {
+			initDefaultTank();
+		}
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) 
-	{
-//		double delta = timeDilation * timer.getDelay() / 1000.0;
-		double delta = timeDilation * Settings.simulationUpdateDelta;
+	public void simulate() {
+		while (simulate) {
+			if (updateDelay > 0) {
+				double currTime = Utils.getTimeSeconds();
+				if ((currTime - lastUpdateTime) > updateDelay) {
+					update();
+					lastUpdateTime = currTime;
+				}
+			} else {
+				update();
+			}
+		}
+	}
 
-		elapsedTime += delta;
-		tank.update(delta);
+	public void update()
+	{
+		float delta = timeDilation * Settings.simulationUpdateDelta;
+		synchronized (tank) {
+			tank.update(delta);
+		}
 
 		timeSinceSave += delta;
 		if (timeSinceSave > Settings.timeBetweenSaves) {
 			timeSinceSave = 0;
 			saveTank();
 		}
-		
-		if (simulate)
-			timer.restart();
-		else
-			timer.stop();
+
+		timeSinceSnapshot += delta;
+		if (timeSinceSnapshot > Settings.historySnapshotTime) {
+			timeSinceSnapshot = 0;
+			makeHistorySnapshot();
+		}
 	}
 
-	public Tank getTank() { return tank; }
-
-	public int getGeneration() { return tank.getGeneration(); }
-
-	public double getElapsedTime() { return elapsedTime; }
-
-	public double getTimeDilation() { return timeDilation; }
-
-	public void setTimeDilation(double td) { timeDilation = td; }
-
 	public void close() {
+		simulate = false;
 		System.out.println();
 		System.out.println("Closing simulation.");
 		saveTank();
@@ -106,7 +157,24 @@ public class Simulation implements Runnable, ActionListener
 
 	public void saveTank() {
 		String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new java.util.Date());
-		FileIO.save(tank, "saves/" + timeStamp);
+		String fileName = "saves/" + name + "/tank/" + timeStamp;
+		FileIO.save(tank, fileName);
+	}
+
+	public void makeHistorySnapshot() {
+		Map<String, Float> stats = tank.getStats();
+
+		if (statsNames == null) {
+			statsNames = new ArrayList<>(tank.getStats().keySet());
+			String statsCsvHeader = String.join(",", statsNames);
+			FileIO.appendLine(historyFile, statsCsvHeader);
+		}
+
+		String statsString = statsNames.stream()
+				.map(k -> String.format("%.5f", stats.get(k)))
+				.collect(Collectors.joining(","));
+
+		FileIO.appendLine(historyFile, statsString);
 	}
 
 	public void toggleDebug() {
@@ -115,5 +183,19 @@ public class Simulation implements Runnable, ActionListener
 
 	public boolean inDebugMode() {
 		return debug;
+	}
+
+	public Tank getTank() { return tank; }
+
+	public int getGeneration() { return tank.getGeneration(); }
+
+	public float getElapsedTime() { return tank.getElapsedTime(); }
+
+	public float getTimeDilation() { return timeDilation; }
+
+	public void setTimeDilation(float td) { timeDilation = td; }
+
+	public void setUpdateDelay(float updateDelay) {
+		this.updateDelay = updateDelay;
 	}
 }

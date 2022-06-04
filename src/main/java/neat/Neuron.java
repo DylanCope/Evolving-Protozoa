@@ -14,18 +14,18 @@ import java.util.stream.Collectors;
  */
 public class Neuron implements Comparable<Neuron>, Serializable {
 
-    public interface Activation extends Function<Double, Double>, Serializable {
+    public interface Activation extends Function<Float, Float>, Serializable {
 
-        Activation SIGMOID = z -> 1 / (1 + Math.exp(-z));
+        Activation SIGMOID = z -> 1 / (1 + (float) Math.exp(-z));
         Activation LINEAR = z -> z;
-        Activation TANH = Math::tanh;
+        Activation TANH = x -> (float) Math.tanh(x);
 
     }
 
     public enum Type implements Serializable {
         SENSOR("SENSOR"), HIDDEN("HIDDEN"), OUTPUT("OUTPUT");
 
-        private String value;
+        private final String value;
         Type(String value) {
             this.value = value;
         }
@@ -39,12 +39,12 @@ public class Neuron implements Comparable<Neuron>, Serializable {
     private static final long serialVersionUID = 1L;
 
     private List<Neuron> inputs;
-    private List<Double> weights;
+    private List<Float> weights;
     private Type type;
     private int id;
-    private double state = 0;
-    private double nextState = 0;
-    private double learningRate = 0;
+    private float state = 0;
+    private float nextState = 0;
+    private float learningRate = 0;
     private Activation activation = Activation.TANH;
 
     public Neuron(int id, Type type, Activation activation)
@@ -54,7 +54,7 @@ public class Neuron implements Comparable<Neuron>, Serializable {
         this.activation = activation;
     }
 
-    public Neuron(int id, List<Neuron> inputs, List<Double> weights)
+    public Neuron(int id, List<Neuron> inputs, List<Float> weights)
     {
         this.id = id;
         this.inputs = inputs;
@@ -63,14 +63,7 @@ public class Neuron implements Comparable<Neuron>, Serializable {
 
     void tick()
     {
-//        nextState = Streams.zip(
-//                inputs.stream().map(Neuron::getState),
-//                weights.stream(),
-//                (x, y) -> x * y)
-//            .reduce(Double::sum)
-//            .map(activation)
-//            .orElse(0.0);
-        nextState = 0.0;
+        nextState = 0.0f;
         for (int i = 0; i < inputs.size(); i++)
             nextState += inputs.get(i).getState() * weights.get(i);
         nextState = activation.apply(nextState);
@@ -92,11 +85,11 @@ public class Neuron implements Comparable<Neuron>, Serializable {
         return id;
     }
 
-    public double getState() {
+    public float getState() {
         return state;
     }
 
-    public Neuron setState(double s) {
+    public Neuron setState(float s) {
         state = s;
         return this;
     }
@@ -106,7 +99,7 @@ public class Neuron implements Comparable<Neuron>, Serializable {
         return this;
     }
 
-    public void addInput(Neuron in, Double weight) {
+    public void addInput(Neuron in, Float weight) {
         inputs.add(in);
         weights.add(weight);
     }
@@ -120,20 +113,20 @@ public class Neuron implements Comparable<Neuron>, Serializable {
         return inputs;
     }
 
-    public Neuron setWeights(List<Double> weights) {
+    public Neuron setWeights(List<Float> weights) {
         this.weights = weights;
         return this;
     }
 
-    public List<Double> getWeights() {
+    public List<Float> getWeights() {
         return weights;
     }
 
-    private double getLearningRate() {
+    private float getLearningRate() {
         return learningRate;
     }
 
-    private Neuron setLearningRate(double lr) {
+    private Neuron setLearningRate(float lr) {
         this.learningRate = lr;
         return this;
     }

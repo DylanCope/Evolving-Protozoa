@@ -1,14 +1,16 @@
 package biology;
 
 import core.Simulation;
+import core.Tank;
 
 import java.awt.*;
+import java.util.Collection;
 import java.util.stream.Stream;
 
 public class MeatPellet extends Pellet {
 
-    public MeatPellet(double radius) {
-        super(radius);
+    public MeatPellet(float radius, Tank tank) {
+        super(radius, tank);
 
         int r = 150 + Simulation.RANDOM.nextInt(105);
         int g = 25  + Simulation.RANDOM.nextInt(100);
@@ -17,16 +19,16 @@ public class MeatPellet extends Pellet {
         setDegradedColour(new Color(158, 121, 79));
     }
 
-    public void age(double delta) {
-        double deathRate = getRadius() * delta * 100;
+    public void age(float delta) {
+        float deathRate = getRadius() * delta * 100;
         setHealth(getHealth() * (1 - deathRate));
     }
 
     @Override
-    public Stream<Entity> update(double delta, Stream<Entity> entities)
+    public void update(float delta, Collection<Entity> entities)
     {
         age(delta);
-        return super.update(delta, entities);
+        super.update(delta, entities);
     }
 
     @Override
@@ -35,7 +37,7 @@ public class MeatPellet extends Pellet {
     }
 
     @Override
-    public double getNutrition() {
+    public float getNutrition() {
         return super.getNutrition() * (3 * getHealth() - 1);
     }
 }

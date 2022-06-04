@@ -5,9 +5,9 @@ import java.io.Serializable;
 public class NeuronGene implements Comparable<NeuronGene>, Serializable
 {
 
-    private int id;
-    private Neuron.Type type;
-    private Neuron.Activation activation;
+    private final int id;
+    private final Neuron.Type type;
+    private final Neuron.Activation activation;
 
     public NeuronGene(int id, Neuron.Type type, Neuron.Activation activation)
     {
@@ -30,7 +30,7 @@ public class NeuronGene implements Comparable<NeuronGene>, Serializable
 
     @Override
     public String toString() {
-        return String.format("Neuron, id:%d, type:%s", id, type);
+        return String.format("Neuron: id=%d; type=%s", id, type);
     }
 
     public int getId() { return id; }

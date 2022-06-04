@@ -10,13 +10,13 @@ public class SynapseGene implements Comparable<SynapseGene>, Serializable
     private int id;
     private int innovation;
     private NeuronGene in, out;
-    private double weight;
+    private float weight;
     private boolean disabled;
 
     public SynapseGene(NeuronGene in, NeuronGene out) {
         this.in = in;
         this.out = out;
-        this.weight = 2*Simulation.RANDOM.nextDouble() - 1;
+        this.weight = (float) (2*Simulation.RANDOM.nextDouble() - 1);
         disabled = false;
         innovation = 0;
     }
@@ -46,7 +46,7 @@ public class SynapseGene implements Comparable<SynapseGene>, Serializable
     public String toString()
     {
         return String.format(
-                "Synapse, innov:%d, in:%d, out:%d, w:%.2f, disabled:%b",
+                "Synapse: innov=%d; in=%d; out=%d; w=%.5f; disabled=%b",
                 innovation, in.getId(), out.getId(), weight, disabled);
     }
 
@@ -90,11 +90,11 @@ public class SynapseGene implements Comparable<SynapseGene>, Serializable
         this.out = out;
     }
 
-    public double getWeight() {
+    public float getWeight() {
         return weight;
     }
 
-    public void setWeight(double weight) {
+    public void setWeight(float weight) {
         this.weight = weight;
     }
 }

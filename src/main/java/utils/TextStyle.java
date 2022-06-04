@@ -15,9 +15,9 @@ public class TextStyle {
 
 	public static String fontName = "Fira Code Retina";
 	
-	public static String toString(double d, int dp) {
-		double ten = Math.pow(10, dp);
-		return Double.toString(((int) (d * ten)) / ten);
+	public static String toString(float d, int dp) {
+		float ten = (float) Math.pow(10, dp);
+		return Float.toString(((int) (d * ten)) / ten);
 	}
 	
 	public static void loadFonts()

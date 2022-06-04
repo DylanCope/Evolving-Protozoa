@@ -17,20 +17,20 @@ public class NetworkGenomeTest
     public void constructingGenome()
     {
         NetworkGenome genome = new NetworkGenome(2, 3);
-        genome.addSynapse(0, 2, 0.5);
-        genome.addSynapse(0, 3, 1.2);
-        genome.addSynapse(0, 4, -1.6);
-        genome.addSynapse(1, 2, 0.3);
-        genome.addSynapse(1, 3, -0.9);
-        genome.addSynapse(1, 4, 0.2);
+        genome.addSynapse(0, 2, 0.5f);
+        genome.addSynapse(0, 3, 1.2f);
+        genome.addSynapse(0, 4, -1.6f);
+        genome.addSynapse(1, 2, 0.3f);
+        genome.addSynapse(1, 3, -0.9f);
+        genome.addSynapse(1, 4, 0.2f);
         System.out.println(genome);
         NeuralNetwork net = genome.phenotype();
-        net.setInput(5.0, -2.0);
+        net.setInput(5.0f, -2.0f);
         System.out.println(net);
         net.tick();
         System.out.println(net);
-        List<Double> expected = Arrays.asList(0.87, 1.00, 0.00);
-        List<Double> actual = net.outputs();
+        List<Float> expected = Arrays.asList(0.87f, 1.00f, 0.00f);
+        List<Float> actual = net.outputs();
         Streams.zip(expected.stream(), actual.stream(), (e, a) -> {
             assertEquals(e, a, 1e-6); return null;
         });

@@ -6,19 +6,32 @@ import java.io.InputStreamReader;
 import core.Application;
 import core.Simulation;
 
-public class REPL
+public class REPL implements Runnable
 {
     private final Simulation simulation;
     private final Window window;
+    private boolean running = true;
 
     public REPL(Simulation simulation, Window window)
     {
         this.simulation = simulation;
         this.window = window;
+    }
+
+    public void setTimeDilation(String[] args) throws Exception
+    {
+        if (args.length != 2)
+            throw new Exception("This command takes 2 arguments.");
+
+        float d = Float.parseFloat(args[1]);
+        simulation.setTimeDilation(d);
+    }
+
+    @Override
+    public void run() {
         System.out.println("Starting REPL...");
         BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-
-        while (true)
+        while (running)
         {
             String line;
             try
@@ -37,10 +50,9 @@ public class REPL
                         Application.exit();
                         break;
                     case "stats":
-                        System.out.println("Number of protozoa: " + simulation.getTank().numberOfProtozoa());
-                        System.out.println("Number of pellets: " + simulation.getTank().numberOfPellets());
-                        System.out.println("Generation:" + simulation.getGeneration());
-                        System.out.println("Time elapsed: " + simulation.getElapsedTime());
+                        simulation.getTank().getStats().forEach(
+                            (k, v) -> System.out.printf("%s: %.5f\n", k, v)
+                        );
                         break;
                     case "settime":
                         setTimeDilation(args);
@@ -55,7 +67,6 @@ public class REPL
                     case "toggleui":
                         System.out.println("Toggling UI.");
                         window.getFrame().setVisible(!window.getFrame().isVisible());
-                        simulation.shouldWaitBetweenTicks(window.getFrame().isVisible());
                         break;
                     default:
                         System.out.println("Command not recognised.");
@@ -67,14 +78,4 @@ public class REPL
             }
         }
     }
-
-    public void setTimeDilation(String[] args) throws Exception
-    {
-        if (args.length != 2)
-            throw new Exception("This command takes 2 arguments.");
-
-        double d = Double.parseDouble(args[1]);
-        simulation.setTimeDilation(d);
-    }
-
 }

@@ -2,39 +2,44 @@ package core;
 
 public final class Settings {
     // Simulation settings
-    public static final double simulationUpdateDelta = 5 * 5.0 / 1000.0;
-    public static final double maxVel = 1.0;
-    public static final double timeBetweenSaves = 100.0;
+    public static final long simulationSeed = 42;
+    public static final float simulationUpdateDelta = 5f / 1000f;
+    public static final float maxVel = 1.0f;
+    public static final float timeBetweenSaves = 500.0f;
+    public static final float historySnapshotTime = 2.0f;
+    public static final boolean writeGenomes = false;
 
     // Tank settings
     public static final int numInitialProtozoa = 300;
-    public static final int numInitialPlantPellets = 1000;
-    public static final double tankRadius = 1.0;
+    public static final int numInitialPlantPellets = 600;
+    public static final float tankRadius = 1.0f;
     public static final int numChunkBreaks = 20;
 
     // Protozoa settings
-    public static final double minProtozoanBirthRadius = 0.01;
-    public static final double maxProtozoanBirthRadius = 0.02;
+    public static final float minProtozoanBirthRadius = 0.01f;
+    public static final float maxProtozoanBirthRadius = 0.02f;
     public static final int defaultRetinaSize = 8;
-    public static final double minHealthToSplit = 0.8;
-    public static final double maxProtozoanSplitRadius = 0.03;
-    public static final double minProtozoanSplitRadius = 0.025;
-    public static final double minProtozoanGrowthRate = 0.03;
-    public static final double maxProtozoanGrowthRate = 0.06;
+    public static final float minHealthToSplit = 0.8f;
+    public static final float maxProtozoanSplitRadius = 0.03f;
+    public static final float minProtozoanSplitRadius = 0.025f;
+    public static final float minProtozoanGrowthRate = 0.03f;
+    public static final float maxProtozoanGrowthRate = 0.06f;
 
-    public static final double globalMutationChance = 0.05;
+    public static final float globalMutationChance = 0.05f;
 
     // Plant Settings
-    public static final double maxPlantRadius = 0.02;
-    public static final double minMaxPlantRadius = 0.015;
-    public static final double minPlantSplitRadius = 0.01;
-    public static final double minPlantBirthRadius = 0.01;
-    public static final double maxPlantBirthRadius = 0.02;
-    public static final double minPlantGrowth = 0.01;
-    public static final double plantGrowthRange = 0.04;
+    public static final float maxPlantRadius = 0.02f;
+    public static final float minMaxPlantRadius = 0.015f;
+    public static final float minPlantSplitRadius = 0.01f;
+    public static final float minPlantBirthRadius = 0.005f;
+    public static final float maxPlantBirthRadius = 0.01f;
+    public static final float minPlantGrowth = 0.01f;
+    public static final float plantGrowthRange = 0.02f;
+    public static final float plantCrowdingGrowthDecay = 1.0f;
+    public static final float plantCriticalCrowding = 4.0f;
 
     // Stats
 
-    public static final double statsDistanceScalar = 100.0;
-    public static final double statsTimeScalar = 100.0;
+    public static final float statsDistanceScalar = 100.0f;
+    public static final float statsTimeScalar = 100.0f;
 }

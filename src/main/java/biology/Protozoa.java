@@ -3,12 +3,14 @@ package biology;
 import com.google.common.collect.Streams;
 import core.Settings;
 import core.Simulation;
+import core.Tank;
 import utils.Vector2;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Protozoa extends Entity 
@@ -16,32 +18,33 @@ public class Protozoa extends Entity
 
 	private static final long serialVersionUID = 2314292760446370751L;
 	public transient int id = Simulation.RANDOM.nextInt();
-	private double totalConsumption = 0;
+	private float totalConsumption = 0;
 	
 	private ProtozoaGenome genome;
 	private Retina retina;
 	private final Brain brain;
 
-	private double shieldFactor = 1.3;
-	private final double attackFactor = 10;
-	private final double consumeFactor = 15;
+	private float shieldFactor = 1.3f;
+	private final float attackFactor = 10f;
+	private final float consumeFactor = 15f;
 
-	private double splitRadius = Double.MAX_VALUE; // No splitting by default.
+	private float splitRadius = Float.MAX_VALUE; // No splitting by default.
 
-	public Protozoa(ProtozoaGenome genome)
+	public Protozoa(ProtozoaGenome genome, Tank tank)
 	{
-		this(genome.brain(), genome.retina(), genome.getRadius());
+		this(genome.brain(), genome.retina(), genome.getRadius(), tank);
 		this.genome = genome;
 		setGrowthRate(genome.getGrowthRate());
 		splitRadius = genome.getSplitRadius();
 	}
 
-	public Protozoa() {
-		this(new ProtozoaGenome());
+	public Protozoa(Tank tank) {
+		this(new ProtozoaGenome(), tank);
 	}
 
-	public Protozoa(Brain brain, Retina retina, double radius)
+	public Protozoa(Brain brain, Retina retina, float radius, Tank tank)
 	{
+		super(tank);
 		setHealthyColour(new Color(
 			100 + Simulation.RANDOM.nextInt(20),
 			80 + Simulation.RANDOM.nextInt(50),
@@ -51,25 +54,25 @@ public class Protozoa extends Entity
 		this.brain = brain;
 		this.retina = retina;
 		setPos(new Vector2(0, 0));
-		double t = 2 * Math.PI * Simulation.RANDOM.nextDouble();
+		float t = (float) (2 * Math.PI * Simulation.RANDOM.nextDouble());
 		setVel(new Vector2(
-				0.1 * Math.cos(t),
-				0.1 * Math.sin(t)
+				(float) (0.1f * Math.cos(t)),
+				(float) (0.1f * Math.sin(t))
 		));
 		this.setRadius(radius);
-		setMaxThinkTime(0.2);
+		setMaxThinkTime(0.2f);
 	}
 
 	public void see(Entity e)
 	{
 		Vector2 dr = getPos().sub(e.getPos());
 		Vector2 dir = getDir();
-		double rx = dr.dot(dir);
-		double ry = dr.dot(dir.perp());
+		float rx = dr.dot(dir);
+		float ry = dr.dot(dir.perp());
 		
 		for (Retina.Cell cell : retina) 
 		{
-			double y = rx*Math.tan(cell.angle);
+			float y = (float) (rx*Math.tan(cell.angle));
 			boolean inView = Math.abs(y - ry) <= e.getRadius() && rx < 0;
 			
 			boolean isBlocked = false;
@@ -83,41 +86,39 @@ public class Protozoa extends Entity
 		}
 	}
 	
-	public void eat(Entity e, double delta)
+	public void eat(Entity e, float delta)
 	{
-		double consumed = consumeFactor * delta * e.getNutrition();
+		float consumed = consumeFactor * delta * e.getNutrition();
 		totalConsumption += consumed;
 		setHealth(getHealth() + consumed);
 		e.setHealth(e.getHealth() - consumed);
 	}
 
-	public void damage(double damage) {
+	public void damage(float damage) {
 		setHealth(getHealth() - damage);
 	}
 	
-	public Stream<Entity> fight(Protozoa p, double delta)
+	public void fight(Protozoa p, float delta)
 	{
-		double myAttack = 2*getHealth() + 0.3*getRadius() + 2*Simulation.RANDOM.nextDouble();
-		double theirAttack = 2*p.getHealth() + 0.3*p.getRadius() + 2*Simulation.RANDOM.nextDouble();
+		float myAttack = (float) (2*getHealth() + 0.3*getRadius() + 2*Simulation.RANDOM.nextDouble());
+		float theirAttack = (float) (2*p.getHealth() + 0.3*p.getRadius() + 2*Simulation.RANDOM.nextDouble());
 
 		if (myAttack > p.shieldFactor * theirAttack) {
 			damage(delta * attackFactor * (myAttack - p.shieldFactor * theirAttack));
 			if (isDead())
-				return handleDeath();
+				handleDeath();
 		}
 		else if (theirAttack > shieldFactor * myAttack) {
 			p.damage(delta * attackFactor * (theirAttack - shieldFactor * myAttack));
 			if (p.isDead())
-				return p.handleDeath();
+				p.handleDeath();
 		}
-
-		return Stream.empty();
 	}
 	
-	public void think(double delta)
+	public void think(float delta)
 	{
 		brain.tick(this);
-		rotate(brain.turn(this));
+		rotate(delta * 100 * brain.turn(this));
 		setSpeed(brain.speed(this));
 	}
 
@@ -125,23 +126,25 @@ public class Protozoa extends Entity
 		return getRadius() > splitRadius && getHealth() > Settings.minHealthToSplit;
 	}
 
-	private Protozoa createSplitChild(double r) {
-		double stuntingFactor = r / getRadius();
-		Protozoa child = genome.createChild();
+	private Protozoa createSplitChild(float r) {
+		float stuntingFactor = r / getRadius();
+		Protozoa child = genome.createChild(tank);
 		child.setRadius(stuntingFactor * child.getRadius());
 		return child;
 	}
 
-	public Stream<Entity> interact(Entity other, double delta) {
-		if (isDead())
-			return handleDeath();
+	public void interact(Entity other, float delta) {
+		if (isDead()) {
+			handleDeath();
+			return;
+		}
 
-		if (shouldSplit())
-			return super.burst(this::createSplitChild);
+		if (shouldSplit()) {
+			super.burst(this::createSplitChild);
+			return;
+		}
 
-		see(other);
-
-		Stream<Entity> newEntities = super.interact(other, delta);
+		super.interact(other, delta);
 
 		if (isTouching(other)) {
 
@@ -150,7 +153,7 @@ public class Protozoa extends Entity
 				Protozoa p = (Protozoa) other;
 
 				if (brain.wantToAttack(p))
-					return Streams.concat(newEntities, fight(p, delta));
+					fight(p, delta);
 
 //				else if (brain.wantToMateWith(p) && p.brain.wantToMateWith(this)) {
 //					// Add some negative consequences of mating?
@@ -162,8 +165,6 @@ public class Protozoa extends Entity
 				eat(other, delta);
 
 		}
-
-		return newEntities;
 	}
 
 	public void resetRetina() {
@@ -173,15 +174,15 @@ public class Protozoa extends Entity
 		}
 	}
 
-	private Stream<Entity> breakIntoPellets() {
-		return burst(MeatPellet::new);
+	private void breakIntoPellets() {
+		burst(r -> new MeatPellet(r, tank));
 	}
 
-	public Stream<Entity> handleDeath() {
+	public void handleDeath() {
 		if (!hasHandledDeath) {
-			return Streams.concat(super.handleDeath(), breakIntoPellets());
+			super.handleDeath();
+			breakIntoPellets();
 		}
-		return Stream.empty();
 	}
 
 	@Override
@@ -190,8 +191,8 @@ public class Protozoa extends Entity
 	}
 
 	@Override
-	public HashMap<String, Double> getStats() {
-		HashMap<String, Double> stats = super.getStats();
+	public HashMap<String, Float> getStats() {
+		HashMap<String, Float> stats = super.getStats();
 		stats.put("Fitness", getFitness());
 		stats.put("Growth Rate", Settings.statsDistanceScalar * getGrowthRate());
 		stats.put("Split Radius", Settings.statsDistanceScalar * splitRadius);
@@ -199,44 +200,47 @@ public class Protozoa extends Entity
 	}
 
 	@Override
-	public double getGrowthRate() {
-		double growthRate = super.getGrowthRate();
+	public float getGrowthRate() {
+		float growthRate = super.getGrowthRate();
 		if (getRadius() > splitRadius)
 			growthRate *= getHealth() * splitRadius / (5 * getRadius());
 		return growthRate;
 	}
 
-	public void age(double delta) {
-		double deathRate = getRadius() * getSpeed() * delta * 200;
+	public void age(float delta) {
+		float deathRate = getRadius() * getSpeed() * delta * 200;
 		setHealth(getHealth() * (1 - deathRate));
 	}
 
 
 	@Override
-	public Stream<Entity> update(double delta, Stream<Entity> entities)
+	public void update(float delta, Collection<Entity> entities)
 	{
 		age(delta);
 		if (isDead())
-			return handleDeath();
+			handleDeath();
+
 
 		resetRetina();
+		entities.forEach(this::see);
+
 		think(delta);
 
-		return super.update(delta, entities);
+  		super.update(delta, entities);
 	}
 	
 	public void render(Graphics g)
 	{
 		super.render(g);
 		
-		double r0 = 1;
-		double r1 = 0.8;
+		float r0 = 1;
+		float r1 = 0.8f;
 		for (Retina.Cell cell : retina)
 		{
-			double x = Math.cos(cell.angle + getVel().angle());
-			double y = Math.sin(cell.angle + getVel().angle());
-			double len = Math.sqrt(x*x + y*y);
-			double r2 = r1;// + 0.5 * (1 - r1) * (1 + Math.cos(2*Math.PI*cell.angle));
+			float x = (float) Math.cos(cell.angle + getVel().angle());
+			float y = (float) Math.sin(cell.angle + getVel().angle());
+			float len = (float) Math.sqrt(x*x + y*y);
+			float r2 = r1;// + 0.5 * (1 - r1) * (1 + Math.cos(2*Math.PI*cell.angle));
 			g.setColor(cell.colour);
 			g.drawLine(
 					(int) (getPos().getX() + (x * getRadius() * r0) / len),
@@ -248,7 +252,7 @@ public class Protozoa extends Entity
 	}
 	
 	@Override
-	public double getNutrition() {
+	public float getNutrition() {
 		return 20 * getHealth() * getRadius();
 	}
 
@@ -265,7 +269,7 @@ public class Protozoa extends Entity
 		this.retina = retina;
 	}
 
-	public double getFitness() {
+	public float getFitness() {
 		return totalConsumption;
 	}
 
@@ -273,11 +277,11 @@ public class Protozoa extends Entity
 		return genome;
 	}
 
-	public double getShieldFactor() {
+	public float getShieldFactor() {
 		return shieldFactor;
 	}
 
-	public void setShieldFactor(double shieldFactor) {
+	public void setShieldFactor(float shieldFactor) {
 		this.shieldFactor = shieldFactor;
 	}
 

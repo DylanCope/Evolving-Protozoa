@@ -13,13 +13,13 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 
 	public class Cell implements Serializable {
 		private static final long serialVersionUID = 1L;
-		public double angle;
+		public float angle;
 		public Entity entity;
 		public Color colour = new Color(10, 10, 10);
 	}
 	
 	private Collection<Cell> cells;
-	private double fov = Math.toRadians(90);
+	private float fov = (float) Math.toRadians(90);
 
 	public Retina()
 	{
@@ -29,7 +29,7 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 	public Retina(int numCells)
 	{
 		int n = numCells;
-		cells = new ArrayList<Cell>();
+		cells = new ArrayList<>();
 		for (int i = 0; i < n; i++) {
 			Cell cell = new Cell();
 			cell.angle  = fov * (n - 2*i) / (2*n);
@@ -42,11 +42,11 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 		return cells.iterator();
 	}
 
-	public double getCellAngle() {
-		return fov / (double) cells.size();
+	public float getCellAngle() {
+		return fov / (float) cells.size();
 	}
 	
-	public double getFov() {
+	public float getFov() {
 		return fov;
 	}
 

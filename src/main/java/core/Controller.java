@@ -28,7 +28,7 @@ public class Controller
 //		if (input.getKey(KeyEvent.VK_DOWN))
 //			renderer.setZoom(renderer.getZoom() / 2.0);
 //		else
-		renderer.setZoom(1 - input.getMouseWheelRotation() / 7.0);
+		renderer.setZoom(1 - input.getMouseWheelRotation() / 7.0f);
 //		
 		if (input.isLeftMouseJustPressed()) 
 		{

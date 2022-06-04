@@ -1,7 +1,7 @@
 package core;
 
 import biology.Entity;
-import com.google.common.collect.Iterators;
+import org.checkerframework.checker.units.qual.A;
 import utils.Vector2;
 
 import java.io.Serializable;
@@ -13,20 +13,20 @@ import java.util.stream.Stream;
 
 public class ChunkManager implements Serializable {
 
-    private final double chunkSize;
-    private final double xMin;
-    private final double yMin;
-    private final double xMax;
-    private final double yMax;
+    private final float chunkSize;
+    private final float xMin;
+    private final float yMin;
+    private final float xMax;
+    private final float yMax;
     private final int nYChunks;
 
     private final int nXChunks;
 
     private final Chunk[][] chunks;
 
-    public ChunkManager(double xMin, double xMax,
-                        double yMin, double yMax,
-                        double chunkSize) {
+    public ChunkManager(float xMin, float xMax,
+                        float yMin, float yMax,
+                        float chunkSize) {
         this.xMin = xMin;
         this.xMax = xMax;
         this.yMin = yMin;
@@ -44,18 +44,18 @@ public class ChunkManager implements Serializable {
     }
 
     public Vector2 toChunkCoords(Vector2 pos) {
-        double x = pos.getX();
-        double y = pos.getY();
+        float x = pos.getX();
+        float y = pos.getY();
 
-        double chunkX = 1 + (x - xMin) / chunkSize;
-        double chunkY = 1 + (y - yMin) / chunkSize;
+        float chunkX = 1 + (x - xMin) / chunkSize;
+        float chunkY = 1 + (y - yMin) / chunkSize;
 
         return new Vector2(chunkX, chunkY);
     }
 
     public Vector2 toTankCoords(Vector2 chunkCoords) {
-        double x = (chunkCoords.getX() - 1) * chunkSize + xMin;
-        double y = (chunkCoords.getY() - 1) * chunkSize + yMin;
+        float x = (chunkCoords.getX() - 1) * chunkSize + xMin;
+        float y = (chunkCoords.getY() - 1) * chunkSize + yMin;
         return new Vector2(x, y);
     }
 
@@ -104,25 +104,34 @@ public class ChunkManager implements Serializable {
         return nearbyChunks;
     }
 
-    public Stream<Entity> getNearbyEntities(Entity e, int n) {
+    public Collection<Entity> getNearbyEntities(Entity e, int n) {
         Vector2 chunkCoords = toChunkCoords(e.getPos());
         List<Chunk> nearbyChunks = getNearbyChunks(chunkCoords, n);
-        Stream<Stream<Entity>> entityStream = nearbyChunks.stream().map(Chunk::getEntities);
-        return entityStream.flatMap(Function.identity()).filter(other -> !e.equals(other));
+        List<Entity> nearbyEntities = new ArrayList<>();
+        for (Chunk chunk : nearbyChunks)
+            for (Entity other : chunk.getEntities())
+                if (other != e)
+                    nearbyEntities.add(other);
+        return nearbyEntities;
     }
 
-    public Stream<Entity> getNearbyEntities(Entity e) {
+    public Collection<Entity> getNearbyEntities(Entity e) {
         return getNearbyEntities(e, 1);
     }
 
-    public Stream<Chunk> getAllChunks() {
-        return Arrays.stream(chunks).flatMap(Arrays::stream);
+    public Collection<Chunk> getAllChunks() {
+        List<Chunk> allChunks = new ArrayList<>();
+        for (Chunk[] chunkRow : chunks)
+            Collections.addAll(allChunks, chunkRow);
+        return allChunks;
     }
 
-    public Stream<Entity> getAllEntities() {
-        Stream<Chunk> chunkStream = getAllChunks();
-        Stream<Stream<Entity>> entityStream = chunkStream.map(Chunk::getEntities);
-        return entityStream.flatMap(Function.identity());
+    public Collection<Entity> getAllEntities() {
+        Collection<Chunk> chunkStream = getAllChunks();
+        List<Entity> allEntities = new ArrayList<>();
+        for (Chunk chunk : chunkStream)
+            allEntities.addAll(chunk.getEntities());
+        return allEntities;
     }
 
     public void forEachEntity(Consumer<Entity> function) {
@@ -133,23 +142,23 @@ public class ChunkManager implements Serializable {
         getAllChunks().forEach(Chunk::update);
     }
 
-    public double getChunkSize() {
+    public float getChunkSize() {
         return chunkSize;
     }
 
-    public double getXMin() {
+    public float getXMin() {
         return xMin;
     }
 
-    public double getYMin() {
+    public float getYMin() {
         return yMin;
     }
 
-    public double getXMax() {
+    public float getXMax() {
         return xMax;
     }
 
-    public double getYMax() {
+    public float getYMax() {
         return yMax;
     }
 

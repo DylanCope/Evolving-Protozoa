@@ -9,8 +9,8 @@ import java.util.List;
 public class NNBrain implements Brain {
 
     public final NeuralNetwork network;
-    private List<Double> outputs;
-    private final double maxTurn = Math.toRadians(15);
+    private List<Float> outputs;
+    private final float maxTurn = (float) Math.toRadians(45);
 
     public NNBrain(NeuralNetwork network) {
         this.network = network;
@@ -20,28 +20,32 @@ public class NNBrain implements Brain {
     @Override
     public void tick(Protozoa p)
     {
-        ArrayList<Double> inputs = new ArrayList<>();
+        ArrayList<Float> inputs = new ArrayList<>();
         for (Retina.Cell cell : p.getRetina()) {
-            inputs.add(-1 + 2 * cell.colour.getRed() / 255.0);
-            inputs.add(-1 + 2 * cell.colour.getGreen() / 255.0);
-            inputs.add(-1 + 2 * cell.colour.getBlue() / 255.0);
+            inputs.add(-1 + 2 * cell.colour.getRed() / 255f);
+            inputs.add(-1 + 2 * cell.colour.getGreen() / 255f);
+            inputs.add(-1 + 2 * cell.colour.getBlue() / 255f);
         }
+        inputs.add(p.getHealth());
         network.setInput(inputs);
         network.tick();
         outputs = network.outputs();
     }
 
     @Override
-    public double turn(Protozoa p)
+    public float turn(Protozoa p)
     {
-        double turn = outputs.get(0);
+        float turn = outputs.get(0);
         return turn * maxTurn;
     }
 
     @Override
-    public double speed(Protozoa p)
+    public float speed(Protozoa p)
     {
-        return Math.min(Settings.maxVel * outputs.get(1), Settings.maxVel);
+        return Math.min(
+                Settings.maxVel * outputs.get(1),
+                Settings.maxVel
+        );
     }
 
     @Override
@@ -55,7 +59,7 @@ public class NNBrain implements Brain {
     }
 
     @Override
-    public double energyConsumption() {
+    public float energyConsumption() {
         return 0;
     }
 }

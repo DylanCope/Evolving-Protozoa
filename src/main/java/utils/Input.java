@@ -1,19 +1,9 @@
 package utils;
 
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
+import javax.swing.*;
+import java.awt.event.*;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class Input implements KeyListener, FocusListener,
 				MouseListener, MouseMotionListener, MouseWheelListener 
@@ -25,6 +15,7 @@ public class Input implements KeyListener, FocusListener,
 	private boolean[] mouseJustDown = new boolean[4];
 
 	private final HashMap<Integer, Runnable> onPressHandlers = new HashMap<>();
+	public Runnable onLeftMouseRelease;
 
 	public void registerOnPressHandler(int key, Runnable handler) {
 		onPressHandlers.put(key, handler);
@@ -73,15 +64,16 @@ public class Input implements KeyListener, FocusListener,
 
 	@Override
 	public void mouseDragged(MouseEvent event) {
-		Vector2 pos = new Vector2(event.getX(), event.getY());
-		mouseDelta = pos.sub(position);
-		position = pos;
+		if (SwingUtilities.isLeftMouseButton(event)) {
+			Vector2 newPosition = new Vector2(event.getX(), event.getY());
+			mouseDelta = newPosition.sub(position);
+		} else {
+			mouseDelta = new Vector2(0, 0);
+		}
 	}
 
 	@Override
-	public void mouseMoved(MouseEvent event) {
-		position = new Vector2(event.getX(), event.getY());
-	}
+	public void mouseMoved(MouseEvent e) {}
 
 	@Override
 	public void mouseClicked(MouseEvent event) {
@@ -102,6 +94,9 @@ public class Input implements KeyListener, FocusListener,
 	public void mousePressed(MouseEvent event) {
 		int button = event.getButton();
 
+		if (SwingUtilities.isLeftMouseButton(event))
+			position = new Vector2(event.getX(), event.getY());
+
 		if (0 < button && button < mouseButtons.length)
 			mouseButtons[button] = true;
 	}
@@ -110,6 +105,12 @@ public class Input implements KeyListener, FocusListener,
 	public void mouseReleased(MouseEvent event) {
 		
 		int button = event.getButton();
+
+		if (SwingUtilities.isLeftMouseButton(event)) {
+			mouseDelta = new Vector2(0, 0);
+			if (onLeftMouseRelease != null)
+				onLeftMouseRelease.run();
+		}
 		
 		if (0 < button && button < mouseButtons.length)
 			mouseButtons[button] = false;

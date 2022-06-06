@@ -35,6 +35,8 @@ public class Window extends Canvas implements Runnable, ActionListener
 		width = (int) d.getWidth();
 		height = (int) d.getHeight();
 		this.simulation = simulation;
+		input = new Input();
+
 		renderer = new Renderer(simulation, this);
 
 		frame = new JFrame(title);
@@ -49,8 +51,7 @@ public class Window extends Canvas implements Runnable, ActionListener
 		frame.setLocationRelativeTo(null);
 		frame.add(renderer);
 		frame.setVisible(true);
-		
-		input = new Input();
+
 		controller = new Controller(input, simulation, renderer);
 		
 		renderer.addKeyListener(input);

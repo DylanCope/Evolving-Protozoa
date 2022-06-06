@@ -27,7 +27,7 @@ public class Renderer extends Canvas
 	float time = 0;
 	private final Vector2 tankRenderCoords;
 	private final float tankRenderRadius;
-	private Vector2 pan;
+	private Vector2 pan, panPosTemp;
 	private float zoom;
 	private float targetZoom;
 	private final float initialZoom = 2;
@@ -44,10 +44,12 @@ public class Renderer extends Canvas
 	{
 		this.simulation = simulation;
 		this.window = window;
+		window.getInput().onLeftMouseRelease = this::updatePanTemp;
 		
-		tankRenderRadius = window.getHeight() / 2.0f;
+		tankRenderRadius = window.getHeight() / 2.0f / simulation.getTank().getRadius();
 		tankRenderCoords = new Vector2(window.getWidth()*0.5f, window.getHeight()*0.5f);
 		pan = new Vector2(0, 0);
+		panPosTemp = pan;
 
 		zoom = 1;
 		targetZoom = 1;
@@ -346,17 +348,17 @@ public class Renderer extends Canvas
 	
 	public Vector2 toRenderSpace(Vector2 v)
 	{
-		Vector2 x;
 		if (track == null)
-			x = v;
+			return v.rotate(rotate)
+					.add(pan.mul(1 / tankRenderRadius))
+					.mul(tankRenderRadius * zoom)
+					.add(tankRenderCoords);
 		else {
-			x = v.sub(track.getPos());
+			return v.sub(track.getPos())
+					.rotate(rotate)
+					.mul(tankRenderRadius * zoom)
+					.add(tankRenderCoords);
 		}
-		return x.rotate(rotate)
-				.mul(tankRenderRadius)
-				.sub(pan)
-				.mul(zoom)
-				.add(tankRenderCoords);
 	}
 	
 	public float toRenderSpace(float s)
@@ -374,9 +376,12 @@ public class Renderer extends Canvas
 			targetZoom = 20;
 	}
 
-	public void pan(Vector2 delta) {
-		if (track == null)
-			pan = pan.add(delta.mul(1/zoom));
+	public void setPan(Vector2 delta) {
+		pan = panPosTemp.add(delta);
+	}
+
+	public void updatePanTemp() {
+		panPosTemp = pan;
 	}
 	
 	public void track(Entity e) {

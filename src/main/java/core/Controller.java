@@ -51,10 +51,8 @@ public class Controller
 			if (!track)
 				renderer.track(null);
 		}
-		
-		if (input.isLeftMousePressed()) 
-		{
-			renderer.pan(input.getMouseDelta().mul(-2));
-		}
+
+		renderer.setPan(input.getMouseDelta());
+
 	}
 }

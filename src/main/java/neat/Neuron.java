@@ -38,34 +38,30 @@ public class Neuron implements Comparable<Neuron>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private List<Neuron> inputs;
-    private List<Float> weights;
+    private final Neuron[] inputs;
+    private final float[] weights;
     private Type type;
-    private int id;
+    private final int id;
     private float state = 0;
     private float nextState = 0;
     private float learningRate = 0;
     private Activation activation = Activation.TANH;
+    private int depth = 0;
 
-    public Neuron(int id, Type type, Activation activation)
-    {
-        this(id, new ArrayList<>(), new ArrayList<>());
-        this.type = type;
-        this.activation = activation;
-    }
-
-    public Neuron(int id, List<Neuron> inputs, List<Float> weights)
+    public Neuron(int id, Neuron[] inputs, float[] weights, Type type, Activation activation)
     {
         this.id = id;
         this.inputs = inputs;
         this.weights = weights;
+        this.type = type;
+        this.activation = activation;
     }
 
     void tick()
     {
         nextState = 0.0f;
-        for (int i = 0; i < inputs.size(); i++)
-            nextState += inputs.get(i).getState() * weights.get(i);
+        for (int i = 0; i < inputs.length; i++)
+            nextState += inputs[i].getState() * weights[i];
         nextState = activation.apply(nextState);
     }
 
@@ -99,26 +95,11 @@ public class Neuron implements Comparable<Neuron>, Serializable {
         return this;
     }
 
-    public void addInput(Neuron in, Float weight) {
-        inputs.add(in);
-        weights.add(weight);
-    }
-
-    public Neuron setInputs(List<Neuron> inputs) {
-        this.inputs = inputs;
-        return this;
-    }
-
-    public List<Neuron> getInputs() {
+    public Neuron[] getInputs() {
         return inputs;
     }
 
-    public Neuron setWeights(List<Float> weights) {
-        this.weights = weights;
-        return this;
-    }
-
-    public List<Float> getWeights() {
+    public float[] getWeights() {
         return weights;
     }
 
@@ -147,10 +128,20 @@ public class Neuron implements Comparable<Neuron>, Serializable {
     @Override
     public String toString()
     {
-        String connections = String.format("[%s]",
-                Streams.zip(inputs.stream(), weights.stream(),
-                        (i, w) -> String.format("(%d, %.1f)", i.getId(), w))
-                        .collect(Collectors.joining(", ")));
-        return String.format("id:%d, state:%.1f, inputs:%s", id, state, connections);
+        StringBuilder s = new StringBuilder(String.format("id:%d, state:%.1f", id, state));
+        s.append(", connections: [");
+        for (int i = 0; i < weights.length; i++)
+            s.append(String.format("(%d, %.1f)", i, weights[i]));
+        s.append("]");
+        return s.toString();
     }
+
+    public void setDepth(int depth) {
+        this.depth = depth;
+    }
+
+    public int getDepth() {
+        return depth;
+    }
+
 }

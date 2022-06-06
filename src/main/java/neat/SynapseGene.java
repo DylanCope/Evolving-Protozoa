@@ -8,6 +8,8 @@ import java.io.Serializable;
 public class SynapseGene implements Comparable<SynapseGene>, Serializable
 {
     private int id;
+
+    private static int globalInnovation = 0;
     private int innovation;
     private NeuronGene in, out;
     private float weight;
@@ -18,7 +20,7 @@ public class SynapseGene implements Comparable<SynapseGene>, Serializable
         this.out = out;
         this.weight = (float) (2*Simulation.RANDOM.nextDouble() - 1);
         disabled = false;
-        innovation = 0;
+        innovation = globalInnovation++;
     }
 
     @Override

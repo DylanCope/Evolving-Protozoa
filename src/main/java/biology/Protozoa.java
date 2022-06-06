@@ -1,18 +1,13 @@
 package biology;
 
-import com.google.common.collect.Streams;
 import core.Settings;
 import core.Simulation;
 import core.Tank;
 import utils.Vector2;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Protozoa extends Entity 
 {
@@ -27,13 +22,13 @@ public class Protozoa extends Entity
 
 	private float shieldFactor = 1.3f;
 	private final float attackFactor = 10f;
-	private final float consumeFactor = 15f;
+	private final float consumeFactor = 25f;
 
 	private float splitRadius = Float.MAX_VALUE; // No splitting by default.
 
 	public Protozoa(ProtozoaGenome genome, Tank tank)
 	{
-		this(genome.brain(), genome.retina(), genome.getRadius(), tank);
+		this(genome.brain(), genome.retina(), genome.getRadius(), genome.getColour(), tank);
 		this.genome = genome;
 		setGrowthRate(genome.getGrowthRate());
 		splitRadius = genome.getSplitRadius();
@@ -43,14 +38,10 @@ public class Protozoa extends Entity
 		this(new ProtozoaGenome(), tank);
 	}
 
-	public Protozoa(Brain brain, Retina retina, float radius, Tank tank)
+	public Protozoa(Brain brain, Retina retina, float radius, Color healthyColor, Tank tank)
 	{
 		super(tank);
-		setHealthyColour(new Color(
-			100 + Simulation.RANDOM.nextInt(20),
-			80 + Simulation.RANDOM.nextInt(50),
-			150  + Simulation.RANDOM.nextInt(100)
-		));
+		setHealthyColour(healthyColor);
 
 		this.brain = brain;
 		this.retina = retina;
@@ -207,6 +198,8 @@ public class Protozoa extends Entity
 		stats.put("Fitness", getFitness());
 		stats.put("Growth Rate", Settings.statsDistanceScalar * getGrowthRate());
 		stats.put("Split Radius", Settings.statsDistanceScalar * splitRadius);
+		if (genome != null)
+			stats.put("Mutations", (float) genome.getNumMutations());
 		return stats;
 	}
 

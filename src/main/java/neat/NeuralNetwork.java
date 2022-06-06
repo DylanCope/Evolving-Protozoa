@@ -3,28 +3,41 @@ package neat;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class NeuralNetwork implements Serializable
 {
     private static final long serialVersionUID = 1L;
 
-    private final List<Neuron> outputNeurons;
-    private final List<Neuron> inputNeurons;
-    private final Collection<Neuron> neurons;
+    private final Neuron[] outputNeurons;
+    private final Neuron[] inputNeurons;
+    private final float[] outputs;
+    private final Neuron[] neurons;
     private final int depth;
+    private final int nInputs;
 
-    public NeuralNetwork(Collection<Neuron> neurons) {
+    public NeuralNetwork(Neuron[] neurons, int nInputs, int nOutputs) {
         this.neurons = neurons;
+        this.nInputs = nInputs;
 
-        inputNeurons = neurons.stream()
-                .filter(n -> n.getType().equals(Neuron.Type.SENSOR))
-                .collect(Collectors.toList());
-        inputNeurons.sort(Comparator.comparingInt(Neuron::getId));
+        inputNeurons = new Neuron[nInputs];
+        int i = 0;
+        for (Neuron neuron : neurons)
+            if (neuron.getType().equals(Neuron.Type.SENSOR)) {
+                inputNeurons[i] = neuron;
+                i++;
+            }
 
-        outputNeurons = neurons.stream()
-                .filter(n -> n.getType().equals(Neuron.Type.OUTPUT))
-                .collect(Collectors.toList());
-        outputNeurons.sort(Comparator.comparingInt(Neuron::getId));
+        outputNeurons = new Neuron[nOutputs];
+        i = 0;
+        for (Neuron neuron : neurons)
+            if (neuron.getType().equals(Neuron.Type.OUTPUT)) {
+                outputNeurons[i] = neuron;
+                i++;
+            }
+
+        outputs = new float[nOutputs];
+        Arrays.fill(outputs, 0f);
 
         depth = calculateDepth();
     }
@@ -34,24 +47,27 @@ public class NeuralNetwork implements Serializable
     }
 
     private int calculateDepth() {
-        return calculateDepth(0, outputNeurons);
+        boolean[] visited = new boolean[neurons.length];
+        Arrays.fill(visited, false);
+        return calculateDepth(0, outputNeurons, visited);
     }
 
-    private int calculateDepth(int depth, Collection<Neuron> explore) {
+    private int calculateDepth(int depth, Neuron[] explore, boolean[] visited) {
         int maxDepth = depth;
-        for (Neuron n : explore)
-            maxDepth = Math.max(maxDepth, calculateDepth(depth + 1, n.getInputs()));
+        for (Neuron n : explore) {
+            if (visited[n.getId()] | n.getType().equals(Neuron.Type.SENSOR))
+                continue;
+            visited[n.getId()] = true;
+            maxDepth = Math.max(maxDepth, calculateDepth(depth + 1, n.getInputs(), visited));
+            n.setDepth(maxDepth);
+        }
+
         return maxDepth;
     }
 
-    public void setInput(Float ... values) {
-        setInput(Arrays.asList(values));
-    }
-
-    public void setInput(List<Float> inputValues)
-    {
-        for (int i = 0; i < inputValues.size(); i++)
-            inputNeurons.get(i).setState(inputValues.get(i));
+    public void setInput(float ... values) {
+        for (int i = 0; i < values.length; i++)
+            inputNeurons[i].setState(values[i]);
     }
 
     public void tick()
@@ -60,19 +76,22 @@ public class NeuralNetwork implements Serializable
         for (Neuron n : neurons) n.update();
     }
 
-    public List<Float> outputs()
+    public float[] outputs()
     {
-        return outputNeurons.stream()
-                .map(Neuron::getState)
-                .collect(Collectors.toList());
+        for (int i = 0; i < outputNeurons.length; i++)
+            outputs[i] = outputNeurons[i].getState();
+        return outputs;
     }
 
     @Override
     public String toString()
     {
-        return neurons.stream()
-                .sorted()
+        return Stream.of(neurons)
                 .map(Neuron::toString)
                 .collect(Collectors.joining("\n"));
+    }
+
+    public int getInputSize() {
+        return nInputs;
     }
 }

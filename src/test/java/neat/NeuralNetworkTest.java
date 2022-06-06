@@ -41,7 +41,7 @@ public class NeuralNetworkTest
     public void setInput()
     {
         NeuralNetwork net = simpleFullyConnected();
-        net.setInput(-5.0, 4.0);
+        net.setInput(-5.0f, 4.0f);
         assertEquals(
                 "id:0, state:-5.0, inputs:[]\n" +
                 "id:1, state:4.0, inputs:[]\n" +
@@ -55,7 +55,7 @@ public class NeuralNetworkTest
     @Test
     public void tick() {
         NeuralNetwork net = simpleFullyConnected();
-        net.setInput(-5.0, 4.0);
+        net.setInput(-5.0f, 4.0f);
         net.tick();
         assertEquals(
                 "id:0, state:0.0, inputs:[]\n" +
@@ -71,10 +71,10 @@ public class NeuralNetworkTest
     public void outputs() throws Exception
     {
         NeuralNetwork net = simpleFullyConnected();
-        net.setInput(-5.0, 4.0);
+        net.setInput(-5.0f, 4.0f);
         net.tick(); net.tick();
         double expectedOutput = 195.25;
-        double actualOutput = net.outputs().get(0);
+        double actualOutput = net.outputs()[0];
         assertEquals(expectedOutput, actualOutput, 1e-6);
     }
 }

@@ -46,7 +46,7 @@ public class Renderer extends Canvas
 		this.window = window;
 		window.getInput().onLeftMouseRelease = this::updatePanTemp;
 		
-		tankRenderRadius = window.getHeight() / 2.0f / simulation.getTank().getRadius();
+		tankRenderRadius = window.getHeight() / 2.0f;
 		tankRenderCoords = new Vector2(window.getWidth()*0.5f, window.getHeight()*0.5f);
 		pan = new Vector2(0, 0);
 		panPosTemp = pan;
@@ -54,7 +54,7 @@ public class Renderer extends Canvas
 		zoom = 1;
 		targetZoom = 1;
 		
-		ui = new UI(window, simulation);
+		ui = new UI(window, simulation, this);
 		
 		requestFocus();
 		setFocusable(true);
@@ -289,7 +289,6 @@ public class Renderer extends Canvas
 	
 	public void background(Graphics2D graphics)
 	{
-		zoom = targetZoom;
 		time += 0.1;
 		Color backgroundColour = new Color(
 				30 + (int)(5 *Math.cos(time/100.0)),
@@ -326,12 +325,13 @@ public class Renderer extends Canvas
 		Graphics2D graphics = (Graphics2D) bs.getDrawGraphics();
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+		zoom = targetZoom;
 		synchronized (simulation.getTank()) {
 			background(graphics);
 			entities(graphics, simulation.getTank());
 			maskTank(graphics,
 					tankRenderCoords,
-					getTracked() != null ? 3*tankRenderRadius/4 : tankRenderRadius,
+					getTracked() != null ? getTrackingScopeRadius() : tankRenderRadius,
 					simulation.inDebugMode() ? 150 : 200);
 
 			maskTank(graphics,
@@ -339,23 +339,27 @@ public class Renderer extends Canvas
 					tankRenderRadius*zoom,
 					simulation.inDebugMode() ? 100 : 255);
 
-			ui.render(graphics, this);
+			ui.render(graphics);
 		}
 		
 		graphics.dispose();
 		bs.show();
 	}
+
+	public float getTrackingScopeRadius() {
+		return 3*tankRenderRadius/4;
+	}
 	
 	public Vector2 toRenderSpace(Vector2 v)
 	{
 		if (track == null)
-			return v.rotate(rotate)
+			return v.rotate(rotate).mul(1 / simulation.getTank().getRadius())
 					.add(pan.mul(1 / tankRenderRadius))
 					.mul(tankRenderRadius * zoom)
 					.add(tankRenderCoords);
 		else {
 			return v.sub(track.getPos())
-					.rotate(rotate)
+					.rotate(rotate).mul(1 / simulation.getTank().getRadius())
 					.mul(tankRenderRadius * zoom)
 					.add(tankRenderCoords);
 		}
@@ -363,7 +367,7 @@ public class Renderer extends Canvas
 	
 	public float toRenderSpace(float s)
 	{
-		return zoom * tankRenderRadius * s;
+		return zoom * tankRenderRadius * s / simulation.getTank().getRadius();
 	}
 
 	public void setZoom(float d) {

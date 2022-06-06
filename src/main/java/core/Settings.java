@@ -11,19 +11,19 @@ public final class Settings {
 
     // Tank settings
     public static final int numInitialProtozoa = 300;
-    public static final int numInitialPlantPellets = 600;
-    public static final float tankRadius = 1.0f;
+    public static final int numInitialPlantPellets = 1000;
+    public static final float tankRadius = 2.0f;
     public static final int numChunkBreaks = 20;
 
     // Protozoa settings
     public static final float minProtozoanBirthRadius = 0.01f;
-    public static final float maxProtozoanBirthRadius = 0.02f;
-    public static final int defaultRetinaSize = 8;
+    public static final float maxProtozoanBirthRadius = 0.015f;
+    public static final int defaultRetinaSize = 4;
     public static final float minHealthToSplit = 0.8f;
     public static final float maxProtozoanSplitRadius = 0.03f;
-    public static final float minProtozoanSplitRadius = 0.025f;
-    public static final float minProtozoanGrowthRate = 0.03f;
-    public static final float maxProtozoanGrowthRate = 0.06f;
+    public static final float minProtozoanSplitRadius = 0.02f;
+    public static final float minProtozoanGrowthRate = 0.1f;
+    public static final float maxProtozoanGrowthRate = 0.2f;
 
     public static final float globalMutationChance = 0.05f;
     public static final float protozoaInteractRange = 0.15f;
@@ -38,6 +38,8 @@ public final class Settings {
     public static final float plantGrowthRange = 0.02f;
     public static final float plantCrowdingGrowthDecay = 1.0f;
     public static final float plantCriticalCrowding = 4.0f;
+
+    public static final int maxPlants = 5000;
 
     // Stats
 

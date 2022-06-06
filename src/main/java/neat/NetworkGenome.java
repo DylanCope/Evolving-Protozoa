@@ -1,25 +1,22 @@
 package neat;
 
-import com.google.common.collect.Sets;
-import com.google.common.collect.Streams;
 import core.Settings;
 import core.Simulation;
 
 import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.Random;
 
 public class NetworkGenome implements Serializable
 {
-	private static int innovation = 0;
 
-	private Set<NeuronGene> neuronGenes = new TreeSet<>();
-	private Set<SynapseGene> synapseGenes = new TreeSet<>();
+	private NeuronGene[] neuronGenes;
+	private SynapseGene[][] synapseGenes;
 	private Random random = Simulation.RANDOM;
 	private float mutationChance = Settings.globalMutationChance;
 	private Neuron.Activation defaultActivation = Neuron.Activation.LINEAR;
 	private float fitness = 0.0f;
+	private int numMutations = 0, nSensors, nOutputs;
 
 	public NetworkGenome() {}
 
@@ -35,6 +32,9 @@ public class NetworkGenome implements Serializable
 		this.mutationChance = other.mutationChance;
 		this.defaultActivation = other.defaultActivation;
 		this.fitness = other.fitness;
+		this.numMutations = other.numMutations;
+		this.nSensors = other.nSensors;
+		this.nOutputs = other.nOutputs;
 	}
 
 	public NetworkGenome(int numInputs, int numOutputs)
@@ -44,74 +44,79 @@ public class NetworkGenome implements Serializable
 
 	public NetworkGenome(int numInputs, int numOutputs, Neuron.Activation defaultActivation)
 	{
+		this.nSensors = numInputs;
+		this.nOutputs = numOutputs;
+
+		neuronGenes = new NeuronGene[numInputs + numOutputs];
 		for (int i = 0; i < numInputs; i++)
-			neuronGenes.add(new NeuronGene(i, Neuron.Type.SENSOR, Neuron.Activation.LINEAR));
+			neuronGenes[i] = new NeuronGene(i, Neuron.Type.SENSOR, Neuron.Activation.LINEAR);
 
 		for (int i = numInputs; i < numInputs + numOutputs; i++)
-			neuronGenes.add(new NeuronGene(i, Neuron.Type.OUTPUT, defaultActivation));
+			neuronGenes[i] = new NeuronGene(i, Neuron.Type.OUTPUT, defaultActivation);
 
-		Set<List<NeuronGene>> neuronGenePairs = Sets.cartesianProduct(
-				neurons(Neuron.Type.SENSOR).collect(Collectors.toSet()),
-				neurons(Neuron.Type.OUTPUT).collect(Collectors.toSet())
+		synapseGenes = new SynapseGene[neuronGenes.length][neuronGenes.length];
+		for (int i = 0; i < numInputs; i++)
+			for (int j = 0; j < numOutputs; j++) {
+				NeuronGene in = neuronGenes[i];
+				NeuronGene out = neuronGenes[numInputs + j];
+				synapseGenes[in.getId()][out.getId()] = new SynapseGene(in, out);
+			}
+		this.defaultActivation = defaultActivation;
+
+//		mutationChance = 1f;
+//		for (int i = 0; i < 2; i++)
+//			mutate();
+	}
+
+	private void resizeSynapseMatrix() {
+		SynapseGene[][] newSynapseGenes = new SynapseGene[neuronGenes.length][neuronGenes.length];
+		for (int i = 0; i < synapseGenes.length; i++)
+			System.arraycopy(synapseGenes[i], 0, newSynapseGenes[i], 0, synapseGenes.length);
+		synapseGenes = newSynapseGenes;
+	}
+
+	private void createConnection(NeuronGene in, NeuronGene out) {
+
+		NeuronGene n = new NeuronGene(
+			neuronGenes.length, Neuron.Type.HIDDEN, defaultActivation
 		);
 
-		synapseGenes = neuronGenePairs.stream()
-				.map(pair -> new SynapseGene(pair.get(0), pair.get(1)))
-				.collect(Collectors.toSet());
+		neuronGenes = Arrays.copyOf(neuronGenes, neuronGenes.length + 1);
+		neuronGenes[neuronGenes.length - 1] = n;
+		resizeSynapseMatrix();
 
-		this.defaultActivation = defaultActivation;
+		SynapseGene inConnection = new SynapseGene(in, n);
+		SynapseGene outConnection = new SynapseGene(n, out);
+		synapseGenes[in.getId()][n.getId()] = inConnection;
+		synapseGenes[n.getId()][out.getId()] = outConnection;
+		synapseGenes[in.getId()][out.getId()].setDisabled(true);
 	}
 	
-	private Optional<SynapseGene> mutateSynapse(NeuronGene in, NeuronGene out)
-	{
+	private void mutateConnection(NeuronGene in, NeuronGene out) {
 		if (random.nextDouble() <= mutationChance) {
-			SynapseGene g = new SynapseGene(in, out);
-			g.setInnovation(innovation++);
-			return Optional.of(g);
-		}
-		return Optional.empty();
-	}
-	
-	private NetworkGenome mutateNeuron(NeuronGene in, NeuronGene out)
-	{
-		if (random.nextDouble() <= mutationChance)
-			if (random.nextBoolean())
-			{
-				NeuronGene n = new NeuronGene(
-					neuronGenes.size(), Neuron.Type.HIDDEN, defaultActivation
-				);
-				neuronGenes.add(n);
-				mutateSynapse(in, n).ifPresent(synapseGenes::add);
-				mutateSynapse(n, out).ifPresent(synapseGenes::add);;
+			numMutations++;
 
-				for (SynapseGene g : synapseGenes)
-					if (g.getIn().equals(in) && g.getOut().equals(out))
-						g.setDisabled(true);
+			SynapseGene g = synapseGenes[in.getId()][out.getId()];
+			if (g == null)
+				synapseGenes[in.getId()][out.getId()] = new SynapseGene(in, out);
+			else {
+				if (random.nextBoolean())
+					createConnection(in, out);
+				else
+					g.setWeight((float) (random.nextDouble()*2 - 1));
 			}
-			else
-				addSynapse(in.getId(), out.getId(), (float) (random.nextDouble()*2 - 1));
-
-		return this;
-	}
-	
-	private Stream<NeuronGene> neurons(Neuron.Type type)
-	{
-		return neuronGenes.stream().filter(n -> n.getType().equals(type));
+		}
 	}
 	
 	public NetworkGenome mutate()
 	{
-		Streams.zip(neurons(Neuron.Type.SENSOR), neurons(Neuron.Type.HIDDEN), this::mutateNeuron);
-		Streams.zip(neurons(Neuron.Type.SENSOR), neurons(Neuron.Type.OUTPUT), this::mutateNeuron);
-
-		Set<SynapseGene> newSynapseGenes = synapseGenes.stream()
-				.map(g -> mutateSynapse(g.getIn(), g.getOut()))
-				.filter(Optional::isPresent)
-				.map(Optional::get)
-				.collect(Collectors.toSet());
-
-		synapseGenes.addAll(newSynapseGenes);
-
+		for (int n = 0; n < 10; n++) {
+			int i = random.nextInt(neuronGenes.length);
+			int j = random.nextInt(neuronGenes.length);
+			if (neuronGenes[j].getType().equals(Neuron.Type.SENSOR))
+				continue;
+			mutateConnection(neuronGenes[i], neuronGenes[j]);
+		}
 		return this;
 	}
 	
@@ -119,22 +124,22 @@ public class NetworkGenome implements Serializable
 	{
 		NetworkGenome G = new NetworkGenome();
 
-		G.synapseGenes = new TreeSet<>();
-		
-		if (other.fitness > fitness) {
-			G.synapseGenes.addAll(other.synapseGenes);
-			G.synapseGenes.addAll(synapseGenes);
-		}
-		else {
-			G.synapseGenes.addAll(synapseGenes);
-			G.synapseGenes.addAll(other.synapseGenes);
-		}
-
-		G.neuronGenes = new HashSet<>();
-		for (SynapseGene s : G.synapseGenes) {
-			G.neuronGenes.add(s.getIn());
-			G.neuronGenes.add(s.getOut());
-		}
+//		G.synapseGenes = new TreeSet<>();
+//
+//		if (other.fitness > fitness) {
+//			G.synapseGenes.addAll(other.synapseGenes);
+//			G.synapseGenes.addAll(synapseGenes);
+//		}
+//		else {
+//			G.synapseGenes.addAll(synapseGenes);
+//			G.synapseGenes.addAll(other.synapseGenes);
+//		}
+//
+//		G.neuronGenes = new HashSet<>();
+//		for (SynapseGene s : G.synapseGenes) {
+//			G.neuronGenes.add(s.getIn());
+//			G.neuronGenes.add(s.getOut());
+//		}
 		
 		return G;
 	}
@@ -146,22 +151,40 @@ public class NetworkGenome implements Serializable
 
 	public NeuralNetwork phenotype()
 	{
-        Map<Integer, Neuron> neurons = neuronGenes.stream()
-                .collect(Collectors.toMap(
-                        NeuronGene::getId,
-                        gene -> new Neuron(gene.getId(), gene.getType(), gene.getActivation())
-                ));
+		int nNeurons = neuronGenes.length;
+		Neuron[] neurons = new Neuron[nNeurons];
 
-        for (SynapseGene gene : synapseGenes) {
-			if (gene.isDisabled())
-				continue;
+		for (NeuronGene g : neuronGenes) {
+			int nInputs = 0;
+			for (SynapseGene[] outGenes : synapseGenes) {
+				SynapseGene synapseGene = outGenes[g.getId()];
+				if (synapseGene != null && !synapseGene.isDisabled())
+					nInputs++;
+			}
 
-            Neuron postSynapticNeuron = neurons.get(gene.getOut().getId());
-            Neuron preSynapticNeuron = neurons.get(gene.getIn().getId());
-            postSynapticNeuron.addInput(preSynapticNeuron, gene.getWeight());
-        }
+			Neuron[] inputs = new Neuron[nInputs];
+			float[] weights = new float[nInputs];
 
-		return new NeuralNetwork(new ArrayList<>(neurons.values()));
+			neurons[g.getId()] = new Neuron(g.getId(), inputs, weights, g.getType(), g.getActivation());
+		}
+
+		for (NeuronGene g : neuronGenes) {
+
+			float[] weights = neurons[g.getId()].getWeights();
+			Neuron[] inputs = neurons[g.getId()].getInputs();
+
+			int i = 0;
+			for (SynapseGene[] outGenes : synapseGenes) {
+				SynapseGene synapseGene = outGenes[g.getId()];
+				if (synapseGene != null && !synapseGene.isDisabled()) {
+					weights[i] = synapseGene.getWeight();
+					inputs[i] = neurons[synapseGene.getIn().getId()];
+					i++;
+				}
+			}
+		}
+
+		return new NeuralNetwork(neurons, nSensors, nOutputs);
 	}
 
 	public float distance(NetworkGenome other)
@@ -173,46 +196,51 @@ public class NetworkGenome implements Serializable
 
 	public void addSynapse(int inID, int outID, float w)
 	{
-		NeuronGene inGene = null, outGene = null;
-		for (NeuronGene gene : neuronGenes)
-		{
-			if (gene.getId() == inID)
-				inGene = gene;
-			if (gene.getId() == outID)
-				outGene = gene;
-		}
-		if (inGene == null | outGene == null)
-			throw new RuntimeException("Could not find neuron genes to initialise synapse...");
-
-		for (SynapseGene g : synapseGenes) {
-			if (g.getIn().getId() == inID && g.getOut().getId() == outID && !g.isDisabled()) {
-				g.setWeight(w);
-				return;
-			}
-		}
-
-		SynapseGene g = new SynapseGene(inGene, outGene);
-		g.setInnovation(innovation++);
-		g.setWeight(w);
-		synapseGenes.add(g);
+//		NeuronGene inGene = null, outGene = null;
+//		for (NeuronGene gene : neuronGenes)
+//		{
+//			if (gene.getId() == inID)
+//				inGene = gene;
+//			if (gene.getId() == outID)
+//				outGene = gene;
+//		}
+//		if (inGene == null | outGene == null)
+//			throw new RuntimeException("Could not find neuron genes to initialise synapse...");
+//
+//		for (SynapseGene g : synapseGenes) {
+//			if (g.getIn().getId() == inID && g.getOut().getId() == outID && !g.isDisabled()) {
+//				g.setWeight(w);
+//				return;
+//			}
+//		}
+//
+//		SynapseGene g = new SynapseGene(inGene, outGene);
+//		g.setInnovation(innovation++);
+//		g.setWeight(w);
+//		synapseGenes.add(g);
 
 	}
 
 	public String toString()
 	{
-		String str = "";
+		StringBuilder str = new StringBuilder();
 		for (NeuronGene gene : neuronGenes)
-			str += gene.toString() + "\n";
-		for (SynapseGene gene : synapseGenes)
-			str += gene.toString() + "\n";
-		return str;
+			str.append(gene.toString()).append("\n");
+		for (SynapseGene[] geneRow : synapseGenes)
+			for (SynapseGene gene : geneRow)
+				str.append(gene.toString()).append("\n");
+		return str.toString();
 	}
 
-	public Collection<SynapseGene> getSynapseGenes() {
+	public SynapseGene[][] getSynapseGenes() {
 		return synapseGenes;
 	}
 
-	public Collection<NeuronGene> getNeuronGenes() {
+	public NeuronGene[] getNeuronGenes() {
 		return neuronGenes;
+	}
+
+	public int getNumMutations() {
+		return numMutations;
 	}
 }

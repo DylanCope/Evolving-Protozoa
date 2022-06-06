@@ -30,7 +30,7 @@ public class NeuronTest {
     public void testSynapse() {
         Neuron preSynaptic = new Neuron(0, Collections.emptyList(), Collections.emptyList());
         Neuron postSynaptic = new Neuron(1, new ArrayList<>(), new ArrayList<>());
-        postSynaptic.addInput(preSynaptic, 5.0);
+        postSynaptic.addInput(preSynaptic, 5.0f);
         assertThat(postSynaptic.getInputs(), contains(preSynaptic));
         assertThat(postSynaptic.getWeights(), contains(closeTo(5.0, 1e-6)));
 

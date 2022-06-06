@@ -125,7 +125,20 @@ public class Simulation
 			} else {
 				update();
 			}
+
+			if (tank.numberOfProtozoa() <= 0) {
+				simulate = false;
+				System.out.println();
+				System.out.println("Finished simulation. All protozoa died.");
+				printStats();
+			}
 		}
+	}
+
+	public void printStats() {
+		tank.getStats().forEach(
+			(k, v) -> System.out.printf("%s: %.5f\n", k, v)
+		);
 	}
 
 	public void update()

@@ -50,9 +50,7 @@ public class REPL implements Runnable
                         Application.exit();
                         break;
                     case "stats":
-                        simulation.getTank().getStats().forEach(
-                            (k, v) -> System.out.printf("%s: %.5f\n", k, v)
-                        );
+                        simulation.printStats();
                         break;
                     case "settime":
                         setTimeDilation(args);

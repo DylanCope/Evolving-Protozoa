@@ -7,9 +7,8 @@ import neat.NetworkGenome;
 import neat.NeuronGene;
 import neat.SynapseGene;
 
+import java.awt.*;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -22,7 +21,9 @@ public class ProtozoaGenome implements Serializable
     private float radius;
     private float growthRate;
     private float splitSize;
+    private Color colour;
     private float mutationChance = Settings.globalMutationChance;
+    private int numMutations = 0;
 
     public static final int actionSpaceSize = 4;
     public static final int nonVisualSensorSize = 1;
@@ -30,10 +31,12 @@ public class ProtozoaGenome implements Serializable
     public ProtozoaGenome(ProtozoaGenome parentGenome) {
         retinaSize = parentGenome.retinaSize;
         radius = parentGenome.radius;
-        networkGenome = parentGenome.networkGenome;
+        networkGenome = new NetworkGenome(parentGenome.networkGenome);
         mutationChance = parentGenome.mutationChance;
         splitSize = parentGenome.splitSize;
         growthRate = parentGenome.growthRate;
+        colour = parentGenome.colour;
+        numMutations = parentGenome.numMutations;
     }
 
     public ProtozoaGenome()
@@ -42,6 +45,7 @@ public class ProtozoaGenome implements Serializable
         radius = randomProtozoanRadius();
         splitSize = randomSplitSize();
         growthRate = randomGrowthRate();
+        colour = randomProtozoaColour();
         int numInputs = 3 * retinaSize + nonVisualSensorSize;
         networkGenome = new NetworkGenome(numInputs, actionSpaceSize);
     }
@@ -50,6 +54,7 @@ public class ProtozoaGenome implements Serializable
                           float radius,
                           float growthRate,
                           float splitSize,
+                          Color colour,
                           NetworkGenome networkGenome)
     {
         this.retinaSize = retinaSize;
@@ -57,6 +62,7 @@ public class ProtozoaGenome implements Serializable
         this.networkGenome = networkGenome;
         this.growthRate = growthRate;
         this.splitSize = splitSize;
+        this.colour = colour;
     }
 
     private static float randomProtozoanRadius() {
@@ -78,8 +84,29 @@ public class ProtozoaGenome implements Serializable
         networkGenome.mutate();
         if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
             radius = randomProtozoanRadius();
+            numMutations++;
+        }
+        if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
+            growthRate = randomGrowthRate();
+            numMutations++;
+        }
+        if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
+            splitSize = randomSplitSize();
+            numMutations++;
+        }
+        if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
+            colour = randomProtozoaColour();
+            numMutations++;
         }
         return this;
+    }
+
+    public static Color randomProtozoaColour() {
+        return new Color(
+                80 + Simulation.RANDOM.nextInt(150),
+                80 + Simulation.RANDOM.nextInt(150),
+                80  + Simulation.RANDOM.nextInt(150)
+        );
     }
 
     public Brain brain()
@@ -117,8 +144,9 @@ public class ProtozoaGenome implements Serializable
         float childRadius = Simulation.RANDOM.nextBoolean() ? radius : other.radius;
         float childSplitSize = Simulation.RANDOM.nextBoolean() ? splitSize : other.splitSize;
         float childGrowthRate = Simulation.RANDOM.nextBoolean() ? growthRate : other.growthRate;
+        Color childColour = Simulation.RANDOM.nextBoolean() ? colour : other.colour;
         return Stream.of(new ProtozoaGenome(
-                childRetinaSize, childRadius, childGrowthRate, childSplitSize, childNetGenome
+                childRetinaSize, childRadius, childGrowthRate, childSplitSize, childColour, childNetGenome
         ));
     }
 
@@ -140,10 +168,19 @@ public class ProtozoaGenome implements Serializable
         s.append("radius=").append(radius).append(",");
         s.append("growthRate=").append(growthRate).append(",");
         s.append("splitSize=").append(splitSize).append(",");
-        for (SynapseGene gene : networkGenome.getSynapseGenes())
-            s.append(gene.toString()).append(",");
+        for (SynapseGene[] geneRow : networkGenome.getSynapseGenes())
+            for (SynapseGene gene : geneRow)
+                s.append(gene.toString()).append(",");
         for (NeuronGene gene : networkGenome.getNeuronGenes())
             s.append(gene.toString()).append(",");
         return s.toString();
+    }
+
+    public Color getColour() {
+        return colour;
+    }
+
+    public int getNumMutations() {
+        return numMutations + networkGenome.getNumMutations();
     }
 }

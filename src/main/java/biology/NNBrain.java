@@ -9,24 +9,27 @@ import java.util.List;
 public class NNBrain implements Brain {
 
     public final NeuralNetwork network;
-    private List<Float> outputs;
+    private float[] outputs;
+    private final float[] inputs;
     private final float maxTurn = (float) Math.toRadians(45);
 
     public NNBrain(NeuralNetwork network) {
         this.network = network;
         outputs = network.outputs();
+        inputs = new float[network.getInputSize()];
     }
 
     @Override
     public void tick(Protozoa p)
     {
-        ArrayList<Float> inputs = new ArrayList<>();
+        int i = 0;
         for (Retina.Cell cell : p.getRetina()) {
-            inputs.add(-1 + 2 * cell.colour.getRed() / 255f);
-            inputs.add(-1 + 2 * cell.colour.getGreen() / 255f);
-            inputs.add(-1 + 2 * cell.colour.getBlue() / 255f);
+            inputs[i++] = -1 + 2 * cell.colour.getRed() / 255f;
+            inputs[i++] = -1 + 2 * cell.colour.getGreen() / 255f;
+            inputs[i++] = -1 + 2 * cell.colour.getBlue() / 255f;
         }
-        inputs.add(p.getHealth());
+        inputs[i] = p.getHealth();
+
         network.setInput(inputs);
         network.tick();
         outputs = network.outputs();
@@ -35,7 +38,7 @@ public class NNBrain implements Brain {
     @Override
     public float turn(Protozoa p)
     {
-        float turn = outputs.get(0);
+        float turn = outputs[0];
         return turn * maxTurn;
     }
 
@@ -43,19 +46,19 @@ public class NNBrain implements Brain {
     public float speed(Protozoa p)
     {
         return Math.min(
-                Settings.maxVel * outputs.get(1),
+                Settings.maxVel * outputs[1],
                 Settings.maxVel
         );
     }
 
     @Override
     public boolean wantToAttack(Protozoa p) {
-        return outputs.get(2) > 0.5;
+        return outputs[2] > 0.5;
     }
 
     @Override
     public boolean wantToMateWith(Protozoa p) {
-        return outputs.get(3) > 0.5;
+        return outputs[3] > 0.5;
     }
 
     @Override

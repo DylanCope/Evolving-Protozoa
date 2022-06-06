@@ -3,9 +3,12 @@ package neat;
 import com.google.common.collect.Streams;
 import org.junit.Test;
 
+import java.sql.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -29,11 +32,9 @@ public class NetworkGenomeTest
         System.out.println(net);
         net.tick();
         System.out.println(net);
-        List<Float> expected = Arrays.asList(0.87f, 1.00f, 0.00f);
-        List<Float> actual = net.outputs();
-        Streams.zip(expected.stream(), actual.stream(), (e, a) -> {
-            assertEquals(e, a, 1e-6); return null;
-        });
+        float[] expected = new float[]{0.87f, 1.00f, 0.00f};
+        float[] actual = net.outputs();
+        assertArrayEquals(expected, actual, 1e-5f);
     }
 
     @Test

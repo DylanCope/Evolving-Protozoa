@@ -18,17 +18,19 @@ import biology.Protozoa;
 
 public class UI 
 {
-	private Window window;
-	private Simulation simulation;
-	private TextObject title;
-	private ArrayList<TextObject> info;
-	private ArrayList<TextObject> debugInfo;
-	private int infoTextSize;
+	private final Window window;
+	private final Simulation simulation;
+	private final Renderer renderer;
+	private final TextObject title;
+	private final ArrayList<TextObject> info;
+	private final ArrayList<TextObject> debugInfo;
+	private final int infoTextSize;
 
-	public UI(Window window, Simulation simulation)
+	public UI(Window window, Simulation simulation, Renderer renderer)
 	{
 		this.window = window;
 		this.simulation = simulation;
+		this.renderer = renderer;
 
 		title = new TextObject("Evolving Protozoa",
 				TextStyle.fontName,
@@ -45,7 +47,7 @@ public class UI
 		TextObject protozoaText = new TextObject("Number of protozoa: ", infoTextSize);
 		protozoaText.setColor(Color.WHITE.darker());
 
-		TextObject trackingFitness = new TextObject("", infoTextSize);
+		TextObject trackingFitness = new TextObject("Generation", infoTextSize);
 		trackingFitness.setColor(Color.WHITE.darker());
 
 
@@ -66,7 +68,7 @@ public class UI
 		return (1.1f*i + 3) * window.getHeight() / 20f;
 	}
 	
-	public void render(Graphics2D g, Renderer renderer)
+	public void render(Graphics2D g)
 	{
 		title.render(g);
 
@@ -81,6 +83,9 @@ public class UI
 		info.get(0).render(g);
 		info.get(1).setText("Number of protozoa: " + simulation.getTank().numberOfProtozoa());
 		info.get(1).render(g);
+		info.get(2).setText("Generation: " + simulation.getGeneration());
+		info.get(2).render(g);
+		lineNumber++;
 
 		Entity tracked = renderer.getTracked();
 		if (tracked != null) {
@@ -89,7 +94,6 @@ public class UI
 				tracked = renderer.getTracked();
 			}
 
-			lineNumber++;
 			TextObject statsTitle = new TextObject(
 					tracked.getPrettyName() + " Stats",
 					(int) (infoTextSize * 1.1),
@@ -127,7 +131,7 @@ public class UI
 
 	private void renderBrainNetwork(NeuralNetwork nn, Graphics2D g) {
 		int networkDepth = nn.getDepth();
-		int boxWidth = 2 * window.getWidth() / 10;
+		int boxWidth = (int) (window.getWidth() / 2.0 - 1.1 * renderer.getTrackingScopeRadius());
 		int boxHeight = 2 * window.getHeight() / 3;
 
 		int boxXStart = window.getWidth() - (int) (boxWidth * 1.05);
@@ -136,8 +140,8 @@ public class UI
 		if (simulation.inDebugMode()) {
 			g.setColor(Color.YELLOW.darker());
 			g.drawRect(boxXStart, boxYStart, boxWidth, boxHeight);
-			for (int yHeight = boxYStart; yHeight < boxYStart + boxHeight; yHeight += yHeight / networkDepth)
-				g.drawLine(boxXStart, yHeight, boxXStart + boxWidth, yHeight);
+			for (int y = boxYStart; y < boxYStart + boxHeight; y += boxHeight / networkDepth)
+				g.drawLine(boxXStart, y, boxXStart + boxWidth, y);
 		}
 
 		HashMap<Neuron, Vector2> neuronPositions = new HashMap<>();

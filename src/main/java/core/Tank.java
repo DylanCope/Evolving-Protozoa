@@ -101,6 +101,10 @@ public class Tank implements Iterable<Entity>, Serializable
 	}
 
 	public void add(Entity e) {
+		if (e instanceof PlantPellet &&
+				entityCounts.getOrDefault(PlantPellet.class, 0) >= Settings.maxPlants)
+			return;
+
 		totalEntitiesAdded++;
 		entitiesToAdd.add(e);
 

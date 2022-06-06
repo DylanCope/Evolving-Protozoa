@@ -51,8 +51,11 @@ public class Tank implements Iterable<Entity>, Serializable
 
 	public void updateEntity(Entity e, float delta) {
 
-		Collection<Entity> nearbyEntities = chunkManager.getNearbyEntities(e);
-		e.update(delta, nearbyEntities);
+		if (e instanceof Protozoa)
+			((Protozoa) e).handleInteractions(delta);
+
+		e.update(delta);
+		e.handleCollisions();
 
 		handleTankEdge(e);
 	}
@@ -63,12 +66,12 @@ public class Tank implements Iterable<Entity>, Serializable
 
 		entitiesToAdd.forEach(chunkManager::add);
 		entitiesToAdd.clear();
+		chunkManager.update();
 
 		Collection<Entity> entities = chunkManager.getAllEntities();
 		entities.forEach(e -> updateEntity(e, delta));
 		entities.forEach(this::handleDeadEntities);
 
-		chunkManager.update();
 	}
 
 	private void handleDeadEntities(Entity e) {
@@ -108,10 +111,6 @@ public class Tank implements Iterable<Entity>, Serializable
 			entityCounts.put(e.getClass(), 1);
 		else
 			entityCounts.put(e.getClass(), 1 + entityCounts.get(e.getClass()));
-	}
-	
-	public void render(Graphics g) {
-		chunkManager.forEachEntity(e -> e.render(g));
 	}
 
 	public Collection<Entity> getEntities() {

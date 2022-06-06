@@ -9,7 +9,8 @@ import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.image.BufferStrategy;
-import java.util.stream.Stream;
+import java.util.Collection;
+import java.util.Iterator;
 
 import utils.Utils;
 import utils.Vector2;
@@ -47,7 +48,7 @@ public class Renderer extends Canvas
 		tankRenderRadius = window.getHeight() / 2.0f;
 		tankRenderCoords = new Vector2(window.getWidth()*0.5f, window.getHeight()*0.5f);
 		pan = new Vector2(0, 0);
-		
+
 		zoom = 1;
 		targetZoom = 1;
 		
@@ -206,6 +207,43 @@ public class Renderer extends Canvas
 			else if (e instanceof Pellet)
 				pellet(g, (Pellet) e);
 		}
+
+		if (simulation.inDebugMode() && track != null) {
+			Iterator<Entity> collisionEntities = track.broadCollisionDetection(track.getRadius());
+			collisionEntities.forEachRemaining(e -> drawCollisionBounds(g, e, e.getRadius(), Color.RED.darker()));
+
+			if (track instanceof Protozoa) {
+				drawCollisionBounds(g, track, Settings.protozoaInteractRange, Color.WHITE.darker());
+				Iterator<Entity> interactEntities = track.broadCollisionDetection(Settings.protozoaInteractRange);
+				interactEntities.forEachRemaining(e -> drawCollisionBounds(g, e, 1.1f * e.getRadius(), Color.WHITE.darker()));
+			}
+		}
+	}
+
+	public void drawCollisionBounds(Graphics2D g, Entity e, float r, Color color) {
+		Vector2 pos = toRenderSpace(e.getPos());
+		r = toRenderSpace(r);
+
+		if (pos.getX() + r > window.getWidth())
+			return;
+		if (pos.getX() - r < 0)
+			return;
+		if (pos.getY() + r > window.getHeight())
+			return;
+		if (pos.getY() - r < 0)
+			return;
+
+		g.setColor(color);
+
+		Stroke s = g.getStroke();
+		g.setStroke(new BasicStroke((int) (0.7*zoom)));
+		g.drawOval(
+				(int)(pos.getX() - r),
+				(int)(pos.getY() - r),
+				(int)(2*r),
+				(int)(2*r));
+		g.setStroke(s);
+
 	}
 	
 	public void maskTank(Graphics g, Vector2 coords, float r, int alpha)
@@ -263,9 +301,10 @@ public class Renderer extends Canvas
 			graphics.setColor(Color.YELLOW.darker());
 			ChunkManager chunkManager = simulation.getTank().getChunkManager();
 			int w = (int) toRenderSpace(chunkManager.getChunkSize());
-			Stream<Vector2> chunkCoords = chunkManager.getAllChunks().stream()
-					.map(chunk -> toRenderSpace(chunk.getTankCoords()));
-			chunkCoords.forEach(pos -> graphics.drawRect((int) pos.getX(), (int) pos.getY(), w, w));
+			for (Chunk chunk : chunkManager.getChunks()) {
+				Vector2 chunkCoords = toRenderSpace(chunk.getTankCoords());
+				graphics.drawRect((int) chunkCoords.getX(), (int) chunkCoords.getY(), w, w);
+			}
 		}
 	}
 	
@@ -284,10 +323,6 @@ public class Renderer extends Canvas
 		
 		Graphics2D graphics = (Graphics2D) bs.getDrawGraphics();
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-//		if (track != null) {
-//			rotate = rotate + (- 0.5*Math.PI - track.getVel().angle() - rotate) * 0.05;
-//		}
 
 		synchronized (simulation.getTank()) {
 			background(graphics);
@@ -363,5 +398,10 @@ public class Renderer extends Canvas
 	public Entity getTracked() {
 		return track;
 	}
-	
+
+	public void resetCamera() {
+		track = null;
+		pan = new Vector2(0, 0);
+		targetZoom = 1;
+	}
 }

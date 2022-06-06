@@ -26,6 +26,7 @@ public final class Settings {
     public static final float maxProtozoanGrowthRate = 0.06f;
 
     public static final float globalMutationChance = 0.05f;
+    public static final float protozoaInteractRange = 0.15f;
 
     // Plant Settings
     public static final float maxPlantRadius = 0.02f;

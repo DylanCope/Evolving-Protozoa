@@ -7,9 +7,8 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import core.Settings;
-import core.Simulation;
-import core.Tank;
+import com.google.common.collect.Iterators;
+import core.*;
 import utils.Vector2;
 
 public abstract class Entity implements Serializable
@@ -44,12 +43,34 @@ public abstract class Entity implements Serializable
 		healthyColour = new Color(255, 255, 255);
 	}
 	
-	public void update(float delta, Collection<Entity> entities) {
+	public void update(float delta) {
 		timeAlive += delta;
 		crowdingFactor = 0;
 		grow(delta);
 		move(delta);
-		entities.forEach(e -> interact(e, delta));
+	}
+
+	public void handleCollisions() {
+		Iterator<Entity> entities = broadCollisionDetection(getRadius());
+		entities.forEachRemaining(this::handlePotentialCollision);
+	}
+
+	public Iterator<Entity> broadCollisionDetection(float range) {
+		float x = getPos().getX();
+		float y = getPos().getY();
+
+		ChunkManager manager = tank.getChunkManager();
+		int iMin = manager.toChunkX(x - range);
+		int iMax = manager.toChunkX(x + range);
+		int jMin = manager.toChunkY(y - range);
+		int jMax = manager.toChunkY(y + range);
+
+		List<Iterator<Entity>> entityIterators = new ArrayList<>();
+		for (int i = iMin; i <= iMax; i++)
+			for (int j = jMin; j <= jMax; j++)
+				entityIterators.add(manager.getChunk(manager.toChunkID(i, j)).getEntities().iterator());
+
+		return Iterators.concat(entityIterators.iterator());
 	}
 
 	public void grow(float delta) {
@@ -100,16 +121,13 @@ public abstract class Entity implements Serializable
 	
 	public abstract boolean isEdible();
 
-	public void interact(Entity e, float delta) {
-		// TODO: optimise to remove repeat interactions
-		handlePotentialCollision(e);
-	}
-
 	public float getCrowdingFactor() {
 		return crowdingFactor;
 	}
 
 	public void handlePotentialCollision(Entity e) {
+		if (e == this)
+			return;
 
 		float sqDist = e.getPos().squareDistanceTo(getPos());
 

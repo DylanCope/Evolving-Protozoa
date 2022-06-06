@@ -43,8 +43,8 @@ public class PlantPellet extends Pellet {
     }
 
     @Override
-    public void update(float delta, Collection<Entity> entities) {
-        super.update(delta, entities);
+    public void update(float delta) {
+        super.update(delta);
         if (getHealth() < 1.0)
             setHealth(getHealth() + (1 - getHealth()) * getGrowthRate());
 

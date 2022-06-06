@@ -10,6 +10,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -134,17 +135,21 @@ public class Protozoa extends Entity
 	}
 
 	public void interact(Entity other, float delta) {
+
+		if (other == this)
+			return;
+
 		if (isDead()) {
 			handleDeath();
 			return;
 		}
 
+		see(other);
+
 		if (shouldSplit()) {
 			super.burst(this::createSplitChild);
 			return;
 		}
-
-		super.interact(other, delta);
 
 		if (isTouching(other)) {
 
@@ -165,6 +170,12 @@ public class Protozoa extends Entity
 				eat(other, delta);
 
 		}
+	}
+
+	public void handleInteractions(float delta) {
+		resetRetina();
+		Iterator<Entity> entities = broadCollisionDetection(Settings.protozoaInteractRange);
+		entities.forEachRemaining(e -> interact(e, delta));
 	}
 
 	public void resetRetina() {
@@ -212,21 +223,16 @@ public class Protozoa extends Entity
 		setHealth(getHealth() * (1 - deathRate));
 	}
 
-
 	@Override
-	public void update(float delta, Collection<Entity> entities)
+	public void update(float delta)
 	{
+		super.update(delta);
+
 		age(delta);
 		if (isDead())
 			handleDeath();
 
-
-		resetRetina();
-		entities.forEach(this::see);
-
 		think(delta);
-
-  		super.update(delta, entities);
 	}
 	
 	public void render(Graphics g)

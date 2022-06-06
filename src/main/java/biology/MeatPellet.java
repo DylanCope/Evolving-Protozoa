@@ -4,8 +4,6 @@ import core.Simulation;
 import core.Tank;
 
 import java.awt.*;
-import java.util.Collection;
-import java.util.stream.Stream;
 
 public class MeatPellet extends Pellet {
 
@@ -25,10 +23,10 @@ public class MeatPellet extends Pellet {
     }
 
     @Override
-    public void update(float delta, Collection<Entity> entities)
+    public void update(float delta)
     {
         age(delta);
-        super.update(delta, entities);
+        super.update(delta);
     }
 
     @Override

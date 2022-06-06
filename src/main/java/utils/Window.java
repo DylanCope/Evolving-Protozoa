@@ -51,7 +51,7 @@ public class Window extends Canvas implements Runnable, ActionListener
 		frame.setVisible(true);
 		
 		input = new Input();
-		controller = new Controller(input, simulation);
+		controller = new Controller(input, simulation, renderer);
 		
 		renderer.addKeyListener(input);
 		renderer.addMouseListener(input);
@@ -70,7 +70,7 @@ public class Window extends Canvas implements Runnable, ActionListener
 	public void actionPerformed(ActionEvent event)
 	{
 		if (frame.isVisible()) {
-			controller.update(simulation, renderer);
+			controller.update();
 			renderer.render();
 			timer.restart();
 		}

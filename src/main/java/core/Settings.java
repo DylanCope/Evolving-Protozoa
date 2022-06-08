@@ -9,7 +9,7 @@ public final class Settings {
     public static final float historySnapshotTime = 2.0f;
     public static final boolean writeGenomes = false;
 
-    public static final int maxPlants = 2000;
+    public static final int maxPlants = 5000;
 
     public static final int maxProtozoa = 2000;
 

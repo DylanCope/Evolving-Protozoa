@@ -75,7 +75,7 @@ public class NetworkGenome implements Serializable
 		synapseGenes = newSynapseGenes;
 	}
 
-	private void createConnection(NeuronGene in, NeuronGene out) {
+	private void createHiddenBetween(NeuronGene in, NeuronGene out) {
 
 		NeuronGene n = new NeuronGene(
 			neuronGenes.length, Neuron.Type.HIDDEN, defaultActivation
@@ -101,7 +101,7 @@ public class NetworkGenome implements Serializable
 				synapseGenes[in.getId()][out.getId()] = new SynapseGene(in, out);
 			else {
 				if (random.nextBoolean())
-					createConnection(in, out);
+					createHiddenBetween(in, out);
 				else
 					g.setWeight((float) (random.nextDouble()*2 - 1));
 			}

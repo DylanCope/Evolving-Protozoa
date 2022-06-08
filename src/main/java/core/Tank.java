@@ -32,10 +32,6 @@ public class Tank implements Iterable<Entity>, Serializable
 		float chunkSize = 2 * radius / Settings.numChunkBreaks;
 		chunkManager = new ChunkManager(-radius, radius, -radius, radius, chunkSize);
 		elapsedTime = 0;
-
-		entityCapacities.put(Protozoa.class, Settings.maxProtozoa);
-		entityCapacities.put(PlantPellet.class, Settings.maxPlants);
-		entityCapacities.put(MeatPellet.class, Settings.maxMeat);
 	}
 	
 	public Vector2 randomPosition(float entityRadius) {

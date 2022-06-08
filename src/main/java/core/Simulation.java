@@ -1,5 +1,6 @@
 package core;
 
+import biology.MeatPellet;
 import biology.PlantPellet;
 import biology.Protozoa;
 import com.github.javafaker.Faker;
@@ -40,6 +41,7 @@ public class Simulation
 		historyFile = "saves/" + name + "/history.csv";
 		newSaveDir();
 		initDefaultTank();
+		loadSettings();
 	}
 
 	public Simulation(long seed, String name)
@@ -51,6 +53,13 @@ public class Simulation
 		historyFile = "saves/" + name + "/history.csv";
 
 		loadMostRecentTank();
+		loadSettings();
+	}
+
+	private void loadSettings() {
+		tank.entityCapacities.put(Protozoa.class, Settings.maxProtozoa);
+		tank.entityCapacities.put(PlantPellet.class, Settings.maxPlants);
+		tank.entityCapacities.put(MeatPellet.class, Settings.maxMeat);
 	}
 
 	private void newSaveDir() {

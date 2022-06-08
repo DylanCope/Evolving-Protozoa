@@ -131,7 +131,7 @@ public class Renderer extends Canvas
 		Vector2 pos = toRenderSpace(p.getPos());
 		float r = toRenderSpace(p.getRadius());
 
-		if (circleNotVisible(pos, r) || (superSimpleRender && r < window.getHeight() / 500.))
+		if (circleNotVisible(pos, r))
 			return;
 
 		drawOutlinedCircle(g, pos, r, p.getColor());
@@ -197,8 +197,6 @@ public class Renderer extends Canvas
 	{
 		Vector2 pos = toRenderSpace(p.getPos());
 		float r = toRenderSpace(p.getRadius());
-		if (superSimpleRender && r < window.getHeight() / 500.)
-			return;
 		drawOutlinedCircle(g, pos, r, p.getColor());
 		stats.put("Pellets Rendered", stats.get("Pellets Rendered") + 1);
 	}

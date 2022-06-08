@@ -3,6 +3,7 @@ package biology;
 import core.Settings;
 import core.Simulation;
 import core.Tank;
+import neat.NeuralNetwork;
 import utils.Vector2;
 
 import java.awt.*;
@@ -22,7 +23,8 @@ public class Protozoa extends Entity
 
 	private float shieldFactor = 1.3f;
 	private final float attackFactor = 10f;
-	private final float consumeFactor = 25f;
+	private final float consumeFactor = 10f;
+	private float deathRate = 0;
 
 	private float splitRadius = Float.MAX_VALUE; // No splitting by default.
 
@@ -110,8 +112,8 @@ public class Protozoa extends Entity
 	public void think(float delta)
 	{
 		brain.tick(this);
-		rotate(delta * 100 * brain.turn(this));
-		setSpeed(brain.speed(this));
+		rotate(delta * 80 * brain.turn(this));
+		setSpeed(Math.abs(brain.speed(this)));
 	}
 
 	private boolean shouldSplit() {
@@ -195,11 +197,18 @@ public class Protozoa extends Entity
 	@Override
 	public HashMap<String, Float> getStats() {
 		HashMap<String, Float> stats = super.getStats();
-		stats.put("Fitness", getFitness());
 		stats.put("Growth Rate", Settings.statsDistanceScalar * getGrowthRate());
+		stats.put("Death Rate", deathRate);
 		stats.put("Split Radius", Settings.statsDistanceScalar * splitRadius);
-		if (genome != null)
+		if (genome != null) {
 			stats.put("Mutations", (float) genome.getNumMutations());
+			stats.put("Genetic Size", Settings.statsDistanceScalar * genome.getRadius());
+		}
+		if (brain instanceof NNBrain) {
+			NeuralNetwork nn = ((NNBrain) brain).network;
+			stats.put("Network Depth", (float) nn.getDepth());
+			stats.put("Network Size", (float) nn.getSize());
+		}
 		return stats;
 	}
 
@@ -212,7 +221,8 @@ public class Protozoa extends Entity
 	}
 
 	public void age(float delta) {
-		float deathRate = getRadius() * getSpeed() * delta * 200;
+		deathRate = getRadius() * delta * 50;
+		deathRate *= 0.75f + 0.25f * getSpeed();
 		setHealth(getHealth() * (1 - deathRate));
 	}
 

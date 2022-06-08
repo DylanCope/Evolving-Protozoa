@@ -3,6 +3,7 @@ package biology;
 import core.Settings;
 import core.Simulation;
 import core.Tank;
+import utils.Vector2;
 
 import java.awt.*;
 import java.util.Collection;
@@ -25,6 +26,12 @@ public class PlantPellet extends Pellet {
                 150  + Simulation.RANDOM.nextInt(100),
                 10  + Simulation.RANDOM.nextInt(100))
         );
+    }
+    @Override
+    public void handlePotentialCollision(Entity e) {
+        super.handlePotentialCollision(e);
+        Vector2 dv = e.getPos().sub(getPos());
+        getPos().translate(dv.scale(5e-5f/ (getRadius() + dv.len())));
     }
 
     private static float randomPlantRadius() {
@@ -59,7 +66,7 @@ public class PlantPellet extends Pellet {
     @Override
     public float getGrowthRate() {
         float x = (-getCrowdingFactor() + Settings.plantCriticalCrowding) / Settings.plantCrowdingGrowthDecay;
-        x = (float) Math.tanh(x);
+        x = (float) (Math.tanh(x));// * Math.tanh(-0.01 + 50 * getCrowdingFactor() / Settings.plantCriticalCrowding));
         x = x < 0 ? (float) (1 - Math.exp(-Settings.plantCrowdingGrowthDecay * x)) : x;
         float growthRate = super.getGrowthRate() * x;
         if (getRadius() > maxRadius)

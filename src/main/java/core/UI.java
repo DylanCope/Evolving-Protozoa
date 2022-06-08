@@ -1,8 +1,8 @@
 package core;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,7 +39,7 @@ public class UI
 		title.setColor(Color.WHITE);
 		
 		info = new ArrayList<>();
-		infoTextSize = window.getHeight() / 35;
+		infoTextSize = window.getHeight() / 45;
 
 		TextObject pelletText = new TextObject("Number of pellets: ", infoTextSize);
 		pelletText.setColor(Color.WHITE.darker());
@@ -65,7 +65,7 @@ public class UI
 	}
 
 	public float getYPos(int i) {
-		return (1.1f*i + 3) * window.getHeight() / 20f;
+		return 1.3f*infoTextSize*i + 3 * window.getHeight() / 20f;
 	}
 	
 	public void render(Graphics2D g)
@@ -131,10 +131,10 @@ public class UI
 
 	private void renderBrainNetwork(NeuralNetwork nn, Graphics2D g) {
 		int networkDepth = nn.getDepth();
-		int boxWidth = (int) (window.getWidth() / 2.0 - 1.1 * renderer.getTrackingScopeRadius());
-		int boxHeight = 2 * window.getHeight() / 3;
+		int boxWidth = (int) (window.getWidth() / 2.0 - 1.2 * renderer.getTrackingScopeRadius());
+		int boxHeight = 3 * window.getHeight() / 4;
 
-		int boxXStart = window.getWidth() - (int) (boxWidth * 1.05);
+		int boxXStart = window.getWidth() - (int) (boxWidth * 1.1);
 		int boxYStart = (window.getHeight() - boxHeight) / 2;
 
 		if (simulation.inDebugMode()) {
@@ -144,7 +144,94 @@ public class UI
 				g.drawLine(boxXStart, y, boxXStart + boxWidth, y);
 		}
 
-		HashMap<Neuron, Vector2> neuronPositions = new HashMap<>();
+		if (!nn.hasComputedGraphicsPositions())
+			precomputeGraphicsPositions(nn, boxXStart, boxYStart, boxWidth, boxHeight);
 
+
+		int r = nn.getGraphicsNodeSpacing() / 8;
+		for (Neuron neuron : nn.getNeurons()) {
+			if (!neuron.getType().equals(Neuron.Type.SENSOR)) {
+				g.setColor(Color.WHITE.darker());
+				Stroke s = g.getStroke();
+
+				for (int i = 0; i < neuron.getInputs().length; i++) {
+					Neuron inputNeuron = neuron.getInputs()[i];
+					float weight = neuron.getWeights()[i];
+					g.setStroke(new BasicStroke((int) (0.3 * r * Math.abs(weight))));
+					g.drawLine(neuron.getGraphicsX(), neuron.getGraphicsY(),
+							inputNeuron.getGraphicsX(), inputNeuron.getGraphicsY());
+				}
+				g.setStroke(s);
+			}
+		}
+
+		for (Neuron neuron : nn.getNeurons()) {
+			Color colour;
+			double state = neuron.getLastState();
+			if (state > 0) {
+				colour = new Color(
+						30, (int) (50 + state * 150), 30
+				);
+			} else {
+				colour = new Color(
+						(int) (50 - state * 150), 30, 30
+				);
+			}
+
+			g.setColor(colour);
+			g.fillOval(
+					neuron.getGraphicsX() - r,
+					neuron.getGraphicsY() - r,
+					2*r,
+					2*r);
+
+			g.setColor(Color.WHITE.darker());
+
+			Stroke s = g.getStroke();
+			g.setStroke(new BasicStroke((int) (0.3*r)));
+			g.drawOval(
+					neuron.getGraphicsX() - r,
+					neuron.getGraphicsY() - r,
+					2*r,
+					2*r);
+			g.setStroke(s);
+		}
+	}
+
+	private void precomputeGraphicsPositions(NeuralNetwork nn,
+											 int boxXStart,
+											 int boxYStart,
+											 int boxWidth,
+											 int boxHeight) {
+
+		Neuron[] neurons = nn.getNeurons();
+		int networkDepth = nn.getDepth();
+
+		int[] depthWidthValues = new int[networkDepth + 1];
+		Arrays.fill(depthWidthValues, 0);
+		for (Neuron n : neurons)
+			depthWidthValues[n.getDepth()]++;
+
+		int maxWidth = 0;
+		for (int width : depthWidthValues)
+			maxWidth = Math.max(maxWidth, width);
+
+		int nodeSpacing = boxHeight / maxWidth;
+		nn.setGraphicsNodeSpacing(nodeSpacing);
+
+		for (int depth = 0; depth <= networkDepth; depth++) {
+			int x = boxXStart + depth * boxWidth / networkDepth;
+			int nNodes = depthWidthValues[depth];
+
+			int i = 0;
+			for (Neuron n : neurons) {
+				if (n.getDepth() == depth) {
+					int y = boxYStart + boxHeight / 2 - (nNodes / 2 - i) * nodeSpacing;
+					n.setGraphicsPosition(x, y);
+					i++;
+				}
+			}
+		}
+		nn.setComputedGraphicsPositions(true);
 	}
 }

@@ -11,7 +11,7 @@ public class NNBrain implements Brain {
     public final NeuralNetwork network;
     private float[] outputs;
     private final float[] inputs;
-    private final float maxTurn = (float) Math.toRadians(45);
+    private final float maxTurn = (float) Math.toRadians(Settings.maxTurnAngle);
 
     public NNBrain(NeuralNetwork network) {
         this.network = network;
@@ -24,9 +24,15 @@ public class NNBrain implements Brain {
     {
         int i = 0;
         for (Retina.Cell cell : p.getRetina()) {
-            inputs[i++] = -1 + 2 * cell.colour.getRed() / 255f;
-            inputs[i++] = -1 + 2 * cell.colour.getGreen() / 255f;
-            inputs[i++] = -1 + 2 * cell.colour.getBlue() / 255f;
+            if (cell.entity != null) {
+                inputs[i++] = -1 + 2 * cell.colour.getRed() / 255f;
+                inputs[i++] = -1 + 2 * cell.colour.getGreen() / 255f;
+                inputs[i++] = -1 + 2 * cell.colour.getBlue() / 255f;
+            } else {
+                inputs[i++] = 0f;
+                inputs[i++] = 0f;
+                inputs[i++] = 0f;
+            }
         }
         inputs[i] = p.getHealth();
 

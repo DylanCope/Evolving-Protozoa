@@ -39,7 +39,7 @@ public class NetworkGenome implements Serializable
 
 	public NetworkGenome(int numInputs, int numOutputs)
 	{
-		this(numInputs, numOutputs, Neuron.Activation.SIGMOID);
+		this(numInputs, numOutputs, Neuron.Activation.TANH);
 	}
 
 	public NetworkGenome(int numInputs, int numOutputs, Neuron.Activation defaultActivation)
@@ -71,7 +71,7 @@ public class NetworkGenome implements Serializable
 	private void resizeSynapseMatrix() {
 		SynapseGene[][] newSynapseGenes = new SynapseGene[neuronGenes.length][neuronGenes.length];
 		for (int i = 0; i < synapseGenes.length; i++)
-			System.arraycopy(synapseGenes[i], 0, newSynapseGenes[i], 0, synapseGenes.length);
+			System.arraycopy(synapseGenes[i], 0, newSynapseGenes[i], 0, synapseGenes[i].length);
 		synapseGenes = newSynapseGenes;
 	}
 
@@ -111,10 +111,10 @@ public class NetworkGenome implements Serializable
 	public NetworkGenome mutate()
 	{
 		for (int n = 0; n < 10; n++) {
-			int i = random.nextInt(neuronGenes.length);
-			int j = random.nextInt(neuronGenes.length);
-			if (neuronGenes[j].getType().equals(Neuron.Type.SENSOR))
-				continue;
+			int i = random.nextInt(neuronGenes.length - nOutputs);
+			if (i >= nSensors)
+				i += nOutputs;
+			int j = nSensors + random.nextInt(neuronGenes.length - nSensors);
 			mutateConnection(neuronGenes[i], neuronGenes[j]);
 		}
 		return this;

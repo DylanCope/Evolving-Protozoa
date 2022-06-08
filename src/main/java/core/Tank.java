@@ -104,6 +104,12 @@ public class Tank implements Iterable<Entity>, Serializable
 		if (e instanceof PlantPellet &&
 				entityCounts.getOrDefault(PlantPellet.class, 0) >= Settings.maxPlants)
 			return;
+		if (e instanceof Protozoa &&
+				entityCounts.getOrDefault(Protozoa.class, 0) >= Settings.maxProtozoa)
+			return;
+		if (e instanceof MeatPellet &&
+				entityCounts.getOrDefault(MeatPellet.class, 0) >= Settings.maxMeat)
+			return;
 
 		totalEntitiesAdded++;
 		entitiesToAdd.add(e);

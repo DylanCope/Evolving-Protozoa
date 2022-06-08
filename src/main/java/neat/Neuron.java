@@ -42,11 +42,11 @@ public class Neuron implements Comparable<Neuron>, Serializable {
     private final float[] weights;
     private Type type;
     private final int id;
-    private float state = 0;
-    private float nextState = 0;
+    private float state = 0, lastState = 0, nextState = 0;
     private float learningRate = 0;
-    private Activation activation = Activation.TANH;
+    private Activation activation;
     private int depth = 0;
+    private int graphicsX = -1, graphicsY = -1;
 
     public Neuron(int id, Neuron[] inputs, float[] weights, Type type, Activation activation)
     {
@@ -67,6 +67,7 @@ public class Neuron implements Comparable<Neuron>, Serializable {
 
     void update()
     {
+        lastState = state;
         state = nextState;
     }
 
@@ -83,6 +84,10 @@ public class Neuron implements Comparable<Neuron>, Serializable {
 
     public float getState() {
         return state;
+    }
+
+    public float getLastState() {
+        return lastState;
     }
 
     public Neuron setState(float s) {
@@ -142,6 +147,19 @@ public class Neuron implements Comparable<Neuron>, Serializable {
 
     public int getDepth() {
         return depth;
+    }
+
+    public void setGraphicsPosition(int x, int y) {
+        graphicsX = x;
+        graphicsY = y;
+    }
+
+    public int getGraphicsX() {
+        return graphicsX;
+    }
+
+    public int getGraphicsY() {
+        return graphicsY;
     }
 
 }

@@ -231,6 +231,10 @@ public abstract class Entity implements Serializable
 
 	public void rotate(float theta) {
 		this.direction += theta;
+		if (this.direction < 0)
+			this.direction += Math.PI * 2;
+		if (this.direction > Math.PI * 2)
+			this.direction -= Math.PI * 2;
 	}
 
 	public Vector2 getVel() {

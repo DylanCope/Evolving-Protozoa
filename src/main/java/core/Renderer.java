@@ -120,95 +120,85 @@ public class Renderer extends Canvas
 	{
 		Vector2 pos = toRenderSpace(p.getPos());
 		float r = toRenderSpace(p.getRadius());
+
+		drawOutlinedCircle(g, pos, r, p.getColor());
 		
-		if (pos.getX() + r > window.getWidth())
-			return;
-		if (pos.getX() - r < 0)
-			return;
-		if (pos.getY() + r > window.getHeight())
-			return;
-		if (pos.getY() - r < 0)
-			return;
-		
-		Color c = p.getColor();
-		g.setColor(c);
-		
-		g.fillOval(
-				(int)(pos.getX() - r), 
-				(int)(pos.getY() - r), 
-				(int)(2*r), 
-				(int)(2*r));
-		
-		if (zoom > 1.3)
+		if (r >= 0.005 * window.getHeight())
 			retina(g, p);
-		
-		Polygon nucleus = new Polygon();
-		float dt = (float) (2*Math.PI / (16.0));
-		float t0 = p.getVel().angle();
-		for (float t = 0; t < 2*Math.PI; t += dt)
-		{
-			float percent = (float) (((t*t*p.id) % (1/7.0)) + (2/5.0));
-			float radius = toRenderSpace(percent * p.getRadius()); 
-			int x = (int) (radius * (0.1 + Math.cos(t + t0)) + pos.getX());
-			int y = (int) (radius * (-0.1 + Math.sin(t + t0)) + pos.getY());
-			nucleus.addPoint(x, y);
+
+		if (r >= 0.01 * window.getHeight()) {
+			Polygon nucleus = new Polygon();
+			float dt = (float) (2 * Math.PI / (16.0));
+			float t0 = p.getVel().angle();
+			for (float t = 0; t < 2 * Math.PI; t += dt) {
+				float percent = (float) (((t * t * p.id) % (1 / 7.0)) + (2 / 5.0));
+				float radius = toRenderSpace(percent * p.getRadius());
+				int x = (int) (radius * (0.1 + Math.cos(t + t0)) + pos.getX());
+				int y = (int) (radius * (-0.1 + Math.sin(t + t0)) + pos.getY());
+				nucleus.addPoint(x, y);
+			}
+			Color b = p.getColor().brighter();
+			g.setColor(new Color(b.getRed(), b.getGreen(), b.getBlue(), 50));
+			g.fillPolygon(nucleus);
 		}
-		Color b = c.brighter();
-		g.setColor(new Color(b.getRed(), b.getGreen(), b.getBlue(), 50));
-		g.fillPolygon(nucleus);
-		
-		g.setColor(c.darker());
+	}
+
+	public boolean circleNotVisible(Vector2 pos, float r) {
+		return (pos.getX() - r > window.getWidth())
+				||(pos.getX() + r < 0)
+				||(pos.getY() - r > window.getHeight())
+				||(pos.getY() + r < 0);
+	}
+
+	public void drawCircle(Graphics2D g, Vector2 pos, float r, Color c) {
+		drawCircle(g, pos, r, c, (int) (0.2*r));
+	}
+
+	public void drawCircle(Graphics2D g, Vector2 pos, float r, Color c, int strokeSize) {
+		g.setColor(c);
 		Stroke s = g.getStroke();
-		g.setStroke(new BasicStroke((int) (0.7*zoom)));
+		g.setStroke(new BasicStroke(strokeSize));
 		g.drawOval(
-				(int)(pos.getX() - r), 
-				(int)(pos.getY() - r), 
-				(int)(2*r), 
+				(int)(pos.getX() - r),
+				(int)(pos.getY() - r),
+				(int)(2*r),
 				(int)(2*r));
 		g.setStroke(s);
+	}
+
+	public void drawOutlinedCircle(Graphics2D g, Vector2 pos, float r, Color c) {
+
+		if (circleNotVisible(pos, r))
+			return;
+
+		g.setColor(c);
+		g.fillOval(
+				(int)(pos.getX() - r),
+				(int)(pos.getY() - r),
+				(int)(2*r),
+				(int)(2*r));
+
+		if (r >= 0.01 * window.getHeight())
+			drawCircle(g, pos, r, c.darker());
 	}
 	
 	public void pellet(Graphics2D g, Pellet p)
 	{
 		Vector2 pos = toRenderSpace(p.getPos());
 		float r = toRenderSpace(p.getRadius());
-		
-		if (pos.getX() + r > window.getWidth())
-			return;
-		if (pos.getX() - r < 0)
-			return;
-		if (pos.getY() + r > window.getHeight())
-			return;
-		if (pos.getY() - r < 0)
-			return;
-		
-		g.setColor(p.getColor());
-		g.fillOval(
-				(int)(pos.getX() - r), 
-				(int)(pos.getY() - r), 
-				(int)(2*r), 
-				(int)(2*r));
-		
-		g.setColor(p.getColor().darker());
+		drawOutlinedCircle(g, pos, r, p.getColor());
+	}
 
-		Stroke s = g.getStroke();
-		g.setStroke(new BasicStroke((int) (0.7*zoom)));
-		g.drawOval(
-				(int)(pos.getX() - r), 
-				(int)(pos.getY() - r), 
-				(int)(2*r), 
-				(int)(2*r));
-		g.setStroke(s);
+	public void renderEntity(Graphics2D g, Entity e) {
+		if (e instanceof Protozoa)
+			protozoa(g, (Protozoa) e);
+		else if (e instanceof Pellet)
+			pellet(g, (Pellet) e);
 	}
 	
 	public void entities(Graphics2D g, Tank tank)
 	{
-		for (Entity e : tank) {
-			if (e instanceof Protozoa)
-				protozoa(g, (Protozoa) e);
-			else if (e instanceof Pellet)
-				pellet(g, (Pellet) e);
-		}
+		tank.getEntities().forEach(e -> renderEntity(g, e));
 
 		if (simulation.inDebugMode() && track != null) {
 			Iterator<Entity> collisionEntities = track.broadCollisionDetection(track.getRadius());
@@ -225,27 +215,8 @@ public class Renderer extends Canvas
 	public void drawCollisionBounds(Graphics2D g, Entity e, float r, Color color) {
 		Vector2 pos = toRenderSpace(e.getPos());
 		r = toRenderSpace(r);
-
-		if (pos.getX() + r > window.getWidth())
-			return;
-		if (pos.getX() - r < 0)
-			return;
-		if (pos.getY() + r > window.getHeight())
-			return;
-		if (pos.getY() - r < 0)
-			return;
-
-		g.setColor(color);
-
-		Stroke s = g.getStroke();
-		g.setStroke(new BasicStroke((int) (0.7*zoom)));
-		g.drawOval(
-				(int)(pos.getX() - r),
-				(int)(pos.getY() - r),
-				(int)(2*r),
-				(int)(2*r));
-		g.setStroke(s);
-
+		if (!circleNotVisible(pos, r))
+			drawCircle(g, pos, r, color);
 	}
 	
 	public void maskTank(Graphics g, Vector2 coords, float r, int alpha)

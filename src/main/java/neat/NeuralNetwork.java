@@ -15,6 +15,8 @@ public class NeuralNetwork implements Serializable
     private final Neuron[] neurons;
     private final int depth;
     private final int nInputs;
+    private boolean computedGraphics = false;
+    private int nodeSpacing;
 
     public NeuralNetwork(Neuron[] neurons, int nInputs, int nOutputs) {
         this.neurons = neurons;
@@ -49,7 +51,19 @@ public class NeuralNetwork implements Serializable
     private int calculateDepth() {
         boolean[] visited = new boolean[neurons.length];
         Arrays.fill(visited, false);
-        return calculateDepth(0, outputNeurons, visited);
+        int depth = calculateDepth(0, outputNeurons, visited);
+        boolean pushback = false;
+        for (Neuron n : neurons)
+            if (n.getType().equals(Neuron.Type.HIDDEN) && n.getDepth() == depth) {
+                pushback = true;
+                break;
+            }
+        if (pushback) {
+            for (Neuron out : outputNeurons)
+                out.setDepth(depth + 1);
+            depth++;
+        }
+        return depth;
     }
 
     private int calculateDepth(int depth, Neuron[] explore, boolean[] visited) {
@@ -58,8 +72,9 @@ public class NeuralNetwork implements Serializable
             if (visited[n.getId()] | n.getType().equals(Neuron.Type.SENSOR))
                 continue;
             visited[n.getId()] = true;
-            maxDepth = Math.max(maxDepth, calculateDepth(depth + 1, n.getInputs(), visited));
-            n.setDepth(maxDepth);
+            int neuronDepth = calculateDepth(depth + 1, n.getInputs(), visited);
+            n.setDepth(neuronDepth);
+            maxDepth = Math.max(maxDepth, neuronDepth);
         }
 
         return maxDepth;
@@ -93,5 +108,29 @@ public class NeuralNetwork implements Serializable
 
     public int getInputSize() {
         return nInputs;
+    }
+
+    public int getSize() {
+        return neurons.length;
+    }
+
+    public Neuron[] getNeurons() {
+        return neurons;
+    }
+
+    public boolean hasComputedGraphicsPositions() {
+        return computedGraphics;
+    }
+
+    public void setComputedGraphicsPositions(boolean computedGraphics) {
+        this.computedGraphics = computedGraphics;
+    }
+
+    public void setGraphicsNodeSpacing(int nodeSpacing) {
+        this.nodeSpacing = nodeSpacing;
+    }
+
+    public int getGraphicsNodeSpacing() {
+        return nodeSpacing;
     }
 }

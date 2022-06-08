@@ -22,7 +22,14 @@ public class Controller
 		input.registerOnPressHandler(KeyEvent.VK_R, renderer::resetCamera);
 	}
 
-
+	private boolean isPosInChunk(Vector2 pos, Chunk chunk) {
+		Vector2 chunkCoords = renderer.toRenderSpace(chunk.getTankCoords());
+		int originX = (int) chunkCoords.getX();
+		int originY = (int) chunkCoords.getY();
+		int chunkSize = renderer.toRenderSpace(simulation.getTank().getChunkManager().getChunkSize());
+		return originX <= pos.getX() && pos.getX() < originX + chunkSize
+				&& originY <= pos.getY() && pos.getY() < originY + chunkSize;
+	}
 
 	public void update()
 	{
@@ -37,15 +44,21 @@ public class Controller
 		{
 			Vector2 pos = input.getMousePosition();
 			boolean track = false;
-			for (Entity e : simulation.getTank().getEntities()) 
-			{
-				Vector2 s = renderer.toRenderSpace(e.getPos());
-				double r = renderer.toRenderSpace(e.getRadius());
-				if (s.sub(pos).len2() < r*r) 
-				{
-					renderer.track(e);
-					track = true;
-					break;
+			synchronized (simulation.getTank()) {
+				for (Chunk chunk : simulation.getTank().getChunkManager().getChunks()) {
+					if (isPosInChunk(pos, chunk)) {
+						for (Entity e : chunk.getEntities())
+						{
+							Vector2 s = renderer.toRenderSpace(e.getPos());
+							double r = renderer.toRenderSpace(e.getRadius());
+							if (s.sub(pos).len2() < r*r)
+							{
+								renderer.track(e);
+								track = true;
+								break;
+							}
+						}
+					}
 				}
 			}
 			if (!track)

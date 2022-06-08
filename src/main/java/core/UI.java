@@ -64,8 +64,12 @@ public class UI
 		debugInfo.add(fpsText);
 	}
 
-	public float getYPos(int i) {
+	public float getYPosLHS(int i) {
 		return 1.3f*infoTextSize*i + 3 * window.getHeight() / 20f;
+	}
+
+	public float getYPosRHS(int i) {
+		return 1.3f*infoTextSize*i + window.getHeight() / 20f;
 	}
 	
 	public void render(Graphics2D g)
@@ -76,7 +80,7 @@ public class UI
 
 		int lineNumber;
 		for (lineNumber = 0; lineNumber < info.size(); lineNumber++)
-			info.get(lineNumber).setPosition(new Vector2(textAwayFromEdge, getYPos(lineNumber)));
+			info.get(lineNumber).setPosition(new Vector2(textAwayFromEdge, getYPosLHS(lineNumber)));
 
 		
 		info.get(0).setText("Number of pellets: " + simulation.getTank().numberOfPellets());
@@ -97,7 +101,7 @@ public class UI
 			TextObject statsTitle = new TextObject(
 					tracked.getPrettyName() + " Stats",
 					(int) (infoTextSize * 1.1),
-					new Vector2(textAwayFromEdge, getYPos(lineNumber))
+					new Vector2(textAwayFromEdge, getYPosLHS(lineNumber))
 			);
 			statsTitle.setColor(Color.WHITE.darker());
 			statsTitle.render(g);
@@ -108,7 +112,7 @@ public class UI
 				String text = entityStat.getKey() + ": " + TextStyle.toString(entityStat.getValue(), 2);
 				TextObject statText = new TextObject(
 						text, infoTextSize,
-						new Vector2(textAwayFromEdge, getYPos(lineNumber))
+						new Vector2(textAwayFromEdge, getYPosLHS(lineNumber))
 				);
 				statText.setColor(Color.WHITE.darker());
 				statText.render(g);
@@ -123,9 +127,33 @@ public class UI
 			info.get(2).setText("");
 
 
-		if (simulation.inDebugMode()) {
-			debugInfo.get(0).setText("FPS: " + (int) renderer.getFPS());
-			debugInfo.get(0).render(g);
+		if (simulation.inDebugMode())
+			renderDebugStats(g);
+	}
+
+	private void renderDebugStats(Graphics2D g) {
+		int lineNumber = 0;
+		HashMap<String, Integer> stats = renderer.getStats();
+
+		TextObject[] statTexts = new TextObject[stats.keySet().size()];
+		int maxWidth = 0;
+		for (Map.Entry<String, Integer> entityStat : stats.entrySet()) {
+			String text = entityStat.getKey() + ": " + TextStyle.toString(entityStat.getValue(), 2);
+			TextObject statText = new TextObject(
+					text, infoTextSize,
+					new Vector2(0, getYPosRHS(lineNumber))
+			);
+			maxWidth = Math.max(maxWidth, statText.getWidth());
+			statText.setColor(Color.YELLOW.darker());
+			statTexts[lineNumber] = statText;
+			lineNumber++;
+		}
+
+		int x = (int) (0.98 * window.getWidth() - maxWidth);
+		for (TextObject statText : statTexts) {
+			int y = (int) statText.getPosition().getY();
+			statText.setPosition(new Vector2(x, y));
+			statText.render(g);
 		}
 	}
 

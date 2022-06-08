@@ -27,11 +27,16 @@ public class PlantPellet extends Pellet {
                 10  + Simulation.RANDOM.nextInt(100))
         );
     }
+
     @Override
-    public void handlePotentialCollision(Entity e) {
-        super.handlePotentialCollision(e);
-        Vector2 dv = e.getPos().sub(getPos());
-        getPos().translate(dv.scale(5e-5f/ (getRadius() + dv.len())));
+    public void handlePotentialCollision(Entity e, float delta) {
+        super.handlePotentialCollision(e, delta);
+        if (e != this) {
+            Vector2 vecToOther = e.getPos().sub(getPos());
+            float distToOther = vecToOther.len();
+            if (distToOther - e.getRadius() <= 3*getRadius())
+                getPos().translate(vecToOther.scale(delta * 5e-4f/ vecToOther.len()));
+        }
     }
 
     private static float randomPlantRadius() {
@@ -56,7 +61,7 @@ public class PlantPellet extends Pellet {
             setHealth(getHealth() + (1 - getHealth()) * getGrowthRate());
 
         if (shouldSplit())
-            burst(r -> new PlantPellet(r, tank));
+            burst(PlantPellet.class, r -> new PlantPellet(r, tank));
     }
 
     /**

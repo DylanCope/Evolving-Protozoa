@@ -94,6 +94,7 @@ public class Simulation
 	{
 		try {
 			tank = (Tank) FileIO.load(filename);
+			System.out.println("Loaded tank at: " + filename);
 		} catch (IOException | ClassNotFoundException e) {
 			System.out.println("Unable to load tank at " + filename + " because: " + e.getMessage());
 			initDefaultTank();
@@ -108,7 +109,7 @@ public class Simulation
 					.filter(f -> !Files.isDirectory(f))
 					.max(Comparator.comparingLong(f -> f.toFile().lastModified()));
 
-			lastFilePath.ifPresent(path -> loadTank(path.toString()));
+			lastFilePath.ifPresent(path -> loadTank(path.toString().replace(".dat", "")));
 		} catch (IOException e) {
 			initDefaultTank();
 		}

@@ -140,7 +140,7 @@ public class Protozoa extends Entity
 		see(other);
 
 		if (shouldSplit()) {
-			super.burst(this::createSplitChild);
+			super.burst(Protozoa.class, this::createSplitChild);
 			return;
 		}
 
@@ -179,7 +179,7 @@ public class Protozoa extends Entity
 	}
 
 	private void breakIntoPellets() {
-		burst(r -> new MeatPellet(r, tank));
+		burst(MeatPellet.class, r -> new MeatPellet(r, tank));
 	}
 
 	public void handleDeath() {

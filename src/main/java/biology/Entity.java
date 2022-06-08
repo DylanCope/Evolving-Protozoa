@@ -3,6 +3,7 @@ package biology;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -50,9 +51,9 @@ public abstract class Entity implements Serializable
 		move(delta);
 	}
 
-	public void handleCollisions() {
+	public void handleCollisions(float delta) {
 		Iterator<Entity> entities = broadCollisionDetection(getRadius());
-		entities.forEachRemaining(this::handlePotentialCollision);
+		entities.forEachRemaining(e -> handlePotentialCollision(e, delta));
 	}
 
 	public Iterator<Entity> broadCollisionDetection(float range) {
@@ -125,7 +126,7 @@ public abstract class Entity implements Serializable
 		return crowdingFactor;
 	}
 
-	public void handlePotentialCollision(Entity e) {
+	public void handlePotentialCollision(Entity e, float delta) {
 		if (e == this)
 			return;
 
@@ -301,7 +302,7 @@ public abstract class Entity implements Serializable
 		this.generation = generation;
 	}
 
-	protected void burst(Function<Float, ? extends Entity> createChild) {
+	protected <T extends Entity> void burst(Class<T> type, Function<Float, T> createChild) {
 		setDead(true);
 		hasHandledDeath = true;
 
@@ -311,7 +312,13 @@ public abstract class Entity implements Serializable
 		for (int i = 0; i < nChildren; i++) {
 			Vector2 dir = new Vector2((float) Math.cos(angle), (float) Math.sin(angle));
 			float p = (float) (0.3 + 0.7 * Simulation.RANDOM.nextDouble() / nChildren);
-			Entity e = createChild.apply(getRadius() * p);
+
+			int nEntities = tank.entityCounts.getOrDefault(type, 0);
+			int maxEntities = tank.entityCapacities.getOrDefault(type, 0);
+			if (nEntities > maxEntities)
+				return;
+
+			T e = createChild.apply(getRadius() * p);
 			e.setPos(getPos().add(dir.mul(2*e.getRadius())));
 			e.setGeneration(getGeneration() + 1);
 			children.add(e);

@@ -3,20 +3,20 @@ package core;
 public final class Settings {
     // Simulation settings
     public static final long simulationSeed = 42;
-    public static final float simulationUpdateDelta = 0f;// 5f / 1000f;
+    public static final float simulationUpdateDelta = 5f / 1000f;
     public static final float maxVel = .5f;
     public static final float timeBetweenSaves = 500.0f;
     public static final float historySnapshotTime = 2.0f;
     public static final boolean writeGenomes = false;
 
-    public static final int maxPlants = 5000;
+    public static final int maxPlants = 2000;
 
-    public static final int maxProtozoa = 3000;
+    public static final int maxProtozoa = 2000;
 
-    public static final int maxMeat = 800;
+    public static final int maxMeat = 500;
 
     // Tank settings
-    public static final int numInitialProtozoa = 500;
+    public static final int numInitialProtozoa = 200;
     public static final int numInitialPlantPellets = 500;
     public static final float tankRadius = 2.0f;
     public static final int numChunkBreaks = 20;

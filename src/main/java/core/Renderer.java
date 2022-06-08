@@ -10,7 +10,9 @@ import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.image.BufferStrategy;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import utils.Utils;
 import utils.Vector2;
@@ -31,11 +33,13 @@ public class Renderer extends Canvas
 	private float zoom;
 	private float targetZoom;
 	private final float initialZoom = 2;
+	private boolean superSimpleRender = false;
 	private final float rotate = 0;
 	private double lastRenderTime = 0;
-	private double fps = 0;
 	private Entity track;
 	private final UI ui;
+
+	private final HashMap<String, Integer> stats = new HashMap<>(5, 1);
 	
 	private final Simulation simulation;
 	private final Window window;
@@ -45,6 +49,11 @@ public class Renderer extends Canvas
 		this.simulation = simulation;
 		this.window = window;
 		window.getInput().onLeftMouseRelease = this::updatePanTemp;
+
+		stats.put("FPS", 0);
+		stats.put("Chunks Rendered", 0);
+		stats.put("Protozoa Rendered", 0);
+		stats.put("Pellets Rendered", 0);
 		
 		tankRenderRadius = window.getHeight() / 2.0f;
 		tankRenderCoords = new Vector2(window.getWidth()*0.5f, window.getHeight()*0.5f);
@@ -81,23 +90,24 @@ public class Renderer extends Canvas
 				(int)(2*r),
 				(int) Math.toDegrees(t0  - 2.8*dt), 
 				(int) Math.toDegrees(fov + 5.6*dt));
-		
-		for (Retina.Cell cell : p.getRetina())
-		{
-			Color col = cell.colour;
-			if (cell.entity != null && 
-					toRenderSpace(cell.entity.getPos()).sub(pos).len2() > tankRenderRadius*tankRenderRadius)
-				col = Color.WHITE;
-			g.setColor(col);
-			g.fillArc(
-					(int)(pos.getX() - r), 
-					(int)(pos.getY() - r), 
-					(int)(2*r), 
-					(int)(2*r),
-					(int) Math.toDegrees(t), 
-					(int) Math.toDegrees(1.35*dt));
-			t += dt;
-		}
+
+		if (stats.get("FPS") >= 10)
+			for (Retina.Cell cell : p.getRetina())
+			{
+				Color col = cell.colour;
+				if (cell.entity != null &&
+						toRenderSpace(cell.entity.getPos()).sub(pos).len2() > tankRenderRadius*tankRenderRadius)
+					col = Color.WHITE;
+				g.setColor(col);
+				g.fillArc(
+						(int)(pos.getX() - r),
+						(int)(pos.getY() - r),
+						(int)(2*r),
+						(int)(2*r),
+						(int) Math.toDegrees(t),
+						(int) Math.toDegrees(1.35*dt));
+				t += dt;
+			}
 		
 		g.setColor(c.darker());
 		g.fillArc(
@@ -121,12 +131,16 @@ public class Renderer extends Canvas
 		Vector2 pos = toRenderSpace(p.getPos());
 		float r = toRenderSpace(p.getRadius());
 
+		if (circleNotVisible(pos, r) || (superSimpleRender && r < window.getHeight() / 500.))
+			return;
+
 		drawOutlinedCircle(g, pos, r, p.getColor());
-		
+		stats.put("Protozoa Rendered", stats.get("Protozoa Rendered") + 1);
+
 		if (r >= 0.005 * window.getHeight())
 			retina(g, p);
 
-		if (r >= 0.01 * window.getHeight()) {
+		if (stats.get("FPS") > 10 && r >= 0.01 * window.getHeight()) {
 			Polygon nucleus = new Polygon();
 			float dt = (float) (2 * Math.PI / (16.0));
 			float t0 = p.getVel().angle();
@@ -168,9 +182,6 @@ public class Renderer extends Canvas
 
 	public void drawOutlinedCircle(Graphics2D g, Vector2 pos, float r, Color c) {
 
-		if (circleNotVisible(pos, r))
-			return;
-
 		g.setColor(c);
 		g.fillOval(
 				(int)(pos.getX() - r),
@@ -178,7 +189,7 @@ public class Renderer extends Canvas
 				(int)(2*r),
 				(int)(2*r));
 
-		if (r >= 0.01 * window.getHeight())
+		if (r >= 0.01 * window.getHeight() && !superSimpleRender)
 			drawCircle(g, pos, r, c.darker());
 	}
 	
@@ -186,7 +197,10 @@ public class Renderer extends Canvas
 	{
 		Vector2 pos = toRenderSpace(p.getPos());
 		float r = toRenderSpace(p.getRadius());
+		if (superSimpleRender && r < window.getHeight() / 500.)
+			return;
 		drawOutlinedCircle(g, pos, r, p.getColor());
+		stats.put("Pellets Rendered", stats.get("Pellets Rendered") + 1);
 	}
 
 	public void renderEntity(Graphics2D g, Entity e) {
@@ -195,10 +209,35 @@ public class Renderer extends Canvas
 		else if (e instanceof Pellet)
 			pellet(g, (Pellet) e);
 	}
+
+	public boolean pointOnScreen(int x, int y) {
+		return 0 <= x && x <= window.getWidth() &&
+				0 <= y && y <= window.getHeight();
+	}
+
+	public boolean chunkInView(Chunk chunk) {
+		Vector2 chunkCoords = toRenderSpace(chunk.getTankCoords());
+		int originX = (int) chunkCoords.getX();
+		int originY = (int) chunkCoords.getY();
+		int chunkSize = toRenderSpace(simulation.getTank().getChunkManager().getChunkSize());
+		return pointOnScreen(originX, originY) ||
+				pointOnScreen(originX + chunkSize, originY) ||
+				pointOnScreen(originX, originY + chunkSize) ||
+				pointOnScreen(originX + chunkSize, originY + chunkSize);
+	}
+
+	public void renderChunk(Graphics2D g, Chunk chunk) {
+		if (chunkInView(chunk)) {
+			stats.put("Chunks Rendered", stats.get("Chunks Rendered") + 1);
+			for (Entity e : chunk.getEntities())
+				renderEntity(g, e);
+		}
+	}
 	
 	public void entities(Graphics2D g, Tank tank)
 	{
-		tank.getEntities().forEach(e -> renderEntity(g, e));
+		for (Chunk chunk : tank.getChunkManager().getChunks())
+			renderChunk(g, chunk);
 
 		if (simulation.inDebugMode() && track != null) {
 			Iterator<Entity> collisionEntities = track.broadCollisionDetection(track.getRadius());
@@ -216,7 +255,7 @@ public class Renderer extends Canvas
 		Vector2 pos = toRenderSpace(e.getPos());
 		r = toRenderSpace(r);
 		if (!circleNotVisible(pos, r))
-			drawCircle(g, pos, r, color);
+			drawCircle(g, pos, r, color, window.getHeight() / 500);
 	}
 	
 	public void maskTank(Graphics g, Vector2 coords, float r, int alpha)
@@ -272,7 +311,7 @@ public class Renderer extends Canvas
 		if (simulation.inDebugMode()) {
 			graphics.setColor(Color.YELLOW.darker());
 			ChunkManager chunkManager = simulation.getTank().getChunkManager();
-			int w = (int) toRenderSpace(chunkManager.getChunkSize());
+			int w = toRenderSpace(chunkManager.getChunkSize());
 			for (Chunk chunk : chunkManager.getChunks()) {
 				Vector2 chunkCoords = toRenderSpace(chunk.getTankCoords());
 				graphics.drawRect((int) chunkCoords.getX(), (int) chunkCoords.getY(), w, w);
@@ -282,7 +321,9 @@ public class Renderer extends Canvas
 	
 	public void render()
 	{
-		fps = 1 / (Utils.getTimeSeconds() - lastRenderTime);
+		stats.replaceAll((s, v) -> 0);
+		stats.put("FPS", (int) (1 / (Utils.getTimeSeconds() - lastRenderTime)));
+		superSimpleRender = stats.get("FPS") <= 5;
 		lastRenderTime = Utils.getTimeSeconds();
 
 		BufferStrategy bs = this.getBufferStrategy();
@@ -336,9 +377,9 @@ public class Renderer extends Canvas
 		}
 	}
 	
-	public float toRenderSpace(float s)
+	public int toRenderSpace(float s)
 	{
-		return zoom * tankRenderRadius * s / simulation.getTank().getRadius();
+		return (int) (zoom * tankRenderRadius * s / simulation.getTank().getRadius());
 	}
 
 	public void setZoom(float d) {
@@ -367,8 +408,8 @@ public class Renderer extends Canvas
 		track = e;
 	}
 
-	public double getFPS() {
-		return fps;
+	public HashMap<String, Integer> getStats() {
+		return stats;
 	}
 
 	public float getZoom() {

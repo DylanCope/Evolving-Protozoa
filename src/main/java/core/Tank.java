@@ -15,7 +15,8 @@ public class Tank implements Iterable<Entity>, Serializable
 	private static final long serialVersionUID = 2804817237950199223L;
 	private final float radius = Settings.tankRadius;
 	private float elapsedTime;
-	private final ConcurrentHashMap<Class<? extends Entity>, Integer> entityCounts;
+	public final ConcurrentHashMap<Class<? extends Entity>, Integer> entityCounts = new ConcurrentHashMap<>(3, 1);
+	public final ConcurrentHashMap<Class<? extends Entity>, Integer> entityCapacities = new ConcurrentHashMap<>(3, 1);
 	private final ChunkManager chunkManager;
 	private int generation = 1;
 	private int protozoaBorn = 0;
@@ -30,8 +31,11 @@ public class Tank implements Iterable<Entity>, Serializable
 	{
 		float chunkSize = 2 * radius / Settings.numChunkBreaks;
 		chunkManager = new ChunkManager(-radius, radius, -radius, radius, chunkSize);
-		entityCounts = new ConcurrentHashMap<>();
 		elapsedTime = 0;
+
+		entityCapacities.put(Protozoa.class, Settings.maxProtozoa);
+		entityCapacities.put(PlantPellet.class, Settings.maxPlants);
+		entityCapacities.put(MeatPellet.class, Settings.maxMeat);
 	}
 	
 	public Vector2 randomPosition(float entityRadius) {
@@ -55,7 +59,6 @@ public class Tank implements Iterable<Entity>, Serializable
 			((Protozoa) e).handleInteractions(delta);
 
 		e.update(delta);
-		e.handleCollisions();
 
 		handleTankEdge(e);
 	}
@@ -69,8 +72,18 @@ public class Tank implements Iterable<Entity>, Serializable
 		chunkManager.update();
 
 		Collection<Entity> entities = chunkManager.getAllEntities();
-		entities.forEach(e -> updateEntity(e, delta));
-		entities.forEach(this::handleDeadEntities);
+
+//		Arrays.stream(chunkManager.getChunks())
+//				.parallel()
+//				.forEach(chunk -> chunk.getEntities().forEach(e -> updateEntity(e, delta)));
+//
+//		Arrays.stream(chunkManager.getChunks())
+//				.parallel()
+//				.forEach(chunk -> chunk.getEntities().forEach(e -> e.handleCollisions(delta)));
+
+		entities.parallelStream().forEach(e -> updateEntity(e, delta));
+		entities.parallelStream().forEach(e -> e.handleCollisions(delta));
+		entities.parallelStream().forEach(this::handleDeadEntities);
 
 	}
 

@@ -124,12 +124,6 @@ public abstract class Entity implements Serializable
 		return other.getPos().squareDistanceTo(getPos()) < r*r;
 	}
 	
-	protected boolean isTouching(Entity other)
-	{
-		float r = getRadius() + other.getRadius();
-		return 0.95 * other.getPos().distanceTo(getPos()) < r;
-	}
-	
 	public abstract boolean isEdible();
 
 	public float getCrowdingFactor() {

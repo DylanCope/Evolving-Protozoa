@@ -133,10 +133,27 @@ public class Renderer extends Canvas
 		if (circleNotVisible(pos, r))
 			return;
 
-		drawOutlinedCircle(g, pos, r, p.getColor());
+		for (Protozoa.Spike spike : p.getSpikes()) {
+			if (r > 0.001 * window.getHeight()) {
+				Stroke s = g.getStroke();
+				g.setColor(p.getColor().darker());
+				g.setStroke(new BasicStroke((int) (r * 0.2)));
+				Vector2 spikeStartPos = p.getDir().unit().rotate(spike.angle).setLength(r).translate(pos);
+				float spikeLen = toRenderSpace(p.getSpikeLength(spike));
+				Vector2 spikeEndPos = spikeStartPos.add(spikeStartPos.sub(pos).setLength(spikeLen));
+				g.drawLine((int) (spikeStartPos.getX()), (int) (spikeStartPos.getY()),
+						   (int) (spikeEndPos.getX()), (int) (spikeEndPos.getY()));
+				g.setStroke(s);
+			}
+		}
+		if (!p.wasJustDamaged) {
+			drawOutlinedCircle(g, pos, r, p.getColor());
+		} else {
+			drawOutlinedCircle(g, pos, r, p.getColor(), Color.RED);
+		}
 		stats.put("Protozoa Rendered", stats.get("Protozoa Rendered") + 1);
 
-		if (r >= 0.005 * window.getHeight())
+		if (r >= 0.005 * window.getHeight() && p.getRetina().numberOfCells() > 0)
 			retina(g, p);
 
 		if (stats.get("FPS") > 10 && r >= 0.01 * window.getHeight()) {
@@ -179,7 +196,7 @@ public class Renderer extends Canvas
 		g.setStroke(s);
 	}
 
-	public void drawOutlinedCircle(Graphics2D g, Vector2 pos, float r, Color c) {
+	public void drawOutlinedCircle(Graphics2D g, Vector2 pos, float r, Color c, Color outline) {
 
 		g.setColor(c);
 		g.fillOval(
@@ -189,7 +206,11 @@ public class Renderer extends Canvas
 				(int)(2*r));
 
 		if (r >= 0.01 * window.getHeight() && !superSimpleRender)
-			drawCircle(g, pos, r, c.darker());
+			drawCircle(g, pos, r, outline);
+	}
+
+	public void drawOutlinedCircle(Graphics2D g, Vector2 pos, float r, Color c) {
+		drawOutlinedCircle(g, pos, r, c, c.darker());
 	}
 	
 	public void pellet(Graphics2D g, Pellet p)

@@ -33,6 +33,8 @@ public final class Settings {
     public static final float minProtozoanGrowthRate = .05f;
     public static final float maxProtozoanGrowthRate = .2f;
     public static final int maxTurnAngle = 25;
+    public static final float spikeGrowthPenalty = .1f;
+    public static final float spikeDamage = 3f;
 
     public static final float globalMutationChance = 0.05f;
     public static final float protozoaInteractRange = 0.15f;

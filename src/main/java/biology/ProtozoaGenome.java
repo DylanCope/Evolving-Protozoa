@@ -9,6 +9,7 @@ import neat.SynapseGene;
 
 import java.awt.*;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 /**
@@ -27,6 +28,7 @@ public class ProtozoaGenome implements Serializable
 
     public static final int actionSpaceSize = 4;
     public static final int nonVisualSensorSize = 4;
+    private Protozoa.Spike[] spikes;
 
     public ProtozoaGenome(ProtozoaGenome parentGenome) {
         retinaSize = parentGenome.retinaSize;
@@ -37,6 +39,7 @@ public class ProtozoaGenome implements Serializable
         growthRate = parentGenome.growthRate;
         colour = parentGenome.colour;
         numMutations = parentGenome.numMutations;
+        spikes = parentGenome.spikes;
     }
 
     public ProtozoaGenome()
@@ -46,6 +49,7 @@ public class ProtozoaGenome implements Serializable
         splitSize = randomSplitSize();
         growthRate = randomGrowthRate();
         colour = randomProtozoaColour();
+        spikes = new Protozoa.Spike[0];
         int numInputs = 3 * retinaSize + nonVisualSensorSize;
         networkGenome = new NetworkGenome(numInputs, actionSpaceSize);
     }
@@ -103,6 +107,14 @@ public class ProtozoaGenome implements Serializable
             networkGenome.addSensor();
             networkGenome.addSensor();
             networkGenome.addSensor();
+            numMutations++;
+        }
+        if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
+            spikes = Arrays.copyOf(spikes, spikes.length+1);
+            Protozoa.Spike spike = new Protozoa.Spike();
+            spike.length = (0.3f + 0.5f * Simulation.RANDOM.nextFloat()) * getRadius();
+            spike.angle = (float) (2 * Math.PI * Simulation.RANDOM.nextFloat());
+            spikes[spikes.length - 1] = spike;
             numMutations++;
         }
         return this;
@@ -189,5 +201,9 @@ public class ProtozoaGenome implements Serializable
 
     public int getNumMutations() {
         return numMutations + networkGenome.getNumMutations();
+    }
+
+    public Protozoa.Spike[] getSpikes() {
+        return spikes;
     }
 }

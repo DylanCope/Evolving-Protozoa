@@ -7,6 +7,7 @@ import neat.NeuralNetwork;
 import utils.Vector2;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -17,7 +18,7 @@ public class Protozoa extends Entity
 	public transient int id = Simulation.RANDOM.nextInt();
 	private float totalConsumption = 0;
 	
-	private ProtozoaGenome genome;
+	private final ProtozoaGenome genome;
 	private Retina retina;
 	private final Brain brain;
 
@@ -27,35 +28,42 @@ public class Protozoa extends Entity
 	private float deathRate = 0;
 	private int nearbyPlants = 0;
 
-	private float splitRadius = Float.MAX_VALUE; // No splitting by default.
+	private final float splitRadius;
+
+	public static class Spike implements Serializable {
+		private static final long serialVersionUID = 1L;
+		public float length;
+		public float angle;
+	}
+
+	private final Spike[] spikes;
+	public boolean wasJustDamaged = false;
 
 	public Protozoa(ProtozoaGenome genome, Tank tank) throws MiscarriageException
 	{
-		this(genome.brain(), genome.retina(), genome.getRadius(), genome.getColour(), tank);
+		super(tank);
+
 		this.genome = genome;
+		brain = genome.brain();
+		retina = genome.retina();
+		spikes = genome.getSpikes();
+
+		setRadius(genome.getRadius());
+		setHealthyColour(genome.getColour());
 		setGrowthRate(genome.getGrowthRate());
 		splitRadius = genome.getSplitRadius();
-	}
 
-	public Protozoa(Tank tank) throws MiscarriageException {
-		this(new ProtozoaGenome(), tank);
-	}
-
-	public Protozoa(Brain brain, Retina retina, float radius, Color healthyColor, Tank tank)
-	{
-		super(tank);
-		setHealthyColour(healthyColor);
-
-		this.brain = brain;
-		this.retina = retina;
 		setPos(new Vector2(0, 0));
 		float t = (float) (2 * Math.PI * Simulation.RANDOM.nextDouble());
 		setVel(new Vector2(
 				(float) (0.1f * Math.cos(t)),
 				(float) (0.1f * Math.sin(t))
 		));
-		this.setRadius(radius);
 		setMaxThinkTime(0.2f);
+	}
+
+	public Protozoa(Tank tank) throws MiscarriageException {
+		this(new ProtozoaGenome(), tank);
 	}
 
 	public void see(Entity e)
@@ -67,7 +75,7 @@ public class Protozoa extends Entity
 		
 		for (Retina.Cell cell : retina) 
 		{
-			float y = (float) (rx*Math.tan(cell.angle));
+			float y = (float) (rx * Math.tan(cell.angle));
 			boolean inView = Math.abs(y - ry) <= e.getRadius() && rx < 0;
 			
 			boolean isBlocked = false;
@@ -90,24 +98,26 @@ public class Protozoa extends Entity
 	}
 
 	public void damage(float damage) {
+		wasJustDamaged = true;
 		setHealth(getHealth() - damage);
 	}
 	
-	public void fight(Protozoa p, float delta)
+	public void attack(Protozoa p, Spike spike, float delta)
 	{
-		float myAttack = (float) (2*getHealth() + 0.3*getRadius() + 2*Simulation.RANDOM.nextDouble());
-		float theirAttack = (float) (2*p.getHealth() + 0.3*p.getRadius() + 2*Simulation.RANDOM.nextDouble());
+		float myAttack = (float) (
+				2*getHealth() +
+				Settings.spikeDamage * getSpikeLength(spike) +
+				2*Simulation.RANDOM.nextDouble()
+		);
+		float theirDefense = (float) (
+				2*p.getHealth() +
+				0.3*p.getRadius() +
+				2*Simulation.RANDOM.nextDouble()
+		);
 
-		if (myAttack > p.shieldFactor * theirAttack) {
-			damage(delta * attackFactor * (myAttack - p.shieldFactor * theirAttack));
-			if (isDead())
-				handleDeath();
-		}
-		else if (theirAttack > shieldFactor * myAttack) {
-			p.damage(delta * attackFactor * (theirAttack - shieldFactor * myAttack));
-			if (p.isDead())
-				p.handleDeath();
-		}
+		if (myAttack > p.shieldFactor * theirDefense)
+			p.damage(delta * attackFactor * (myAttack - p.shieldFactor * theirDefense));
+
 	}
 	
 	public void think(float delta)
@@ -148,15 +158,25 @@ public class Protozoa extends Entity
 			super.burst(Protozoa.class, this::createSplitChild);
 			return;
 		}
+		float r = getRadius() + other.getRadius();
+		float d = other.getPos().distanceTo(getPos());
+		if (other instanceof Protozoa) {
+			Protozoa p = (Protozoa) other;
+			for (Spike spike : spikes) {
+				float spikeLen = getSpikeLength(spike);
+				if (d < r + spikeLen && spikeInContact(spike, spikeLen, p))
+					attack(p, spike, delta);
+			}
+		}
 
-		if (isTouching(other)) {
+		if (0.95 * d < r) {
 
 			if (other instanceof Protozoa)
 			{
 				Protozoa p = (Protozoa) other;
 
-				if (brain.wantToAttack(p))
-					fight(p, delta);
+//				if (brain.wantToAttack(p))
+//					fight(p, delta);
 
 //				else if (brain.wantToMateWith(p) && p.brain.wantToMateWith(this)) {
 //					// Add some negative consequences of mating?
@@ -170,8 +190,15 @@ public class Protozoa extends Entity
 		}
 	}
 
+	private boolean spikeInContact(Spike spike, float spikeLen, Entity other) {
+		Vector2 spikeStartPos = getDir().unit().rotate(spike.angle).setLength(getRadius()).translate(getPos());
+		Vector2 spikeEndPos = spikeStartPos.add(spikeStartPos.sub(getPos()).setLength(spikeLen));
+		return other.getPos().sub(spikeEndPos).len2() < other.getRadius() * other.getRadius();
+	}
+
 	public void handleInteractions(float delta) {
 		nearbyPlants = 0;
+		wasJustDamaged = false;
 		resetRetina();
 		Iterator<Entity> entities = broadCollisionDetection(Settings.protozoaInteractRange);
 		entities.forEachRemaining(e -> interact(e, delta));
@@ -223,6 +250,8 @@ public class Protozoa extends Entity
 		float growthRate = super.getGrowthRate();
 		if (getRadius() > splitRadius)
 			growthRate *= getHealth() * splitRadius / (5 * getRadius());
+		for (Spike spike : spikes)
+			growthRate -= Settings.spikeGrowthPenalty * spike.length;
 		return growthRate;
 	}
 
@@ -306,5 +335,13 @@ public class Protozoa extends Entity
 
 	public int numNearbyPlants() {
 		return nearbyPlants;
+	}
+
+	public Spike[] getSpikes() {
+		return spikes;
+	}
+
+	public float getSpikeLength(Spike spike) {
+		return spike.length * getRadius() / splitRadius;
 	}
 }

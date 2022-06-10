@@ -45,7 +45,7 @@ public class Neuron implements Comparable<Neuron>, Serializable {
     private float state = 0, lastState = 0, nextState = 0;
     private float learningRate = 0;
     private Activation activation;
-    private int depth = 0;
+    private int depth = -1;
     private int graphicsX = -1, graphicsY = -1;
 
     public Neuron(int id, Neuron[] inputs, float[] weights, Type type, Activation activation)

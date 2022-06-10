@@ -6,9 +6,7 @@ import core.Tank;
 import utils.Vector2;
 
 import java.awt.*;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.stream.Stream;
 
 public class PlantPellet extends Pellet {
 
@@ -18,7 +16,7 @@ public class PlantPellet extends Pellet {
         super(radius, tank);
         setGrowthRate((float) (Settings.minPlantGrowth + Settings.plantGrowthRange * Simulation.RANDOM.nextDouble()));
 
-        float range = Settings.maxPlantRadius - Settings.minMaxPlantRadius;
+        float range = Settings.maxPlantBirthRadius - Settings.minMaxPlantRadius;
         maxRadius = (float) (Settings.minMaxPlantRadius + range * Simulation.RANDOM.nextDouble());
 
         setHealthyColour(new Color(
@@ -51,14 +49,15 @@ public class PlantPellet extends Pellet {
     private boolean shouldSplit() {
         return getRadius() > maxRadius &&
                 getCrowdingFactor() < Settings.plantCriticalCrowding &&
-                getHealth() > Settings.minHealthToSplit;
+                getHealth() > Settings.minHealthToSplit &&
+                numCollisions < 2;
     }
 
     @Override
     public void update(float delta) {
         super.update(delta);
         if (getHealth() < 1.0)
-            setHealth(getHealth() + (1 - getHealth()) * getGrowthRate());
+            setHealth(getHealth() + Settings.plantRegen * delta * (1 - getHealth()) * getGrowthRate());
 
         if (shouldSplit())
             burst(PlantPellet.class, r -> new PlantPellet(r, tank));
@@ -89,5 +88,9 @@ public class PlantPellet extends Pellet {
     @Override
     public String getPrettyName() {
         return "Plant";
+    }
+
+    public int burstMultiplier() {
+        return 200;
     }
 }

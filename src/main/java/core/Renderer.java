@@ -32,7 +32,7 @@ public class Renderer extends Canvas
 	private Vector2 pan, panPosTemp;
 	private float zoom;
 	private float targetZoom;
-	private final float initialZoom = 2;
+	private final float initialZoom = 1;
 	private boolean superSimpleRender = false;
 	private final float rotate = 0;
 	private double lastRenderTime = 0;
@@ -40,7 +40,6 @@ public class Renderer extends Canvas
 	private final UI ui;
 
 	private final HashMap<String, Integer> stats = new HashMap<>(5, 1);
-	
 	private final Simulation simulation;
 	private final Window window;
 	
@@ -159,9 +158,9 @@ public class Renderer extends Canvas
 
 	public boolean circleNotVisible(Vector2 pos, float r) {
 		return (pos.getX() - r > window.getWidth())
-				||(pos.getX() + r < 0)
-				||(pos.getY() - r > window.getHeight())
-				||(pos.getY() + r < 0);
+			 ||(pos.getX() + r < 0)
+			 ||(pos.getY() - r > window.getHeight())
+			 ||(pos.getY() + r < 0);
 	}
 
 	public void drawCircle(Graphics2D g, Vector2 pos, float r, Color c) {
@@ -239,12 +238,16 @@ public class Renderer extends Canvas
 
 		if (simulation.inDebugMode() && track != null) {
 			Iterator<Entity> collisionEntities = track.broadCollisionDetection(track.getRadius());
-			collisionEntities.forEachRemaining(e -> drawCollisionBounds(g, e, e.getRadius(), Color.RED.darker()));
+			collisionEntities.forEachRemaining(
+					e -> drawCollisionBounds(g, e, e.getRadius(), Color.RED.darker())
+			);
 
 			if (track instanceof Protozoa) {
 				drawCollisionBounds(g, track, Settings.protozoaInteractRange, Color.WHITE.darker());
 				Iterator<Entity> interactEntities = track.broadCollisionDetection(Settings.protozoaInteractRange);
-				interactEntities.forEachRemaining(e -> drawCollisionBounds(g, e, 1.1f * e.getRadius(), Color.WHITE.darker()));
+				interactEntities.forEachRemaining(
+						e -> drawCollisionBounds(g, e, 1.1f * e.getRadius(), Color.WHITE.darker())
+				);
 			}
 		}
 	}

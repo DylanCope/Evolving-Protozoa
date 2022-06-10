@@ -34,7 +34,9 @@ public class NNBrain implements Brain {
                 inputs[i++] = 0f;
             }
         }
-        inputs[i] = p.getHealth();
+        inputs[i++] = p.getHealth() * 2 - 1;
+        inputs[i++] = p.getRadius() / p.getGenome().getSplitRadius();
+        inputs[i] = 2 * p.getCrowdingFactor() / 3 - 1;
 
         network.setInput(inputs);
         network.tick();
@@ -59,12 +61,12 @@ public class NNBrain implements Brain {
 
     @Override
     public boolean wantToAttack(Protozoa p) {
-        return outputs[2] > 0.5;
+        return outputs[2] > 0;
     }
 
     @Override
     public boolean wantToMateWith(Protozoa p) {
-        return outputs[3] > 0.5;
+        return outputs[3] > 0;
     }
 
     @Override

@@ -1,16 +1,16 @@
 package biology;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.io.Serializable;
-import java.lang.reflect.Type;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
 import com.google.common.collect.Iterators;
-import core.*;
+import core.ChunkManager;
+import core.Settings;
+import core.Simulation;
+import core.Tank;
 import utils.Vector2;
+
+import java.awt.*;
+import java.io.Serializable;
+import java.util.List;
+import java.util.*;
 
 public abstract class Entity implements Serializable
 {
@@ -28,11 +28,17 @@ public abstract class Entity implements Serializable
 	private float health = 1f;
 	private float growthRate = 0.0f;
 	private int generation = 1;
+	protected int numCollisions = 0;
 	
 	private boolean dead = false;
 	private float nutrition;
 	private float crowdingFactor;
 	protected boolean hasHandledDeath = false;
+
+	@FunctionalInterface
+	public interface EntityBuilder<T, R> {
+		R apply(T t) throws MiscarriageException;
+	}
 
 	Tank tank;
 
@@ -52,6 +58,7 @@ public abstract class Entity implements Serializable
 	}
 
 	public void handleCollisions(float delta) {
+		numCollisions = 0;
 		Iterator<Entity> entities = broadCollisionDetection(getRadius());
 		entities.forEachRemaining(e -> handlePotentialCollision(e, delta));
 	}
@@ -140,10 +147,8 @@ public abstract class Entity implements Serializable
 
 		if (sqDist < r*r)
 		{
-			if (e.getVel().len2()*e.getRadius() > getVel().len2()*getRadius())
-				getPos().moveAway(e.getPos(), r);
-			else
-				e.getPos().moveAway(getPos(), r);
+			getPos().moveAway(e.getPos(), r);
+			e.getPos().moveAway(getPos(), r);
 		}
 	}
 
@@ -210,6 +215,8 @@ public abstract class Entity implements Serializable
 
 	public void setRadius(float radius) {
 		this.radius = radius;
+		if (this.radius > Settings.maxEntityRadius)
+			this.radius = Settings.maxEntityRadius;
 	}
 
 	public boolean isDead() {
@@ -302,12 +309,18 @@ public abstract class Entity implements Serializable
 		this.generation = generation;
 	}
 
-	protected <T extends Entity> void burst(Class<T> type, Function<Float, T> createChild) {
+	public int burstMultiplier() {
+		return 20;
+	}
+
+	public <T extends Entity> void burst(Class<T> type, EntityBuilder<Float, T> createChild) {
 		setDead(true);
 		hasHandledDeath = true;
 
 		float angle = (float) (2 * Math.PI * Simulation.RANDOM.nextDouble());
-		int nChildren = 2 + Simulation.RANDOM.nextInt(3);
+		int maxChildren = (int) (burstMultiplier() * getRadius() / Settings.maxEntityRadius);
+
+		int nChildren = (maxChildren <= 1) ? 2 : 2 + Simulation.RANDOM.nextInt(maxChildren);
 
 		for (int i = 0; i < nChildren; i++) {
 			Vector2 dir = new Vector2((float) Math.cos(angle), (float) Math.sin(angle));
@@ -317,12 +330,14 @@ public abstract class Entity implements Serializable
 			int maxEntities = tank.entityCapacities.getOrDefault(type, 0);
 			if (nEntities > maxEntities)
 				return;
+			try {
+				T e = createChild.apply(getRadius() * p);
+				e.setPos(getPos().add(dir.mul(2 * e.getRadius())));
+				e.setGeneration(getGeneration() + 1);
+				children.add(e);
+				tank.add(e);
+			} catch (MiscarriageException ignored) {}
 
-			T e = createChild.apply(getRadius() * p);
-			e.setPos(getPos().add(dir.mul(2*e.getRadius())));
-			e.setGeneration(getGeneration() + 1);
-			children.add(e);
-			tank.add(e);
 			angle += 2 * Math.PI / nChildren;
 		}
 	}

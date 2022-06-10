@@ -110,14 +110,8 @@ public class Tank implements Iterable<Entity>, Serializable
 	}
 
 	public void add(Entity e) {
-		if (e instanceof PlantPellet &&
-				entityCounts.getOrDefault(PlantPellet.class, 0) >= Settings.maxPlants)
-			return;
-		if (e instanceof Protozoa &&
-				entityCounts.getOrDefault(Protozoa.class, 0) >= Settings.maxProtozoa)
-			return;
-		if (e instanceof MeatPellet &&
-				entityCounts.getOrDefault(MeatPellet.class, 0) >= Settings.maxMeat)
+		if (entityCounts.getOrDefault(e.getClass(), 0)
+				>= entityCapacities.getOrDefault(e.getClass(), 0))
 			return;
 
 		totalEntitiesAdded++;
@@ -126,10 +120,7 @@ public class Tank implements Iterable<Entity>, Serializable
 		if (e instanceof Protozoa)
 			handleNewProtozoa((Protozoa) e);
 
-		if (!entityCounts.containsKey(e.getClass()))
-			entityCounts.put(e.getClass(), 1);
-		else
-			entityCounts.put(e.getClass(), 1 + entityCounts.get(e.getClass()));
+		entityCounts.put(e.getClass(), 1 + entityCounts.getOrDefault(e.getClass(), 0));
 	}
 
 	public Collection<Entity> getEntities() {

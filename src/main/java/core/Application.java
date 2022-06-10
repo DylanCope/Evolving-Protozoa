@@ -11,11 +11,11 @@ public class Application
 	public static Simulation simulation;
 	public static Window window;
 	
-	public static final float refreshDelay = 1000 / 30f;
+	public static final float refreshDelay = 1000 / 60f;
 	
 	public static void main(String[] args)
 	{
-		simulation = new Simulation(Settings.simulationSeed, "pontus-weepinbell-maiores");
+		simulation = new Simulation(Settings.simulationSeed);
 		try {
 			if (!(args.length > 0 && args[0].equals("noui"))) {
 				TextStyle.loadFonts();

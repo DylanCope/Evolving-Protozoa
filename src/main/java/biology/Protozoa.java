@@ -9,6 +9,7 @@ import utils.Vector2;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 
 public class Protozoa extends Entity 
 {
@@ -23,12 +24,12 @@ public class Protozoa extends Entity
 
 	private float shieldFactor = 1.3f;
 	private final float attackFactor = 10f;
-	private final float consumeFactor = 10f;
+	private final float consumeFactor = 50f;
 	private float deathRate = 0;
 
 	private float splitRadius = Float.MAX_VALUE; // No splitting by default.
 
-	public Protozoa(ProtozoaGenome genome, Tank tank)
+	public Protozoa(ProtozoaGenome genome, Tank tank) throws MiscarriageException
 	{
 		this(genome.brain(), genome.retina(), genome.getRadius(), genome.getColour(), tank);
 		this.genome = genome;
@@ -36,7 +37,7 @@ public class Protozoa extends Entity
 		splitRadius = genome.getSplitRadius();
 	}
 
-	public Protozoa(Tank tank) {
+	public Protozoa(Tank tank) throws MiscarriageException {
 		this(new ProtozoaGenome(), tank);
 	}
 
@@ -84,7 +85,7 @@ public class Protozoa extends Entity
 	{
 		float consumed = consumeFactor * delta * e.getNutrition();
 		totalConsumption += consumed;
-		setHealth(getHealth() + consumed);
+		setHealth(getHealth() + Settings.eatingConversionRation * consumed);
 		e.setHealth(e.getHealth() - consumed);
 	}
 
@@ -120,7 +121,7 @@ public class Protozoa extends Entity
 		return getRadius() > splitRadius && getHealth() > Settings.minHealthToSplit;
 	}
 
-	private Protozoa createSplitChild(float r) {
+	private Protozoa createSplitChild(float r) throws MiscarriageException {
 		float stuntingFactor = r / getRadius();
 		Protozoa child = genome.createChild(tank);
 		child.setRadius(stuntingFactor * child.getRadius());
@@ -198,7 +199,7 @@ public class Protozoa extends Entity
 	public HashMap<String, Float> getStats() {
 		HashMap<String, Float> stats = super.getStats();
 		stats.put("Growth Rate", Settings.statsDistanceScalar * getGrowthRate());
-		stats.put("Death Rate", deathRate);
+		stats.put("Death Rate", 100 * deathRate);
 		stats.put("Split Radius", Settings.statsDistanceScalar * splitRadius);
 		if (genome != null) {
 			stats.put("Mutations", (float) genome.getNumMutations());
@@ -221,7 +222,7 @@ public class Protozoa extends Entity
 	}
 
 	public void age(float delta) {
-		deathRate = getRadius() * delta * 50;
+		deathRate = getRadius() * delta * Settings.protozoaStarvationFactor;
 		deathRate *= 0.75f + 0.25f * getSpeed();
 		setHealth(getHealth() * (1 - deathRate));
 	}

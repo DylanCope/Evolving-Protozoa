@@ -36,6 +36,6 @@ public class MeatPellet extends Pellet {
 
     @Override
     public float getNutrition() {
-        return super.getNutrition() * (3 * getHealth() - 1);
+        return super.getNutrition() * (10 * getHealth() - 2);
     }
 }

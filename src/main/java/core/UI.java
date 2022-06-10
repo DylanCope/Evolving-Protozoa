@@ -186,8 +186,23 @@ public class UI
 					Neuron inputNeuron = neuron.getInputs()[i];
 					float weight = neuron.getWeights()[i];
 					g.setStroke(new BasicStroke((int) (0.3 * r * Math.abs(weight))));
-					g.drawLine(neuron.getGraphicsX(), neuron.getGraphicsY(),
-							inputNeuron.getGraphicsX(), inputNeuron.getGraphicsY());
+
+					if (neuron == inputNeuron) {
+						g.drawOval(
+								neuron.getGraphicsX(),
+								neuron.getGraphicsY() - 2*r,
+								3*r,
+								3*r);
+					} else if (inputNeuron.getDepth() == neuron.getDepth()) {
+						int width = boxWidth / (2 * networkDepth);
+						int height = Math.abs(neuron.getGraphicsY() - inputNeuron.getGraphicsY());
+						int x = neuron.getGraphicsX() - width / 2;
+						int y = Math.min(neuron.getGraphicsY(), inputNeuron.getGraphicsY());
+						g.drawArc(x, y, width, height,-90, 180);
+					} else {
+						g.drawLine(neuron.getGraphicsX(), neuron.getGraphicsY(),
+								inputNeuron.getGraphicsX(), inputNeuron.getGraphicsY());
+					}
 				}
 				g.setStroke(s);
 			}
@@ -213,10 +228,23 @@ public class UI
 					2*r,
 					2*r);
 
-			g.setColor(Color.WHITE.darker());
+
+			if (simulation.inDebugMode())
+				if (neuron.getType().equals(Neuron.Type.HIDDEN))
+					g.setColor(Color.YELLOW.darker());
+				else if (neuron.getType().equals(Neuron.Type.SENSOR))
+					g.setColor(Color.BLUE.brighter());
+				else
+					g.setColor(Color.WHITE.darker());
+			else {
+				g.setColor(Color.WHITE.darker());
+			}
+			if (neuron.getDepth() == networkDepth && neuron.getType().equals(Neuron.Type.HIDDEN))
+				g.setColor(new Color(150, 30, 150));
 
 			Stroke s = g.getStroke();
 			g.setStroke(new BasicStroke((int) (0.3*r)));
+
 			g.drawOval(
 					neuron.getGraphicsX() - r,
 					neuron.getGraphicsY() - r,

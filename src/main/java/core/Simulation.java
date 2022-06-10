@@ -1,10 +1,10 @@
 package core;
 
 import biology.MeatPellet;
+import biology.MiscarriageException;
 import biology.PlantPellet;
 import biology.Protozoa;
 import com.github.javafaker.Faker;
-import neat.SynapseGene;
 import utils.FileIO;
 import utils.Utils;
 
@@ -52,6 +52,7 @@ public class Simulation
 		genomeFile = "saves/" + name + "/genomes.csv";
 		historyFile = "saves/" + name + "/history.csv";
 
+		newSaveDir();
 		loadMostRecentTank();
 		loadSettings();
 	}
@@ -66,8 +67,15 @@ public class Simulation
 		try {
 			Files.createDirectories(Paths.get("saves/" + name));
 			Files.createDirectories(Paths.get("saves/" + name + "/tank"));
-			Files.createFile(Paths.get(genomeFile));
-			Files.createFile(Paths.get(historyFile));
+
+			Path genomePath = Paths.get(genomeFile);
+			if (!Files.exists(genomePath))
+				Files.createFile(genomePath);
+
+			Path historyPath = Paths.get(historyFile);
+			if (!Files.exists(historyPath))
+				Files.createFile(historyPath);
+
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -88,10 +96,14 @@ public class Simulation
 	public void initDefaultTank()
 	{
 		tank = new Tank();
+		loadSettings();
 		tank.setGenomeFile(genomeFile);
 
-		for (int i = 0; i < Settings.numInitialProtozoa; i++)
-			tank.addRandom(new Protozoa(tank));
+		for (int i = 0; i < Settings.numInitialProtozoa; i++) {
+			try {
+				tank.addRandom(new Protozoa(tank));
+			} catch (MiscarriageException ignored) {}
+		}
 
 		for (int i = 0; i < Settings.numInitialPlantPellets; i++)
 			tank.addRandom(new PlantPellet(tank));
@@ -112,16 +124,20 @@ public class Simulation
 
 	public void loadMostRecentTank() {
 		Path dir = Paths.get("saves/" + name + "/tank");
+		if (Files.exists(dir))
+			try (Stream<Path> pathStream = Files.list(dir)) {
+				Optional<Path> lastFilePath = pathStream
+						.filter(f -> !Files.isDirectory(f))
+						.max(Comparator.comparingLong(f -> f.toFile().lastModified()));
 
-		try (Stream<Path> pathStream = Files.list(dir)) {
-			Optional<Path> lastFilePath = pathStream
-					.filter(f -> !Files.isDirectory(f))
-					.max(Comparator.comparingLong(f -> f.toFile().lastModified()));
-
-			lastFilePath.ifPresent(path -> loadTank(path.toString().replace(".dat", "")));
-		} catch (IOException e) {
-			initDefaultTank();
-		}
+				lastFilePath.ifPresentOrElse(
+						path -> loadTank(path.toString().replace(".dat", "")),
+						this::initDefaultTank
+				);
+			} catch (IOException e) {
+				initDefaultTank();
+			}
+		else initDefaultTank();
 	}
 
 	public void simulate() {

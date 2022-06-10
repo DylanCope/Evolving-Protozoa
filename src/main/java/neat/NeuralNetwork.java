@@ -1,5 +1,7 @@
 package neat;
 
+import biology.MiscarriageException;
+
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,6 +23,10 @@ public class NeuralNetwork implements Serializable
     public NeuralNetwork(Neuron[] neurons, int nInputs, int nOutputs) {
         this.neurons = neurons;
         this.nInputs = nInputs;
+
+        for (Neuron neuron : neurons)
+            if (neuron == null)
+                throw new IllegalArgumentException("Cannot handle null neurons.");
 
         inputNeurons = new Neuron[nInputs];
         int i = 0;
@@ -51,28 +57,34 @@ public class NeuralNetwork implements Serializable
     private int calculateDepth() {
         boolean[] visited = new boolean[neurons.length];
         Arrays.fill(visited, false);
-        int depth = calculateDepth(0, outputNeurons, visited);
-        boolean pushback = false;
+        int depth = calculateDepth(outputNeurons, visited);
+
+        for (Neuron n : outputNeurons)
+            n.setDepth(depth);
+
+        for (Neuron n : inputNeurons)
+            n.setDepth(0);
+
         for (Neuron n : neurons)
-            if (n.getType().equals(Neuron.Type.HIDDEN) && n.getDepth() == depth) {
-                pushback = true;
-                break;
-            }
-        if (pushback) {
-            for (Neuron out : outputNeurons)
-                out.setDepth(depth + 1);
-            depth++;
-        }
+            if (n.getDepth() == -1)
+                n.setDepth(depth);
+
         return depth;
     }
 
-    private int calculateDepth(int depth, Neuron[] explore, boolean[] visited) {
-        int maxDepth = depth;
-        for (Neuron n : explore) {
-            if (visited[n.getId()] | n.getType().equals(Neuron.Type.SENSOR))
-                continue;
+    private int calculateDepth(Neuron[] explore, boolean[] visited) {
+
+        List<Neuron> unexplored = Arrays.stream(explore)
+                .filter(n -> !visited[n.getId()])
+                .collect(Collectors.toList());
+
+        for (Neuron n : explore)
             visited[n.getId()] = true;
-            int neuronDepth = calculateDepth(depth + 1, n.getInputs(), visited);
+
+        int maxDepth = 0;
+
+        for (Neuron n : unexplored) {
+            int neuronDepth = 1 + calculateDepth(n.getInputs(), visited);
             n.setDepth(neuronDepth);
             maxDepth = Math.max(maxDepth, neuronDepth);
         }

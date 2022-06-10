@@ -41,7 +41,7 @@ public abstract class Pellet extends Entity
 
 	@Override
 	public float getNutrition() {
-		return 10 * getRadius();
+		return 3 * getRadius();
 	}
 
 }

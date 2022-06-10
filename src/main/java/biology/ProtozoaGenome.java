@@ -26,7 +26,7 @@ public class ProtozoaGenome implements Serializable
     private int numMutations = 0;
 
     public static final int actionSpaceSize = 4;
-    public static final int nonVisualSensorSize = 1;
+    public static final int nonVisualSensorSize = 3;
 
     public ProtozoaGenome(ProtozoaGenome parentGenome) {
         retinaSize = parentGenome.retinaSize;
@@ -109,9 +109,12 @@ public class ProtozoaGenome implements Serializable
         );
     }
 
-    public Brain brain()
-    {
-        return new NNBrain(networkGenome.phenotype());
+    public Brain brain() throws MiscarriageException {
+        try {
+            return new NNBrain(networkGenome.phenotype());
+        } catch (IllegalArgumentException e) {
+            throw new MiscarriageException();
+        }
     }
 
     public Retina retina()
@@ -133,7 +136,7 @@ public class ProtozoaGenome implements Serializable
     }
 
 
-    public Protozoa phenotype(Tank tank)
+    public Protozoa phenotype(Tank tank) throws MiscarriageException
     {
         return new Protozoa(this, tank);
     }
@@ -155,8 +158,7 @@ public class ProtozoaGenome implements Serializable
         return crossover(other).map(ProtozoaGenome::mutate);
     }
 
-    public Protozoa createChild(Tank tank)
-    {
+    public Protozoa createChild(Tank tank) throws MiscarriageException {
         ProtozoaGenome childGenome = new ProtozoaGenome(this);
         return childGenome.mutate().phenotype(tank);
     }
@@ -171,8 +173,8 @@ public class ProtozoaGenome implements Serializable
         for (SynapseGene[] geneRow : networkGenome.getSynapseGenes())
             for (SynapseGene gene : geneRow)
                 s.append(gene.toString()).append(",");
-        for (NeuronGene gene : networkGenome.getNeuronGenes())
-            s.append(gene.toString()).append(",");
+//        for (NeuronGene gene : networkGenome.getNeuronGenes())
+//            s.append(gene.toString()).append(",");
         return s.toString();
     }
 

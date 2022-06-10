@@ -7,10 +7,8 @@ import java.io.Serializable;
 
 public class SynapseGene implements Comparable<SynapseGene>, Serializable
 {
-    private int id;
-
     private static int globalInnovation = 0;
-    private int innovation;
+    private final int innovation;
     private NeuronGene in, out;
     private float weight;
     private boolean disabled;
@@ -60,20 +58,8 @@ public class SynapseGene implements Comparable<SynapseGene>, Serializable
         this.disabled = disabled;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public int getInnovation() {
         return innovation;
-    }
-
-    public void setInnovation(int innovation) {
-        this.innovation = innovation;
     }
 
     public NeuronGene getIn() {

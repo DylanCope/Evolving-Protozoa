@@ -11,6 +11,7 @@ import java.util.HashMap;
 public class PlantPellet extends Pellet {
 
     private final float maxRadius;
+    private float idealRadius;
 
     public PlantPellet(float radius, Tank tank) {
         super(radius, tank);
@@ -51,6 +52,11 @@ public class PlantPellet extends Pellet {
                 getCrowdingFactor() < Settings.plantCriticalCrowding &&
                 getHealth() > Settings.minHealthToSplit &&
                 numCollisions < 2;
+    }
+
+    @Override
+    public float getRadius() {
+        return (0.3f + 0.7f * getHealth()) * super.getRadius();
     }
 
     @Override

@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 public class ProtozoaGenome implements Serializable
 {
     private final NetworkGenome networkGenome;
-    private final int retinaSize;
+    private int retinaSize;
     private float radius;
     private float growthRate;
     private float splitSize;
@@ -26,7 +26,7 @@ public class ProtozoaGenome implements Serializable
     private int numMutations = 0;
 
     public static final int actionSpaceSize = 4;
-    public static final int nonVisualSensorSize = 3;
+    public static final int nonVisualSensorSize = 4;
 
     public ProtozoaGenome(ProtozoaGenome parentGenome) {
         retinaSize = parentGenome.retinaSize;
@@ -96,6 +96,13 @@ public class ProtozoaGenome implements Serializable
         }
         if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
             colour = randomProtozoaColour();
+            numMutations++;
+        }
+        if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
+            retinaSize++;
+            networkGenome.addSensor();
+            networkGenome.addSensor();
+            networkGenome.addSensor();
             numMutations++;
         }
         return this;
@@ -173,8 +180,6 @@ public class ProtozoaGenome implements Serializable
         for (SynapseGene[] geneRow : networkGenome.getSynapseGenes())
             for (SynapseGene gene : geneRow)
                 s.append(gene.toString()).append(",");
-//        for (NeuronGene gene : networkGenome.getNeuronGenes())
-//            s.append(gene.toString()).append(",");
         return s.toString();
     }
 

@@ -9,7 +9,6 @@ import utils.Vector2;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
 
 public class Protozoa extends Entity 
 {
@@ -26,6 +25,7 @@ public class Protozoa extends Entity
 	private final float attackFactor = 10f;
 	private final float consumeFactor = 50f;
 	private float deathRate = 0;
+	private int nearbyPlants = 0;
 
 	private float splitRadius = Float.MAX_VALUE; // No splitting by default.
 
@@ -130,7 +130,7 @@ public class Protozoa extends Entity
 
 	public void interact(Entity other, float delta) {
 
-		if (other == this)
+		if (other == this || other.getPos().sub(getPos()).len() > Settings.protozoaInteractRange)
 			return;
 
 		if (isDead()) {
@@ -138,7 +138,11 @@ public class Protozoa extends Entity
 			return;
 		}
 
-		see(other);
+		if (retina.numberOfCells() > 0)
+			see(other);
+
+		if (other instanceof PlantPellet)
+			nearbyPlants++;
 
 		if (shouldSplit()) {
 			super.burst(Protozoa.class, this::createSplitChild);
@@ -167,6 +171,7 @@ public class Protozoa extends Entity
 	}
 
 	public void handleInteractions(float delta) {
+		nearbyPlants = 0;
 		resetRetina();
 		Iterator<Entity> entities = broadCollisionDetection(Settings.protozoaInteractRange);
 		entities.forEachRemaining(e -> interact(e, delta));
@@ -297,5 +302,9 @@ public class Protozoa extends Entity
 
 	public Brain getBrain() {
 		return brain;
+	}
+
+	public int numNearbyPlants() {
+		return nearbyPlants;
 	}
 }

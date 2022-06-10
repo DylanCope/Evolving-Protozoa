@@ -96,7 +96,8 @@ public class ChunkManager implements Serializable {
     }
 
     public void add(Entity e) {
-        entities.add(e);
+        if (e != null)
+            entities.add(e);
     }
 
     public Chunk[] getChunks() {

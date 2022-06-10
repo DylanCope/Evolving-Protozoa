@@ -152,7 +152,7 @@ public class Simulation
 				update();
 			}
 
-			if (tank.numberOfProtozoa() <= 0) {
+			if (tank.numberOfProtozoa() <= 0 && Settings.finishOnProtozoaExtinction) {
 				simulate = false;
 				System.out.println();
 				System.out.println("Finished simulation. All protozoa died.");

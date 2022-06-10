@@ -212,10 +212,12 @@ public class UI
 			Color colour;
 			double state = neuron.getLastState();
 			if (state > 0) {
+				state = state > 1 ? 1 : state;
 				colour = new Color(
 						30, (int) (50 + state * 150), 30
 				);
 			} else {
+				state = state < -1 ? -1 : state;
 				colour = new Color(
 						(int) (50 - state * 150), 30, 30
 				);

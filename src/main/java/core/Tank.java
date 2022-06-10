@@ -1,10 +1,8 @@
 package core;
 
-import java.awt.Graphics;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import biology.*;
 import utils.FileIO;
@@ -78,7 +76,7 @@ public class Tank implements Iterable<Entity>, Serializable
 //				.forEach(chunk -> chunk.getEntities().forEach(e -> e.handleCollisions(delta)));
 
 		entities.parallelStream().forEach(e -> updateEntity(e, delta));
-		entities.parallelStream().forEach(e -> e.handleCollisions(delta));
+		entities.parallelStream().forEach(e -> e.physicsUpdate(delta));
 		entities.parallelStream().forEach(this::handleDeadEntities);
 
 	}

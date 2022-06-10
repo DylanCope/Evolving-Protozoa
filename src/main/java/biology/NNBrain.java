@@ -3,9 +3,6 @@ package biology;
 import core.Settings;
 import neat.NeuralNetwork;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class NNBrain implements Brain {
 
     public final NeuralNetwork network;
@@ -23,6 +20,11 @@ public class NNBrain implements Brain {
     public void tick(Protozoa p)
     {
         int i = 0;
+        inputs[i++] = p.getHealth() * 2 - 1;
+        inputs[i++] = 2 * p.getRadius() / p.getGenome().getSplitRadius() - 1;
+        inputs[i++] = 2 * p.getCrowdingFactor() / 3 - 1;
+        inputs[i++] = p.numNearbyPlants() / 50f - 1;
+
         for (Retina.Cell cell : p.getRetina()) {
             if (cell.entity != null) {
                 inputs[i++] = -1 + 2 * cell.colour.getRed() / 255f;
@@ -34,9 +36,6 @@ public class NNBrain implements Brain {
                 inputs[i++] = 0f;
             }
         }
-        inputs[i++] = p.getHealth() * 2 - 1;
-        inputs[i++] = p.getRadius() / p.getGenome().getSplitRadius();
-        inputs[i] = 2 * p.getCrowdingFactor() / 3 - 1;
 
         network.setInput(inputs);
         network.tick();
@@ -54,8 +53,8 @@ public class NNBrain implements Brain {
     public float speed(Protozoa p)
     {
         return Math.min(
-                Settings.maxVel * outputs[1],
-                Settings.maxVel
+                Settings.maxSpeed * outputs[1],
+                Settings.maxSpeed
         );
     }
 

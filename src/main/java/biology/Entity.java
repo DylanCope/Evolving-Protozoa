@@ -16,10 +16,10 @@ public abstract class Entity implements Serializable
 {
 	private static final long serialVersionUID = -4333766895269415282L;
 	private Vector2 pos;
+	private Vector2 vel = new Vector2(0, 0);
+	private final Vector2 force = new Vector2(0, 0);
 	private float radius;
-	private float direction = 0;
 	private float speed = 0;
-	private float interactAngle = (float) (Math.PI / 8);
 	private Color healthyColour, fullyDegradedColour;
 	
 	private float thinkTime = 0f;
@@ -57,10 +57,24 @@ public abstract class Entity implements Serializable
 		move(delta);
 	}
 
-	public void handleCollisions(float delta) {
+	public void physicsUpdate(float delta) {
 		numCollisions = 0;
-		Iterator<Entity> entities = broadCollisionDetection(getRadius());
+		Iterator<Entity> entities = broadCollisionDetection(radius);
 		entities.forEachRemaining(e -> handlePotentialCollision(e, delta));
+//		force.set(0, 0);
+//		applyForce(getDragForce());
+//		vel.translate(force.scale(delta / getMass()));
+		vel.scale(1f - delta * Settings.tankViscosity);
+	}
+
+	public void applyForce(Vector2 f) {
+		force.translate(f);
+	}
+
+	public Vector2 getDragForce() {
+		// https://galileo.phys.virginia.edu/classes/152.mf1i.spring02/Stokes_Law.htm
+		float fMag = (float) (6 * Math.PI * getRadius() * Settings.tankViscosity * vel.len());
+		return vel.unit().scale(-fMag);
 	}
 
 	public Iterator<Entity> broadCollisionDetection(float range) {
@@ -82,7 +96,7 @@ public abstract class Entity implements Serializable
 	}
 
 	public void grow(float delta) {
-		setRadius(getRadius() * (1 + getGrowthRate() * delta));
+		setRadius(radius * (1 + getGrowthRate() * delta));
 	}
 
 	public void setGrowthRate(float gr) {
@@ -102,17 +116,6 @@ public abstract class Entity implements Serializable
 			(int) (2*radius),
 			(int) (2*radius)
 		);
-	}
-
-	public boolean tick(float delta)
-	{
-		thinkTime += delta;
-
-		if (thinkTime >= maxThinkTime) {
-			thinkTime = 0;
-			return true;
-		}
-		return false;
 	}
 	
 	public boolean isCollidingWith(Entity other)
@@ -149,7 +152,23 @@ public abstract class Entity implements Serializable
 		{
 			getPos().moveAway(e.getPos(), r);
 			e.getPos().moveAway(getPos(), r);
+
+			Vector2 v1 = elasticCollision(e);
+			Vector2 v2 = e.elasticCollision(this);
+			setVel(v1);
+			e.setVel(v2);
 		}
+	}
+
+	public Vector2 elasticCollision(Entity e) {
+
+		// https://en.wikipedia.org/wiki/Elastic_collision
+
+		float mr = 2 * e.getMass() / (e.getMass() + getMass());
+		Vector2 dx = getPos().sub(e.getPos());
+		Vector2 dv = getVel().sub(e.getVel());
+		float k = dv.dot(dx) / dx.len2();
+		return getVel().sub(dx.scale(mr * k));
 	}
 
 	public void move(float delta)
@@ -228,34 +247,24 @@ public abstract class Entity implements Serializable
 	}
 
 	public Vector2 getDir() {
-		return new Vector2(
-				(float) Math.cos(direction),
-				(float) Math.sin(direction));
-	}
-
-	public void setDir(Vector2 dir) {
-		this.direction = dir.angle();
+		return vel.unit();
 	}
 
 	public void rotate(float theta) {
-		this.direction += theta;
-		if (this.direction < 0)
-			this.direction += Math.PI * 2;
-		if (this.direction > Math.PI * 2)
-			this.direction -= Math.PI * 2;
+		vel.turn(theta);
 	}
 
 	public Vector2 getVel() {
-		return getDir().mul(speed);
+		return vel;
 	}
 
 	public void setVel(Vector2 vel) {
-		this.speed = vel.len();
-		if (this.speed != 0)
-			setDir(vel.mul(1 / this.speed));
+		this.vel = vel;
 	}
 
-	public void setSpeed(float speed) { this.speed = speed; }
+	public void setSpeed(float speed) {
+		vel.setLength(speed);
+	}
 
 	public float getSpeed() { return speed; }
 
@@ -344,6 +353,15 @@ public abstract class Entity implements Serializable
 
 	public Collection<Entity> getChildren() {
 		return children;
+	}
+
+	public float getMass() {
+		float r = getRadius();
+		return (float) ((4 / 3) * Math.PI * r * r * r * getMassDensity());
+	}
+
+	public float getMassDensity() {
+		return 1f;
 	}
 
 //	@Override

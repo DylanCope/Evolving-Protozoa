@@ -65,13 +65,22 @@ public class Vector2 implements Serializable
 		float s = (float) Math.sin(angle);
 		return new Vector2(x*c - y*s, x*s + y*c);
 	}
+
+	public void turn(float angle) {
+		float c = (float) Math.cos(angle);
+		float s = (float) Math.sin(angle);
+		float xNew = x*c - y*s;
+		float yNew = x*s + y*c;
+		x = xNew;
+		y = yNew;
+	}
 	
 	public Vector2 unit()
 	{
 		float len = len();
 		if (len == 0)
 			return new Vector2(0, 0);
-		return new Vector2(getX() / len, getY() / len);
+		return new Vector2(x / len, y / len);
 	}
 	
 	public float angle() {
@@ -144,5 +153,10 @@ public class Vector2 implements Serializable
 		float l = (float) Math.sqrt(dx*dx + dy*dy);
 		x = other.getX() + dx * amount / l;
 		y = other.getY() + dy * amount / l;
+	}
+
+	public void set(float x, float y) {
+		this.x = x;
+		this.y = y;
 	}
 }

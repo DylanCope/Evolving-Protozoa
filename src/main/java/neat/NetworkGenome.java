@@ -74,6 +74,21 @@ public class NetworkGenome implements Serializable
 		this.defaultActivation = defaultActivation;
 	}
 
+
+	public void addSensor() {
+		NeuronGene n = new NeuronGene(
+				nNeuronGenes++, Neuron.Type.SENSOR, Neuron.Activation.LINEAR
+		);
+
+		sensorNeuronGenes = Arrays.copyOf(sensorNeuronGenes, sensorNeuronGenes.length + 1);
+		sensorNeuronGenes[sensorNeuronGenes.length - 1] = n;
+		nSensors++;
+
+		resizeSynapseMatrix();
+		for (int i = 0; i < outputNeuronGenes.length; i++)
+			synapseGenes[n.getId()][outputNeuronGenes[i].getId()] = new SynapseGene(n, outputNeuronGenes[i]);
+	}
+
 	private void resizeSynapseMatrix() {
 		SynapseGene[][] newSynapseGenes = new SynapseGene[nNeuronGenes][nNeuronGenes];
 		for (int i = 0; i < synapseGenes.length; i++)

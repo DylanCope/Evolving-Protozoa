@@ -15,15 +15,12 @@ import java.util.*;
 public abstract class Entity implements Serializable
 {
 	private static final long serialVersionUID = -4333766895269415282L;
-	private Vector2 pos;
+	private Vector2 pos, prevPos;
 	private Vector2 vel = new Vector2(0, 0);
-	private final Vector2 force = new Vector2(0, 0);
+	private final Vector2 acc = new Vector2(0, 0);
 	private float radius;
-	private float speed = 0;
 	private Color healthyColour, fullyDegradedColour;
 	
-	private float thinkTime = 0f;
-	private float maxThinkTime;
 	private float timeAlive = 0f;
 	private float health = 1f;
 	private float growthRate = 0.0f;
@@ -52,29 +49,44 @@ public abstract class Entity implements Serializable
 	
 	public void update(float delta) {
 		timeAlive += delta;
+	}
+
+	public void resetPhysics() {
+		if (prevPos == null)
+			prevPos = pos;
+		acc.set(0, 0);
 		crowdingFactor = 0;
-		grow(delta);
-		move(delta);
 	}
 
 	public void physicsUpdate(float delta) {
+		float subStepDelta = delta / Settings.physicsSubSteps;
 		numCollisions = 0;
-		Iterator<Entity> entities = broadCollisionDetection(radius);
-		entities.forEachRemaining(e -> handlePotentialCollision(e, delta));
-//		force.set(0, 0);
+		for (int i = 0; i < Settings.physicsSubSteps; i++) {
+			Iterator<Entity> entities = broadCollisionDetection(radius);
+			entities.forEachRemaining(e -> handlePotentialCollision(e, subStepDelta));
 //		applyForce(getDragForce());
+			acc.translate(getDragAcceleration());
+//			acc.translate(getBrownianAcceleration());
 //		vel.translate(force.scale(delta / getMass()));
-		vel.scale(1f - delta * Settings.tankViscosity);
+//			vel.scale(1f - 2*subStepDelta);
+			move(subStepDelta);
+			prevPos = pos;
+		}
+		crowdingFactor /= Settings.physicsSubSteps;
 	}
 
-	public void applyForce(Vector2 f) {
-		force.translate(f);
+	private Vector2 getBrownianAcceleration() {
+		double angle = 2 * Math.PI * Simulation.RANDOM.nextDouble();
+		float r = Settings.brownianFactor * Simulation.RANDOM.nextFloat();
+		float x = r * (float) Math.cos(angle);
+		float y = r * (float) Math.sin(angle);
+		return new Vector2(x, y);
 	}
 
-	public Vector2 getDragForce() {
-		// https://galileo.phys.virginia.edu/classes/152.mf1i.spring02/Stokes_Law.htm
-		float fMag = (float) (6 * Math.PI * getRadius() * Settings.tankViscosity * vel.len());
-		return vel.unit().scale(-fMag);
+	public Vector2 getDragAcceleration() {
+//		 https://galileo.phys.virginia.edu/classes/152.mf1i.spring02/Stokes_Law.htm
+		float fMag = Settings.tankViscosity * vel.len2();
+		return vel.unit().scale(-fMag / getMass());
 	}
 
 	public Iterator<Entity> broadCollisionDetection(float range) {
@@ -95,8 +107,15 @@ public abstract class Entity implements Serializable
 		return Iterators.concat(entityIterators.iterator());
 	}
 
+	public void handleInteractions(float delta) {
+		grow(delta);
+	}
+
 	public void grow(float delta) {
-		setRadius(radius * (1 + getGrowthRate() * delta));
+		float gr = getGrowthRate();
+		float newR = radius * (1 + gr * delta);
+		if (newR > Settings.minPlantBirthRadius || gr > 0)
+			setRadius(newR);
 	}
 
 	public void setGrowthRate(float gr) {
@@ -160,14 +179,17 @@ public abstract class Entity implements Serializable
 
 		float mr = 2 * e.getMass() / (e.getMass() + getMass());
 		Vector2 dx = getPos().sub(e.getPos());
-		Vector2 dv = getVel().sub(e.getVel());
+		Vector2 dv = getVel().sub(e.getVel()).scale(Settings.coefRestitution);
 		float k = dv.dot(dx) / dx.len2();
 		return getVel().sub(dx.scale(mr * k));
 	}
 
 	public void move(float delta)
 	{
-		getPos().translate(getVel().mul(delta));
+		if (vel.len2() > Settings.maxEntitySpeed * Settings.maxEntitySpeed)
+			vel.setLength(Settings.maxEntitySpeed);
+		Vector2 dx = vel.mul(delta).translate(acc.mul(delta * delta));
+		pos.translate(dx);
 	}
 
 	public void setHealth(float h)
@@ -183,10 +205,6 @@ public abstract class Entity implements Serializable
 
 	public void handleDeath() {
 		hasHandledDeath = true;
-	}
-
-	public void setMaxThinkTime(float maxThinkTime) {
-		this.maxThinkTime = maxThinkTime;
 	}
 
 	public abstract String getPrettyName();
@@ -240,10 +258,6 @@ public abstract class Entity implements Serializable
 		this.dead = dead;
 	}
 
-	public Vector2 getDir() {
-		return vel.unit();
-	}
-
 	public void rotate(float theta) {
 		vel.turn(theta);
 	}
@@ -260,7 +274,7 @@ public abstract class Entity implements Serializable
 		vel.setLength(speed);
 	}
 
-	public float getSpeed() { return speed; }
+	public float getSpeed() { return vel.len(); }
 
 	public Color getColor() {
 		Color healthyColour = getHealthyColour();
@@ -355,7 +369,7 @@ public abstract class Entity implements Serializable
 	}
 
 	public float getMassDensity() {
-		return 1f;
+		return 10000f;
 	}
 
 //	@Override

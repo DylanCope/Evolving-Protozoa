@@ -90,13 +90,10 @@ public class Renderer extends Canvas
 				(int) Math.toDegrees(t0  - 2.8*dt), 
 				(int) Math.toDegrees(fov + 5.6*dt));
 
-		if (stats.get("FPS") >= 10)
+		if (stats.get("FPS") >= 0)
 			for (Retina.Cell cell : p.getRetina())
 			{
 				Color col = cell.colour;
-				if (cell.entity != null &&
-						toRenderSpace(cell.entity.getPos()).sub(pos).len2() > tankRenderRadius*tankRenderRadius)
-					col = Color.WHITE;
 				g.setColor(col);
 				g.fillArc(
 						(int)(pos.getX() - r),

@@ -19,6 +19,7 @@ public class ProtozoaGenome implements Serializable
 {
     private final NetworkGenome networkGenome;
     private int retinaSize;
+    private float retinaFoV;
     private float radius;
     private float growthRate;
     private float splitSize;
@@ -40,15 +41,18 @@ public class ProtozoaGenome implements Serializable
         colour = parentGenome.colour;
         numMutations = parentGenome.numMutations;
         spikes = parentGenome.spikes;
+        retinaFoV = parentGenome.retinaFoV;
     }
 
     public ProtozoaGenome()
     {
-        retinaSize = Settings.defaultRetinaSize;
+//        retinaSize = Settings.defaultRetinaSize;
+        retinaSize = Simulation.RANDOM.nextInt(10);
         radius = randomProtozoanRadius();
         splitSize = randomSplitSize();
         growthRate = randomGrowthRate();
         colour = randomProtozoaColour();
+        retinaFoV = randomFoV();
         spikes = new Protozoa.Spike[0];
         int numInputs = 3 * retinaSize + nonVisualSensorSize;
         networkGenome = new NetworkGenome(numInputs, actionSpaceSize);
@@ -67,6 +71,11 @@ public class ProtozoaGenome implements Serializable
         this.growthRate = growthRate;
         this.splitSize = splitSize;
         this.colour = colour;
+    }
+
+    private static float randomFoV() {
+        float range = (float) (Math.toRadians(255));
+        return (float) (Math.toRadians(15) + range * Simulation.RANDOM.nextDouble());
     }
 
     private static float randomProtozoanRadius() {
@@ -117,6 +126,10 @@ public class ProtozoaGenome implements Serializable
             spikes[spikes.length - 1] = spike;
             numMutations++;
         }
+        if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
+            retinaFoV = randomFoV();
+            numMutations++;
+        }
         return this;
     }
 
@@ -138,7 +151,7 @@ public class ProtozoaGenome implements Serializable
 
     public Retina retina()
     {
-        return new Retina(this.retinaSize);
+        return new Retina(this.retinaSize, this.retinaFoV);
     }
 
     public float getRadius()

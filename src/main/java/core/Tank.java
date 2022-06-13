@@ -33,27 +33,23 @@ public class Tank implements Iterable<Entity>, Serializable
 	}
 	
 	public Vector2 randomPosition(float entityRadius) {
-		float rad = radius - 2*entityRadius;
+		float rad = radius - 4*entityRadius;
 		float t = (float) (2 * Math.PI * Simulation.RANDOM.nextDouble());
-		float r = (float) Simulation.RANDOM.nextDouble();
+		float r = 2*entityRadius + rad * Simulation.RANDOM.nextFloat();
 		return new Vector2(
-				(float) (rad * (1 - r*r) * Math.cos(t)),
-				(float) (rad * (1 - r*r) * Math.sin(t))
+				(float) (r * Math.cos(t)),
+				(float) (r * Math.sin(t))
 		);
 	}
 
 	public void handleTankEdge(Entity e) {
 		if (e.getPos().len() - e.getRadius() > radius)
-			e.setPos(e.getPos().setLength(-0.98f * radius));
+			e.getPos().setLength(-0.98f * radius);
 	}
 
 	public void updateEntity(Entity e, float delta) {
-
-		if (e instanceof Protozoa)
-			((Protozoa) e).handleInteractions(delta);
-
+		e.handleInteractions(delta);
 		e.update(delta);
-
 		handleTankEdge(e);
 	}
 
@@ -74,9 +70,9 @@ public class Tank implements Iterable<Entity>, Serializable
 //		Arrays.stream(chunkManager.getChunks())
 //				.parallel()
 //				.forEach(chunk -> chunk.getEntities().forEach(e -> e.handleCollisions(delta)));
-
-		entities.parallelStream().forEach(e -> updateEntity(e, delta));
+		entities.parallelStream().forEach(Entity::resetPhysics);
 		entities.parallelStream().forEach(e -> e.physicsUpdate(delta));
+		entities.parallelStream().forEach(e -> updateEntity(e, delta));
 		entities.parallelStream().forEach(this::handleDeadEntities);
 
 	}

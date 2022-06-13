@@ -26,7 +26,7 @@ public class NNBrain implements Brain {
         inputs[i++] = p.numNearbyPlants() / 50f - 1;
 
         for (Retina.Cell cell : p.getRetina()) {
-            if (cell.entity != null) {
+            if (cell.nEntities > 0) {
                 inputs[i++] = -1 + 2 * cell.colour.getRed() / 255f;
                 inputs[i++] = -1 + 2 * cell.colour.getGreen() / 255f;
                 inputs[i++] = -1 + 2 * cell.colour.getBlue() / 255f;
@@ -53,8 +53,8 @@ public class NNBrain implements Brain {
     public float speed(Protozoa p)
     {
         return Math.min(
-                Settings.maxSpeed * outputs[1],
-                Settings.maxSpeed
+                Settings.maxProtozoaSpeed * outputs[1],
+                Settings.maxProtozoaSpeed
         );
     }
 

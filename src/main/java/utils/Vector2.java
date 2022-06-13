@@ -159,4 +159,9 @@ public class Vector2 implements Serializable
 		this.x = x;
 		this.y = y;
 	}
+
+	public void set(Vector2 v) {
+		this.x = v.getX();
+		this.y = v.getY();
+	}
 }

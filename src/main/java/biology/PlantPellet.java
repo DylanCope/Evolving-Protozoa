@@ -40,7 +40,7 @@ public class PlantPellet extends Pellet {
 
     private static float randomPlantRadius() {
         float range = Settings.maxPlantBirthRadius - Settings.minPlantBirthRadius;
-        return (float) (Settings.minPlantBirthRadius + range * Simulation.RANDOM.nextDouble());
+        return Settings.minPlantBirthRadius + range * Simulation.RANDOM.nextFloat();
     }
 
     public PlantPellet(Tank tank) {
@@ -62,8 +62,7 @@ public class PlantPellet extends Pellet {
     @Override
     public void update(float delta) {
         super.update(delta);
-        if (getHealth() < 1.0)
-            setHealth(getHealth() + Settings.plantRegen * delta * (1 - getHealth()) * getGrowthRate());
+        setHealth(getHealth() + Settings.plantRegen * delta * getGrowthRate());
 
         if (shouldSplit())
             burst(PlantPellet.class, r -> new PlantPellet(r, tank));

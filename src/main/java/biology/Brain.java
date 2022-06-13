@@ -31,7 +31,7 @@ public interface Brain extends Serializable
 
 		@Override
 		public float speed(Protozoa p) {
-			return (float) (Simulation.RANDOM.nextDouble() * Settings.maxSpeed);
+			return (float) (Simulation.RANDOM.nextDouble() * Settings.maxProtozoaSpeed);
 		}
 
 		@Override

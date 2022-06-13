@@ -78,7 +78,7 @@ public class Renderer extends Canvas
 
 		float dt 	= p.getRetina().getCellAngle();
 		float fov 	= p.getRetina().getFov();
-		float t0 	= -p.getVel().angle() - 0.5f*fov - rotate;
+		float t0 	= -p.getDir().angle() - 0.5f*fov - rotate;
 		float t 	= t0;
 		
 		g.setColor(c.darker());
@@ -93,15 +93,19 @@ public class Renderer extends Canvas
 		if (stats.get("FPS") >= 0)
 			for (Retina.Cell cell : p.getRetina())
 			{
-				Color col = cell.colour;
-				g.setColor(col);
+				if (cell.anythingVisible()) {
+					Color col = cell.getColour();
+					g.setColor(col);
+				} else {
+					g.setColor(Color.WHITE);
+				}
 				g.fillArc(
 						(int)(pos.getX() - r),
 						(int)(pos.getY() - r),
 						(int)(2*r),
 						(int)(2*r),
-						(int) Math.toDegrees(t),
-						(int) Math.toDegrees(1.35*dt));
+						(int) Math.toDegrees(t - 0.01),
+						(int) Math.toDegrees(dt + 0.01));
 				t += dt;
 			}
 		
@@ -120,6 +124,22 @@ public class Renderer extends Canvas
 				(int)(pos.getY() - 0.75*r), 
 				(int)(2*0.75*r), 
 				(int)(2*0.75*r));
+
+		if (p == track && simulation.inDebugMode()) {
+			g.setColor(Color.YELLOW.darker());
+			float dirAngle = p.getDir().angle();
+			for (Retina.Cell cell : p.getRetina().getCells()) {
+				for (Vector2 ray : cell.getRays()) {
+					Vector2 rayRotated = ray.rotate(dirAngle);
+					Vector2 rayDir = rayRotated.unit().scale(toRenderSpace(Settings.protozoaInteractRange));
+					Vector2 rayStart = pos.add(rayRotated.unit().scale(r));
+					Vector2 rayEnd = pos.add(rayDir);
+					g.drawLine(
+							(int) rayStart.getX(), (int) rayStart.getY(),
+							(int) rayEnd.getX(), (int) rayEnd.getY());
+				}
+			}
+		}
 	}
 	
 	public void protozoa(Graphics2D g, Protozoa p)
@@ -129,25 +149,26 @@ public class Renderer extends Canvas
 
 		if (circleNotVisible(pos, r))
 			return;
-
-		for (Protozoa.Spike spike : p.getSpikes()) {
-			if (r > 0.001 * window.getHeight()) {
-				Stroke s = g.getStroke();
-				g.setColor(p.getColor().darker());
-				g.setStroke(new BasicStroke((int) (r * 0.2)));
-				Vector2 spikeStartPos = p.getDir().unit().rotate(spike.angle).setLength(r).translate(pos);
-				float spikeLen = toRenderSpace(p.getSpikeLength(spike));
-				Vector2 spikeEndPos = spikeStartPos.add(spikeStartPos.sub(pos).setLength(spikeLen));
-				g.drawLine((int) (spikeStartPos.getX()), (int) (spikeStartPos.getY()),
-						   (int) (spikeEndPos.getX()), (int) (spikeEndPos.getY()));
-				g.setStroke(s);
-			}
-		}
 		if (!p.wasJustDamaged) {
 			drawOutlinedCircle(g, pos, r, p.getColor());
 		} else {
 			drawOutlinedCircle(g, pos, r, p.getColor(), Color.RED);
 		}
+
+		for (Protozoa.Spike spike : p.getSpikes()) {
+			if (r > 0.001 * window.getHeight()) {
+				Stroke s = g.getStroke();
+				g.setColor(p.getColor().darker().darker());
+				g.setStroke(new BasicStroke((int) (r * 0.2)));
+				Vector2 spikeStartPos = p.getDir().unit().rotate(spike.angle).setLength(r).translate(pos);
+				float spikeLen = toRenderSpace(p.getSpikeLength(spike));
+				Vector2 spikeEndPos = spikeStartPos.add(spikeStartPos.sub(pos).setLength(spikeLen));
+				g.drawLine((int) (spikeStartPos.getX()), (int) (spikeStartPos.getY()),
+						(int) (spikeEndPos.getX()), (int) (spikeEndPos.getY()));
+				g.setStroke(s);
+			}
+		}
+
 		stats.put("Protozoa Rendered", stats.get("Protozoa Rendered") + 1);
 
 		if (r >= 0.005 * window.getHeight() && p.getRetina().numberOfCells() > 0)

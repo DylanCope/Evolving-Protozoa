@@ -3,6 +3,8 @@ package biology;
 import core.Settings;
 import neat.NeuralNetwork;
 
+import java.awt.*;
+
 public class NNBrain implements Brain {
 
     public final NeuralNetwork network;
@@ -20,16 +22,17 @@ public class NNBrain implements Brain {
     public void tick(Protozoa p)
     {
         int i = 0;
+        // ProtozoaGenome.nonVisualSensorSize
+        inputs[i++] = 1; // bias term
         inputs[i++] = p.getHealth() * 2 - 1;
         inputs[i++] = 2 * p.getRadius() / p.getGenome().getSplitRadius() - 1;
-        inputs[i++] = 2 * p.getCrowdingFactor() / 3 - 1;
-        inputs[i++] = p.numNearbyPlants() / 50f - 1;
 
         for (Retina.Cell cell : p.getRetina()) {
-            if (cell.nEntities > 0) {
-                inputs[i++] = -1 + 2 * cell.colour.getRed() / 255f;
-                inputs[i++] = -1 + 2 * cell.colour.getGreen() / 255f;
-                inputs[i++] = -1 + 2 * cell.colour.getBlue() / 255f;
+            if (cell.anythingVisible()) {
+                Color colour = cell.getColour();
+                inputs[i++] = -1 + 2 * colour.getRed() / 255f;
+                inputs[i++] = -1 + 2 * colour.getGreen() / 255f;
+                inputs[i++] = -1 + 2 * colour.getBlue() / 255f;
             } else {
                 inputs[i++] = 0f;
                 inputs[i++] = 0f;
@@ -56,11 +59,6 @@ public class NNBrain implements Brain {
                 Settings.maxProtozoaSpeed * outputs[1],
                 Settings.maxProtozoaSpeed
         );
-    }
-
-    @Override
-    public boolean wantToAttack(Protozoa p) {
-        return outputs[2] > 0;
     }
 
     @Override

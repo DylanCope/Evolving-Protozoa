@@ -7,11 +7,12 @@ import utils.Vector2;
 
 import java.awt.*;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class PlantPellet extends Pellet {
 
     private final float maxRadius;
-    private float idealRadius;
+    private float crowdingFactor;
 
     public PlantPellet(float radius, Tank tank) {
         super(radius, tank);
@@ -59,9 +60,25 @@ public class PlantPellet extends Pellet {
         return (0.3f + 0.7f * getHealth()) * super.getRadius();
     }
 
+    public float getCrowdingFactor() {
+        return crowdingFactor;
+    }
+
+    private void updateCrowding(Entity e) {
+        float sqDist = e.getPos().squareDistanceTo(getPos());
+        if (sqDist < Math.pow(3 * getRadius(), 2)) {
+            crowdingFactor += e.getRadius() / (getRadius() + sqDist);
+        }
+    }
+
     @Override
     public void update(float delta) {
         super.update(delta);
+
+        crowdingFactor = 0;
+        Iterator<Entity> entities = broadCollisionDetection(getRadius());
+        entities.forEachRemaining(this::updateCrowding);
+
         setHealth(getHealth() + Settings.plantRegen * delta * getGrowthRate());
 
         if (shouldSplit())

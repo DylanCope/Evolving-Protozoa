@@ -4,7 +4,7 @@ public final class Settings {
     // Simulation settings
     public static final long simulationSeed = 42;
     public static final float simulationUpdateDelta = 5f / 1000f;
-    public static final float maxProtozoaSpeed = .2f;
+    public static final float maxProtozoaSpeed = 2f;
     public static final float maxEntitySpeed = .2f;
     public static final float timeBetweenSaves = 500.0f;
     public static final float historySnapshotTime = 2.0f;
@@ -17,7 +17,7 @@ public final class Settings {
     public static final int maxMeat = 1000;
 
     // Tank settings
-    public static final int numInitialProtozoa = 500;
+    public static final int numInitialProtozoa = 200;
     public static final int numInitialPlantPellets = 1000;
     public static final float tankRadius = 2.0f;
     public static final int numChunkBreaks = 20;
@@ -31,7 +31,7 @@ public final class Settings {
     public static final float maxProtozoanBirthRadius = 0.015f;
     public static final float protozoaStarvationFactor = 40f;
     public static final int defaultRetinaSize = 0;
-    public static final int maxRetinaCellEntities = 5;
+    public static final float minRetinaRayAngle = (float) Math.toRadians(10);
     public static final float minHealthToSplit = 0.8f;
     public static final float maxProtozoanSplitRadius = 0.03f;
     public static final float minProtozoanSplitRadius = 0.015f;

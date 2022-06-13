@@ -71,8 +71,8 @@ public class Tank implements Iterable<Entity>, Serializable
 //				.parallel()
 //				.forEach(chunk -> chunk.getEntities().forEach(e -> e.handleCollisions(delta)));
 		entities.parallelStream().forEach(Entity::resetPhysics);
-		entities.parallelStream().forEach(e -> e.physicsUpdate(delta));
 		entities.parallelStream().forEach(e -> updateEntity(e, delta));
+		entities.parallelStream().forEach(e -> e.physicsUpdate(delta));
 		entities.parallelStream().forEach(this::handleDeadEntities);
 
 	}

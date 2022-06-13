@@ -2,6 +2,7 @@ package biology;
 
 import com.google.common.collect.Iterators;
 import core.Settings;
+import utils.Vector2;
 
 import java.awt.Color;
 import java.io.Serializable;
@@ -15,15 +16,87 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 
 	public static class Cell implements Serializable {
 		private static final long serialVersionUID = 1L;
-		public float angle;
-		public Entity[] entities = new Entity[Settings.maxRetinaCellEntities];
-		public float[] weights = new float[Settings.maxRetinaCellEntities];
-		public Color colour = new Color(10, 10, 10);
-		public int nEntities = 0;
+		private final float angle;
+		private final Entity[] entities;
+		private final float[] weights, lengths;
+		private final Vector2[] rays;
 
-		public void set(int idx, Entity e, float w) {
+		public Cell(float angle, float cellFov) {
+			int nRays = 1;
+			if (cellFov > Settings.minRetinaRayAngle)
+				nRays = (int) (cellFov / Settings.minRetinaRayAngle);
+
+			entities = new Entity[nRays];
+			weights = new float[nRays];
+			lengths = new float[nRays];
+			rays = new Vector2[nRays];
+			float rayAngle = cellFov / nRays;
+			for (int i = 0; i < nRays; i++) {
+				float t = -rayAngle / 2 + angle + (nRays - 2*i) * cellFov / (2*nRays);
+				rays[i] = Vector2.fromAngle(t);
+			}
+			this.angle = angle;
+			reset();
+		}
+
+		public void reset() {
+			Arrays.fill(entities, null);
+			Arrays.fill(weights, 0);
+			Arrays.fill(lengths, Float.MAX_VALUE);
+		}
+
+		public void set(int idx, Entity e, float sqLen) {
 			entities[idx] = e;
-			weights[idx] = w;
+			lengths[idx] = sqLen;
+			weights[idx] = 1f;
+		}
+
+		public Vector2[] getRays() {
+			return rays;
+		}
+
+		public Color getColour() {
+			float r = 0;
+			float g = 0;
+			float b = 0;
+			int nEntities = 0;
+			for (int i = 0; i < entities.length; i++) {
+				if (entities[i] != null) {
+					float w = weights[i];
+					r += w * entities[i].getColor().getRed();
+					g += w * entities[i].getColor().getGreen();
+					b += w * entities[i].getColor().getBlue();
+					nEntities++;
+				}
+			}
+
+			if (nEntities == 0)
+				return new Color(0, 0, 0);
+
+			return new Color(
+					(int) (r / nEntities),
+					(int) (g / nEntities),
+					(int) (b / nEntities)
+			);
+		}
+
+		public boolean anythingVisible() {
+			for (Entity e : entities)
+				if (e != null)
+					return true;
+			return false;
+		}
+
+		public float getAngle() {
+			return angle;
+		}
+
+		public boolean rayIntersectedEntity(int rayIndex) {
+			return entities[rayIndex] != null;
+		}
+
+		public float entitySqLen(int rayIndex) {
+			return lengths[rayIndex];
 		}
 	}
 	
@@ -38,19 +111,16 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 	{
 		cells = new Cell[numCells];
 		this.fov = fov;
+		float cellFov = fov / numCells;
 		for (int i = 0; i < numCells; i++) {
-			Cell cell = new Cell();
-			cell.angle = fov * (numCells - 2*i) / (2* numCells);
-			cells[i] = cell;
+			float angle = -cellFov / 2 + fov * (numCells - 2 * i) / (2 * numCells);
+			cells[i] = new Cell(angle, cellFov);
 		}
 	}
 
 	public void reset() {
-		for (Retina.Cell cell : cells) {
-			cell.colour = Color.WHITE;
-			Arrays.fill(cell.entities, null);
-			cell.nEntities = 0;
-		}
+		for (Retina.Cell cell : cells)
+			cell.reset();
 	}
 
 	public Cell getCell(int cellIdx) {
@@ -83,5 +153,5 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 		float k = (float) (0.5 * Math.log((1 + x) / (1 - x))) / (dMin - Settings.protozoaInteractRange);
 		return (float) (1 + Math.tanh(-k*(Math.sqrt(sqLen) - dMin))) / 2f;
 	}
-	
+
 }

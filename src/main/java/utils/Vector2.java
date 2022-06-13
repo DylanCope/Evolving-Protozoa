@@ -13,7 +13,11 @@ public class Vector2 implements Serializable
 		this.setX(x);
 		this.setY(y);
 	}
-	
+
+	public static Vector2 fromAngle(float angle) {
+		return new Vector2((float) Math.cos(angle), (float) Math.sin(angle));
+	}
+
 	public float len2()
 	{
 		return x*x + y*y;

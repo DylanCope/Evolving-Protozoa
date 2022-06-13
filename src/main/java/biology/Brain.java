@@ -10,7 +10,6 @@ public interface Brain extends Serializable
 	void tick(Protozoa p);
 	float turn(Protozoa p);
 	float speed(Protozoa p);
-	boolean wantToAttack(Protozoa p);
 	boolean wantToMateWith(Protozoa p);
 	float energyConsumption();
 	
@@ -32,12 +31,6 @@ public interface Brain extends Serializable
 		@Override
 		public float speed(Protozoa p) {
 			return (float) (Simulation.RANDOM.nextDouble() * Settings.maxProtozoaSpeed);
-		}
-
-		@Override
-		public boolean wantToAttack(Protozoa p)
-		{
-			return Simulation.RANDOM.nextBoolean();
 		}
 
 		@Override

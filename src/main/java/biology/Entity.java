@@ -29,7 +29,6 @@ public abstract class Entity implements Serializable
 	
 	private boolean dead = false;
 	private float nutrition;
-	private float crowdingFactor;
 	protected boolean hasHandledDeath = false;
 
 	@FunctionalInterface
@@ -55,7 +54,6 @@ public abstract class Entity implements Serializable
 		if (prevPos == null)
 			prevPos = pos;
 		acc.set(0, 0);
-		crowdingFactor = 0;
 	}
 
 	public void physicsUpdate(float delta) {
@@ -72,7 +70,6 @@ public abstract class Entity implements Serializable
 			move(subStepDelta);
 			prevPos = pos;
 		}
-		crowdingFactor /= Settings.physicsSubSteps;
 	}
 
 	private Vector2 getBrownianAcceleration() {
@@ -145,19 +142,11 @@ public abstract class Entity implements Serializable
 	
 	public abstract boolean isEdible();
 
-	public float getCrowdingFactor() {
-		return crowdingFactor;
-	}
-
 	public void handlePotentialCollision(Entity e, float delta) {
 		if (e == this)
 			return;
 
 		float sqDist = e.getPos().squareDistanceTo(getPos());
-
-		if (sqDist < Math.pow(3 * getRadius(), 2)) {
-			crowdingFactor += e.getRadius() / (getRadius() + sqDist);
-		}
 
 		float r = getRadius() + e.getRadius();
 
@@ -215,7 +204,6 @@ public abstract class Entity implements Serializable
 		stats.put("Health", 100 * getHealth());
 		stats.put("Size", Settings.statsDistanceScalar * getRadius());
 		stats.put("Speed", Settings.statsDistanceScalar * getSpeed());
-		stats.put("Crowding Factor", getCrowdingFactor());
 		stats.put("Generation", (float) getGeneration());
 		return stats;
 	}
@@ -256,10 +244,6 @@ public abstract class Entity implements Serializable
 
 	public void setDead(boolean dead) {
 		this.dead = dead;
-	}
-
-	public void rotate(float theta) {
-		vel.turn(theta);
 	}
 
 	public Vector2 getVel() {

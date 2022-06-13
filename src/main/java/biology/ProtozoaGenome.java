@@ -27,8 +27,8 @@ public class ProtozoaGenome implements Serializable
     private float mutationChance = Settings.globalMutationChance;
     private int numMutations = 0;
 
-    public static final int actionSpaceSize = 4;
-    public static final int nonVisualSensorSize = 4;
+    public static final int actionSpaceSize = 2;
+    public static final int nonVisualSensorSize = 2;
     private Protozoa.Spike[] spikes;
 
     public ProtozoaGenome(ProtozoaGenome parentGenome) {
@@ -46,15 +46,14 @@ public class ProtozoaGenome implements Serializable
 
     public ProtozoaGenome()
     {
-//        retinaSize = Settings.defaultRetinaSize;
-        retinaSize = Simulation.RANDOM.nextInt(10);
+        retinaSize = Settings.defaultRetinaSize;
         radius = randomProtozoanRadius();
         splitSize = randomSplitSize();
         growthRate = randomGrowthRate();
         colour = randomProtozoaColour();
         retinaFoV = randomFoV();
         spikes = new Protozoa.Spike[0];
-        int numInputs = 3 * retinaSize + nonVisualSensorSize;
+        int numInputs = 3 * retinaSize + nonVisualSensorSize + 1;
         networkGenome = new NetworkGenome(numInputs, actionSpaceSize);
     }
 

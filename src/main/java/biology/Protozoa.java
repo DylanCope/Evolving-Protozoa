@@ -8,7 +8,6 @@ import utils.Vector2;
 
 import java.awt.*;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -67,131 +66,43 @@ public class Protozoa extends Entity
 	public Protozoa(Tank tank) throws MiscarriageException {
 		this(new ProtozoaGenome(), tank);
 	}
-
-	private int retinaCellIndex(float x, float y) {
-
-		int cellIdx = -1;
-		if (retina.getFov() <= Math.PI) {
-			if (x >= 0 && y >= 0) {
-				float angle = (float) Math.atan2(x, y);
-				cellIdx = (int) (retina.numberOfCells() * Math.floor(2 * angle / Math.PI));
-			} else if (y > x) {
-				return -1;
-			} else {
-				return -2;
-			}
-		} else if (retina.getFov() > Math.PI) {
-			float angle;
-			if (x < 0 && y >= 0) {
-				angle = (float) Math.atan2(-x, y);
-			} else if (x < 0 && y < 0) {
-				angle = (float) (Math.atan2(-y, -x) + Math.PI / 2);
-			} else if (x > 0 && y < 0) {
-				angle = (float) Math.atan2(-y, x);
-			} else if (x > y){
-				return -1;
-			} else {
-				return -2;
-			}
-			cellIdx = (int) (retina.numberOfCells() * Math.floor(2 * angle / (3 * Math.PI)));
-		}
-		if (cellIdx >= retina.numberOfCells())
-			return retina.numberOfCells() - 1;
-		return cellIdx;
-	}
-
-	public Retina.Cell[] getRetinaCells(Entity e, Vector2 dr) {
-		Vector2 dr1 = dr.add(dr.perp().setLength(e.getRadius()));
-		Vector2 dr2 = dr.add(dr.perp().setLength(-e.getRadius()));
-		Vector2 dir = getDir();
-
-		Vector2 viewMin = dir.rotate(-retina.getFov() / 2);
-		Vector2 viewMax = dir.rotate(retina.getFov() / 2);
-		Vector2 viewMaxPerp = viewMax.perp();
-		Vector2 viewMinPerp = viewMin.perp();
-
-		float det = viewMin.dot(viewMax.perp());
-		if (det < 1e-8)
-			return null;
-
-		float x1 = -viewMaxPerp.dot(dr1) / det;
-		float y1 = viewMinPerp.dot(dr1) / det;
-
-		float x2 = -viewMaxPerp.dot(dr2) / det;
-		float y2 = viewMinPerp.dot(dr2) / det;
-
-		int idx1 = retinaCellIndex(x1, y1);
-		int idx2 = retinaCellIndex(x2, y2);
-
-		if (idx1 < 0 && idx2 < 0)
-			return null;
-
-		int idxMin, idxMax;
-		if (idx1 == -1) {
-			idxMin = 0; idxMax = idx2 + 1;
-		}
-		else if (idx1 == -2) {
-			idxMin = idx2; idxMax = retina.numberOfCells();
-		}
-		else if (idx2 == -1) {
-			idxMin = 0; idxMax = idx1 + 1;
-		}
-		else if (idx2 == -2) {
-			idxMin = idx1; idxMax = retina.numberOfCells();
-		}
-		else {
-			idxMin = Math.min(idx1, idx2);
-			idxMax = Math.max(idx1, idx2) + 1;
-		}
-
-		return Arrays.copyOfRange(retina.getCells(), idxMin, idxMax);
-	}
-
 	public void see(Entity e)
 	{
-		Vector2 dr = getPos().sub(e.getPos());
-		Retina.Cell[] cells = getRetinaCells(e, dr);
-		if (cells == null)
-			return;
+		Vector2 dr = e.getPos().sub(getPos());
+		float dirAngle = getDir().angle();
 
-		for (Retina.Cell cell : cells) {
-			boolean dealtWith = false;
-			float l2 = dr.len2();
-			for (int i = 0; i < cell.nEntities; i++) {
-				Vector2 drOther = cell.entities[i].getPos().sub(getPos());
-				if (l2 > drOther.len2()) {
-					if (dr.angleBetween(drOther) < Math.atan2(cell.entities[i].getRadius(), dr.len()))
-						return;
-				} else if (dr.angleBetween(drOther) < Math.atan2(e.getRadius(), dr.len())) {
-					dealtWith = true;
-					cell.set(i, e, Retina.computeWeight((float) Math.sqrt(l2)));
-					break;
-				}
-			}
+		for (Retina.Cell cell : retina.getCells()) {
+			Vector2[] rays = cell.getRays();
+			for (int i = 0; i < rays.length; i++) {
+				Vector2 ray = rays[i].rotate(dirAngle);
+				boolean inView = doesRayIntersectCircle(ray, dr, e.getRadius());
 
-			if (!dealtWith && cell.nEntities < cell.entities.length) {
-				cell.set(cell.nEntities, e, Retina.computeWeight((float) Math.sqrt(l2)));
-				cell.nEntities++;
-			}
+				float sqLen = dr.len2();
+				boolean isBlocked = false;
+				if (cell.rayIntersectedEntity(i))
+					isBlocked = sqLen > cell.entitySqLen(i);
 
-			float w = cell.weights[0];
-			float r = w * cell.entities[0].getColor().getRed();
-			float g = w * cell.entities[0].getColor().getGreen();
-			float b = w * cell.entities[0].getColor().getBlue();
-			if (cell.nEntities > 1) {
-				for (int i = 1; i < cell.nEntities; i++) {
-					w = cell.weights[i];
-					r += w * cell.entities[i].getColor().getRed();
-					g += w * cell.entities[i].getColor().getGreen();
-					b += w * cell.entities[i].getColor().getBlue();
-				}
+				if (inView && !isBlocked)
+					cell.set(i, e, sqLen);
+
 			}
-			cell.colour = new Color(
-					(int) (r / cell.nEntities),
-					(int) (g / cell.nEntities),
-					(int) (b / cell.nEntities)
-			);
 		}
+	}
+
+	private static boolean doesRayIntersectCircle(Vector2 ray, Vector2 pos, float r) {
+		float a = ray.len2();
+		float b = -2 * ray.dot(pos);
+		float c = pos.len2() - r*r;
+
+		float d = b*b - 4*a*c;
+		boolean doesIntersect = d != 0;
+		if (!doesIntersect)
+			return false;
+
+		double l1 = (-b + Math.sqrt(d)) / (2*a);
+		double l2 = (-b - Math.sqrt(d)) / (2*a);
+
+		return l1 > 0 || l2 > 0;
 	}
 	
 	public void eat(Entity e, float delta)
@@ -265,6 +176,7 @@ public class Protozoa extends Entity
 		}
 		float r = getRadius() + other.getRadius();
 		float d = other.getPos().distanceTo(getPos());
+
 		if (other instanceof Protozoa) {
 			Protozoa p = (Protozoa) other;
 			for (Spike spike : spikes) {
@@ -385,11 +297,11 @@ public class Protozoa extends Entity
 		float r1 = 0.8f;
 		for (Retina.Cell cell : retina)
 		{
-			float x = (float) Math.cos(cell.angle + getVel().angle());
-			float y = (float) Math.sin(cell.angle + getVel().angle());
+			float x = (float) Math.cos(cell.getAngle() + getDir().angle());
+			float y = (float) Math.sin(cell.getAngle() + getDir().angle());
 			float len = (float) Math.sqrt(x*x + y*y);
 			float r2 = r1;// + 0.5 * (1 - r1) * (1 + Math.cos(2*Math.PI*cell.angle));
-			g.setColor(cell.colour);
+			g.setColor(cell.getColour());
 			g.drawLine(
 					(int) (getPos().getX() + (x * getRadius() * r0) / len),
 					(int) (getPos().getY() + (y * getRadius() * r0) / len),

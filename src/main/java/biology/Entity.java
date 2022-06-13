@@ -31,6 +31,10 @@ public abstract class Entity implements Serializable
 	private float nutrition;
 	protected boolean hasHandledDeath = false;
 
+	public Tank getTank() {
+		return tank;
+	}
+
 	@FunctionalInterface
 	public interface EntityBuilder<T, R> {
 		R apply(T t) throws MiscarriageException;

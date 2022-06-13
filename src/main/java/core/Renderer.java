@@ -33,7 +33,7 @@ public class Renderer extends Canvas
 	private float zoom;
 	private float targetZoom;
 	private final float initialZoom = 1;
-	private boolean superSimpleRender = false;
+	private boolean superSimpleRender = false, renderChemicals = false;
 	private final float rotate = 0;
 	private double lastRenderTime = 0;
 	private Entity track;
@@ -348,6 +348,22 @@ public class Renderer extends Canvas
 
 		graphics.fillRect(0, 0, window.getWidth(), window.getHeight());
 
+		if (renderChemicals) {
+			ChemicalSolution chemicalSolution = simulation.getTank().getChemicalSolution();
+			int w = toRenderSpace(chemicalSolution.getGridSize());
+			for (int i = 0; i < chemicalSolution.getNXChunks(); i++) {
+				for (int j = 0; j < chemicalSolution.getNYChunks(); j++) {
+					Vector2 chunkCoords = toRenderSpace(chemicalSolution.toTankCoords(i, j));
+
+					graphics.setColor(new Color(
+							80, 200, 60,
+							(int) (120 * chemicalSolution.getPlantPheromoneDenisty(i, j))
+					));
+					graphics.fillRect((int) chunkCoords.getX(), (int) chunkCoords.getY(), w, w);
+				}
+			}
+		}
+
 		if (simulation.inDebugMode()) {
 			graphics.setColor(Color.YELLOW.darker());
 			ChunkManager chunkManager = simulation.getTank().getChunkManager();
@@ -464,5 +480,9 @@ public class Renderer extends Canvas
 		track = null;
 		pan = new Vector2(0, 0);
 		targetZoom = 1;
+	}
+
+	public void toggleChemicalGrid() {
+		renderChemicals = !renderChemicals;
 	}
 }

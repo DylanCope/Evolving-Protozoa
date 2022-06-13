@@ -19,6 +19,7 @@ public class Controller
 		this.renderer = renderer;
 
 		input.registerOnPressHandler(KeyEvent.VK_F3, simulation::toggleDebug);
+		input.registerOnPressHandler(KeyEvent.VK_F4, renderer::toggleChemicalGrid);
 		input.registerOnPressHandler(KeyEvent.VK_R, renderer::resetCamera);
 	}
 

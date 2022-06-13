@@ -1,5 +1,6 @@
 package biology;
 
+import core.ChemicalSolution;
 import core.Settings;
 import neat.NeuralNetwork;
 
@@ -10,12 +11,17 @@ public class NNBrain implements Brain {
     public final NeuralNetwork network;
     private float[] outputs;
     private final float[] inputs;
-    private final float maxTurn = (float) Math.toRadians(Settings.maxTurnAngle);
+    private final float maxTurn;
 
-    public NNBrain(NeuralNetwork network) {
+    public NNBrain(NeuralNetwork network, float maxTurn) {
         this.network = network;
+        this.maxTurn = maxTurn;
         outputs = network.outputs();
         inputs = new float[network.getInputSize()];
+    }
+
+    public NNBrain(NeuralNetwork network) {
+        this(network, (float) Math.toRadians(Settings.maxTurnAngle));
     }
 
     @Override
@@ -26,6 +32,12 @@ public class NNBrain implements Brain {
         inputs[i++] = 1; // bias term
         inputs[i++] = p.getHealth() * 2 - 1;
         inputs[i++] = 2 * p.getRadius() / p.getGenome().getSplitRadius() - 1;
+
+        ChemicalSolution chemicalSolution = p.getTank().getChemicalSolution();
+        int chemicalX = chemicalSolution.toChemicalGridX(p.getPos().getX());
+        int chemicalY = chemicalSolution.toChemicalGridY(p.getPos().getY());
+        inputs[i++] = chemicalSolution.getPlantPheromoneGradientX(chemicalX, chemicalY);
+        inputs[i++] = chemicalSolution.getPlantPheromoneGradientY(chemicalX, chemicalY);
 
         for (Retina.Cell cell : p.getRetina()) {
             if (cell.anythingVisible()) {

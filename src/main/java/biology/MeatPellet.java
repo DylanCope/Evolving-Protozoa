@@ -7,6 +7,8 @@ import java.awt.*;
 
 public class MeatPellet extends Pellet {
 
+    private float rotteness = 0.0f;
+
     public MeatPellet(float radius, Tank tank) {
         super(radius, tank);
 
@@ -20,6 +22,9 @@ public class MeatPellet extends Pellet {
     public void age(float delta) {
         float deathRate = getRadius() * delta * 100;
         setHealth(getHealth() * (1 - deathRate));
+        rotteness = rotteness * (1 - deathRate);
+        if (rotteness > 1)
+            rotteness = 1;
     }
 
     @Override
@@ -36,6 +41,6 @@ public class MeatPellet extends Pellet {
 
     @Override
     public float getNutrition() {
-        return super.getNutrition() * (10 * getHealth() - 2);
+        return super.getNutrition() * (10 * (1 - rotteness) - 2);
     }
 }

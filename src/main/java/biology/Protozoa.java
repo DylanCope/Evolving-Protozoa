@@ -245,6 +245,7 @@ public class Protozoa extends Entity
 		stats.put("Growth Rate", Settings.statsDistanceScalar * getGrowthRate());
 		stats.put("Death Rate", 100 * deathRate);
 		stats.put("Split Radius", Settings.statsDistanceScalar * splitRadius);
+		stats.put("Max Turning", genome.getMaxTurn());
 		if (genome != null) {
 			stats.put("Mutations", (float) genome.getNumMutations());
 			stats.put("Genetic Size", Settings.statsDistanceScalar * genome.getRadius());

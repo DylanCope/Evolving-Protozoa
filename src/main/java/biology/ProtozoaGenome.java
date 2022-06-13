@@ -26,9 +26,10 @@ public class ProtozoaGenome implements Serializable
     private Color colour;
     private float mutationChance = Settings.globalMutationChance;
     private int numMutations = 0;
+    private float maxTurn;
 
     public static final int actionSpaceSize = 2;
-    public static final int nonVisualSensorSize = 2;
+    public static final int nonVisualSensorSize = 4;
     private Protozoa.Spike[] spikes;
 
     public ProtozoaGenome(ProtozoaGenome parentGenome) {
@@ -42,6 +43,7 @@ public class ProtozoaGenome implements Serializable
         numMutations = parentGenome.numMutations;
         spikes = parentGenome.spikes;
         retinaFoV = parentGenome.retinaFoV;
+        maxTurn = parentGenome.maxTurn;
     }
 
     public ProtozoaGenome()
@@ -51,6 +53,7 @@ public class ProtozoaGenome implements Serializable
         splitSize = randomSplitSize();
         growthRate = randomGrowthRate();
         colour = randomProtozoaColour();
+        maxTurn = randomMaxTurn();
         retinaFoV = randomFoV();
         spikes = new Protozoa.Spike[0];
         int numInputs = 3 * retinaSize + nonVisualSensorSize + 1;
@@ -75,6 +78,11 @@ public class ProtozoaGenome implements Serializable
     private static float randomFoV() {
         float range = (float) (Math.toRadians(255));
         return (float) (Math.toRadians(15) + range * Simulation.RANDOM.nextDouble());
+    }
+
+    private static float randomMaxTurn() {
+        float range = (float) (Math.toRadians(12));
+        return (float) (Math.toRadians(3) + range * Simulation.RANDOM.nextDouble());
     }
 
     private static float randomProtozoanRadius() {
@@ -110,7 +118,7 @@ public class ProtozoaGenome implements Serializable
             colour = randomProtozoaColour();
             numMutations++;
         }
-        if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
+        if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance && retinaSize < Settings.maxRetinaSize) {
             retinaSize++;
             networkGenome.addSensor();
             networkGenome.addSensor();
@@ -142,7 +150,7 @@ public class ProtozoaGenome implements Serializable
 
     public Brain brain() throws MiscarriageException {
         try {
-            return new NNBrain(networkGenome.phenotype());
+            return new NNBrain(networkGenome.phenotype(), maxTurn);
         } catch (IllegalArgumentException e) {
             throw new MiscarriageException();
         }
@@ -217,5 +225,9 @@ public class ProtozoaGenome implements Serializable
 
     public Protozoa.Spike[] getSpikes() {
         return spikes;
+    }
+
+    public float getMaxTurn() {
+        return maxTurn;
     }
 }

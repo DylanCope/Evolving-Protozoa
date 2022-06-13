@@ -16,6 +16,7 @@ public class Tank implements Iterable<Entity>, Serializable
 	public final ConcurrentHashMap<Class<? extends Entity>, Integer> entityCounts = new ConcurrentHashMap<>(3, 1);
 	public final ConcurrentHashMap<Class<? extends Entity>, Integer> entityCapacities = new ConcurrentHashMap<>(3, 1);
 	private final ChunkManager chunkManager;
+	private final ChemicalSolution chemicalSolution;
 	private int generation = 1;
 	private int protozoaBorn = 0;
 	private int totalEntitiesAdded = 0;
@@ -29,6 +30,8 @@ public class Tank implements Iterable<Entity>, Serializable
 	{
 		float chunkSize = 2 * radius / Settings.numChunkBreaks;
 		chunkManager = new ChunkManager(-radius, radius, -radius, radius, chunkSize);
+		float chemicalGridSize = 2 * radius / Settings.numChemicalBreaks;
+		chemicalSolution = new ChemicalSolution(-radius, radius, -radius, radius, chemicalGridSize);
 		elapsedTime = 0;
 	}
 	
@@ -74,6 +77,8 @@ public class Tank implements Iterable<Entity>, Serializable
 		entities.parallelStream().forEach(e -> updateEntity(e, delta));
 		entities.parallelStream().forEach(e -> e.physicsUpdate(delta));
 		entities.parallelStream().forEach(this::handleDeadEntities);
+
+		chemicalSolution.update(delta, entities);
 
 	}
 
@@ -187,5 +192,9 @@ public class Tank implements Iterable<Entity>, Serializable
 
 	public void setGenomeFile(String genomeFile) {
 		this.genomeFile = genomeFile;
+	}
+
+	public ChemicalSolution getChemicalSolution() {
+		return chemicalSolution;
 	}
 }

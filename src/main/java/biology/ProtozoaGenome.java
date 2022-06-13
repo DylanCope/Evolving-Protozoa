@@ -209,9 +209,8 @@ public class ProtozoaGenome implements Serializable
         s.append("radius=").append(radius).append(",");
         s.append("growthRate=").append(growthRate).append(",");
         s.append("splitSize=").append(splitSize).append(",");
-        for (SynapseGene[] geneRow : networkGenome.getSynapseGenes())
-            for (SynapseGene gene : geneRow)
-                s.append(gene.toString()).append(",");
+        for (SynapseGene gene : networkGenome.getSynapseGenes())
+            s.append(gene.toString()).append(",");
         return s.toString();
     }
 

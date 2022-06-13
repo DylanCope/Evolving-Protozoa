@@ -15,7 +15,8 @@ public class Application
 	
 	public static void main(String[] args)
 	{
-		simulation = new Simulation(Settings.simulationSeed, "thalassa-charmeleon-eum");
+		simulation = new Simulation(Settings.simulationSeed);
+//		simulation = new Simulation(Settings.simulationSeed, "thalassa-charmeleon-eum");
 		try {
 			if (!(args.length > 0 && args[0].equals("noui"))) {
 				TextStyle.loadFonts();

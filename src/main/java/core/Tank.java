@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import biology.*;
+import org.checkerframework.checker.units.qual.A;
 import utils.FileIO;
 import utils.Vector2;
 
@@ -13,10 +14,13 @@ public class Tank implements Iterable<Entity>, Serializable
 	private static final long serialVersionUID = 2804817237950199223L;
 	private final float radius = Settings.tankRadius;
 	private float elapsedTime;
-	public final ConcurrentHashMap<Class<? extends Entity>, Integer> entityCounts = new ConcurrentHashMap<>(3, 1);
-	public final ConcurrentHashMap<Class<? extends Entity>, Integer> entityCapacities = new ConcurrentHashMap<>(3, 1);
+	public final ConcurrentHashMap<Class<? extends Entity>, Integer> entityCounts =
+			new ConcurrentHashMap<>(3, 1);
+	public final ConcurrentHashMap<Class<? extends Entity>, Integer> entityCapacities =
+			new ConcurrentHashMap<>(3, 1);
 	private final ChunkManager chunkManager;
 	private final ChemicalSolution chemicalSolution;
+	private final List<Rock> rocks;
 	private int generation = 1;
 	private int protozoaBorn = 0;
 	private int totalEntitiesAdded = 0;
@@ -30,10 +34,17 @@ public class Tank implements Iterable<Entity>, Serializable
 	{
 		float chunkSize = 2 * radius / Settings.numChunkBreaks;
 		chunkManager = new ChunkManager(-radius, radius, -radius, radius, chunkSize);
+
 		float chemicalGridSize = 2 * radius / Settings.numChemicalBreaks;
 		chemicalSolution = new ChemicalSolution(-radius, radius, -radius, radius, chemicalGridSize);
+
+		rocks = new ArrayList<>();
+		RockGeneration.generateRocks(this);
+		rocks.forEach(chunkManager::allocateToChunk);
+
 		elapsedTime = 0;
 	}
+
 	
 	public Vector2 randomPosition(float entityRadius) {
 		float rad = radius - 4*entityRadius;
@@ -46,8 +57,12 @@ public class Tank implements Iterable<Entity>, Serializable
 	}
 
 	public void handleTankEdge(Entity e) {
-		if (e.getPos().len() - e.getRadius() > radius)
+		float rPos = e.getPos().len();
+		if (Settings.sphericalTank && rPos - e.getRadius() > radius)
 			e.getPos().setLength(-0.98f * radius);
+		else if (rPos + e.getRadius() > radius)
+			e.getPos().setLength(radius - e.getRadius());
+
 	}
 
 	public void updateEntity(Entity e, float delta) {
@@ -66,13 +81,6 @@ public class Tank implements Iterable<Entity>, Serializable
 
 		Collection<Entity> entities = chunkManager.getAllEntities();
 
-//		Arrays.stream(chunkManager.getChunks())
-//				.parallel()
-//				.forEach(chunk -> chunk.getEntities().forEach(e -> updateEntity(e, delta)));
-//
-//		Arrays.stream(chunkManager.getChunks())
-//				.parallel()
-//				.forEach(chunk -> chunk.getEntities().forEach(e -> e.handleCollisions(delta)));
 		entities.parallelStream().forEach(Entity::resetPhysics);
 		entities.parallelStream().forEach(e -> updateEntity(e, delta));
 		entities.parallelStream().forEach(e -> e.physicsUpdate(delta));
@@ -178,12 +186,20 @@ public class Tank implements Iterable<Entity>, Serializable
 		return generation;
 	}
 
+	public boolean isCollidingWithAnything(Entity e) {
+		if (chunkManager.getAllEntities().stream().anyMatch(e::isCollidingWith))
+			return true;
+		return rocks.stream().anyMatch(e::isCollidingWith);
+	}
+
     public void addRandom(Entity e) {
-		e.setPos(randomPosition(e.getRadius()));
-		for (int i = 0; i < 5 && chunkManager.getAllEntities().stream().anyMatch(e::isCollidingWith); i++)
+		for (int i = 0; i < 5; i++) {
 			e.setPos(randomPosition(e.getRadius()));
-		if (chunkManager.getAllEntities().stream().noneMatch(e::isCollidingWith))
-			add(e);
+			if (!isCollidingWithAnything(e)) {
+				add(e);
+				return;
+			}
+		}
     }
 
 	public float getElapsedTime() {
@@ -196,5 +212,9 @@ public class Tank implements Iterable<Entity>, Serializable
 
 	public ChemicalSolution getChemicalSolution() {
 		return chemicalSolution;
+	}
+
+	public List<Rock> getRocks() {
+		return rocks;
 	}
 }

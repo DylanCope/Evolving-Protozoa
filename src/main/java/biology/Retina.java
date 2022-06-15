@@ -17,7 +17,7 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 	public static class Cell implements Serializable {
 		private static final long serialVersionUID = 1L;
 		private final float angle;
-		private final Entity[] entities;
+		private final Color[] colours;
 		private final float[] weights, lengths;
 		private final Vector2[] rays;
 
@@ -26,7 +26,7 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 			if (cellFov > Settings.minRetinaRayAngle)
 				nRays = (int) (cellFov / Settings.minRetinaRayAngle);
 
-			entities = new Entity[nRays];
+			colours = new Color[nRays];
 			weights = new float[nRays];
 			lengths = new float[nRays];
 			rays = new Vector2[nRays];
@@ -40,13 +40,13 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 		}
 
 		public void reset() {
-			Arrays.fill(entities, null);
+			Arrays.fill(colours, null);
 			Arrays.fill(weights, 0);
 			Arrays.fill(lengths, Float.MAX_VALUE);
 		}
 
-		public void set(int idx, Entity e, float sqLen) {
-			entities[idx] = e;
+		public void set(int idx, Color c, float sqLen) {
+			colours[idx] = c;
 			lengths[idx] = sqLen;
 			weights[idx] = 1f;
 		}
@@ -60,12 +60,12 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 			float g = 0;
 			float b = 0;
 			int nEntities = 0;
-			for (int i = 0; i < entities.length; i++) {
-				if (entities[i] != null) {
+			for (int i = 0; i < colours.length; i++) {
+				if (colours[i] != null) {
 					float w = weights[i];
-					r += w * entities[i].getColor().getRed();
-					g += w * entities[i].getColor().getGreen();
-					b += w * entities[i].getColor().getBlue();
+					r += w * colours[i].getRed();
+					g += w * colours[i].getGreen();
+					b += w * colours[i].getBlue();
 					nEntities++;
 				}
 			}
@@ -81,8 +81,8 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 		}
 
 		public boolean anythingVisible() {
-			for (Entity e : entities)
-				if (e != null)
+			for (Color c : colours)
+				if (c != null)
 					return true;
 			return false;
 		}
@@ -92,10 +92,10 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 		}
 
 		public boolean rayIntersectedEntity(int rayIndex) {
-			return entities[rayIndex] != null;
+			return colours[rayIndex] != null;
 		}
 
-		public float entitySqLen(int rayIndex) {
+		public float collisionSqLen(int rayIndex) {
 			return lengths[rayIndex];
 		}
 	}

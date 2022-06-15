@@ -9,10 +9,7 @@ import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.image.BufferStrategy;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import utils.Utils;
 import utils.Vector2;
@@ -33,6 +30,7 @@ public class Renderer extends Canvas
 	private float zoom;
 	private float targetZoom;
 	private final float initialZoom = 1;
+	private double zoomRange = 5, zoomSlowness = 8;
 	private boolean superSimpleRender = false, renderChemicals = false;
 	private final float rotate = 0;
 	private double lastRenderTime = 0;
@@ -42,7 +40,7 @@ public class Renderer extends Canvas
 	private final HashMap<String, Integer> stats = new HashMap<>(5, 1);
 	private final Simulation simulation;
 	private final Window window;
-	
+
 	public Renderer(Simulation simulation, Window window)
 	{
 		this.simulation = simulation;
@@ -53,14 +51,16 @@ public class Renderer extends Canvas
 		stats.put("Chunks Rendered", 0);
 		stats.put("Protozoa Rendered", 0);
 		stats.put("Pellets Rendered", 0);
+		stats.put("Zoom", 0);
 		
 		tankRenderRadius = window.getHeight() / 2.0f;
 		tankRenderCoords = new Vector2(window.getWidth()*0.5f, window.getHeight()*0.5f);
 		pan = new Vector2(0, 0);
 		panPosTemp = pan;
 
-		zoom = 1;
-		targetZoom = 1;
+		zoom = 1f;
+		targetZoom = zoom;
+
 		
 		ui = new UI(window, simulation, this);
 		
@@ -198,6 +198,10 @@ public class Renderer extends Canvas
 			 ||(pos.getY() + r < 0);
 	}
 
+	public boolean pointNotVisible(Vector2 pos) {
+		return circleNotVisible(pos, 0);
+	}
+
 	public void drawCircle(Graphics2D g, Vector2 pos, float r, Color c) {
 		drawCircle(g, pos, r, c, (int) (0.2*r));
 	}
@@ -276,19 +280,105 @@ public class Renderer extends Canvas
 			renderChunk(g, chunk);
 
 		if (simulation.inDebugMode() && track != null) {
-			Iterator<Entity> collisionEntities = track.broadCollisionDetection(track.getRadius());
+			ChunkManager chunkManager = tank.getChunkManager();
+			Iterator<Collidable> collisionEntities = chunkManager.broadCollisionDetection(
+					track.getPos(), track.getRadius());
 			collisionEntities.forEachRemaining(
-					e -> drawCollisionBounds(g, e, e.getRadius(), Color.RED.darker())
+					o -> drawCollisionBounds(g, o, Color.RED.darker())
 			);
 
 			if (track instanceof Protozoa) {
 				drawCollisionBounds(g, track, Settings.protozoaInteractRange, Color.WHITE.darker());
-				Iterator<Entity> interactEntities = track.broadCollisionDetection(Settings.protozoaInteractRange);
+				Iterator<Entity> interactEntities = chunkManager.broadEntityDetection(
+						track.getPos(), Settings.protozoaInteractRange);
 				interactEntities.forEachRemaining(
 						e -> drawCollisionBounds(g, e, 1.1f * e.getRadius(), Color.WHITE.darker())
 				);
 			}
 		}
+	}
+
+	public void rocks(Graphics2D g, Tank tank) {
+		for (Rock rock : tank.getRocks()) {
+			Vector2[] screenPoints = new Vector2[]{
+					toRenderSpace(rock.getPoints()[0]),
+					toRenderSpace(rock.getPoints()[1]),
+					toRenderSpace(rock.getPoints()[2])
+			};
+
+			int[] xPoints = new int[screenPoints.length];
+			for (int i = 0; i < screenPoints.length; i++)
+				xPoints[i] = (int) screenPoints[i].getX();
+
+			int[] yPoints = new int[screenPoints.length];
+			for (int i = 0; i < screenPoints.length; i++)
+				yPoints[i] = (int) screenPoints[i].getY();
+
+			Color color = new Color(
+					rock.getColor().getRed(),
+					rock.getColor().getGreen(),
+					rock.getColor().getBlue(),
+					simulation.inDebugMode() ? 100 : 255
+			);
+			g.setColor(color);
+			g.fillPolygon(xPoints, yPoints, screenPoints.length);
+			g.setColor(color.darker());
+			g.drawPolygon(xPoints, yPoints, screenPoints.length);
+
+			if (simulation.inDebugMode()) {
+				g.setColor(Color.YELLOW.darker());
+				for (int i = 0; i < 3; i++) {
+					Vector2[] edge = rock.getEdge(i);
+					Vector2 edgeCentre = edge[0].add(edge[1]).scale(0.5f);
+					Vector2 normalStart = edgeCentre.sub(rock.getNormals()[i].mul(0.01f));
+					Vector2 normalEnd = edgeCentre.add(rock.getNormals()[i].mul(0.01f));
+					Vector2 a = toRenderSpace(normalStart);
+					Vector2 b = toRenderSpace(normalEnd);
+					g.drawLine((int) a.getX(), (int) a.getY(), (int) b.getX(), (int) b.getY());
+				}
+			}
+		}
+	}
+
+	public void drawCollisionBounds(Graphics2D g, Collidable collidable, Color color) {
+		if (collidable instanceof Entity) {
+			Entity e = (Entity) collidable;
+			drawCollisionBounds(g, e, e.getRadius(), color);
+		} else if (collidable instanceof Rock) {
+			drawCollisionBounds(g, (Rock) collidable, color);
+		}
+	}
+
+	public void drawCollisionBounds(Graphics2D g, Rock rock, Color color) {
+
+		Vector2[] screenPoints = new Vector2[]{
+			toRenderSpace(rock.getPoints()[0]),
+			toRenderSpace(rock.getPoints()[1]),
+			toRenderSpace(rock.getPoints()[2])
+		};
+
+		int[] xPoints = new int[screenPoints.length];
+		for (int i = 0; i < screenPoints.length; i++)
+			xPoints[i] = (int) screenPoints[i].getX();
+
+		int[] yPoints = new int[screenPoints.length];
+		for (int i = 0; i < screenPoints.length; i++)
+			yPoints[i] = (int) screenPoints[i].getY();
+
+		int strokeSize = 5;
+		Stroke s = g.getStroke();
+		g.setStroke(new BasicStroke(strokeSize));
+		g.setColor(color);
+		for (int i = 0; i < rock.getEdges().length; i++) {
+			if (rock.getEdgeAttachedState(i))
+				continue;
+			Vector2[] edge = rock.getEdge(i);
+			Vector2 start = toRenderSpace(edge[0]);
+			Vector2 end = toRenderSpace(edge[1]);
+			g.drawLine((int) start.getX(), (int) start.getY(),
+					(int) end.getX(), (int) end.getY());
+		}
+		g.setStroke(s);
 	}
 
 	public void drawCollisionBounds(Graphics2D g, Entity e, float r, Color color) {
@@ -394,24 +484,29 @@ public class Renderer extends Canvas
 		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
 		zoom = targetZoom;
+		stats.put("Zoom", (int) (100 * zoom));
 		synchronized (simulation.getTank()) {
-			background(graphics);
-			entities(graphics, simulation.getTank());
-			maskTank(graphics,
-					tankRenderCoords,
-					getTracked() != null ? getTrackingScopeRadius() : tankRenderRadius,
-					simulation.inDebugMode() ? 150 : 200);
+			try {
+				background(graphics);
+				entities(graphics, simulation.getTank());
+				rocks(graphics, simulation.getTank());
+				maskTank(graphics,
+						tankRenderCoords,
+						getTracked() != null ? getTrackingScopeRadius() : tankRenderRadius,
+						simulation.inDebugMode() ? 150 : 200);
 
-			maskTank(graphics,
-					toRenderSpace(new Vector2(0, 0)),
-					tankRenderRadius*zoom,
-					simulation.inDebugMode() ? 100 : 255);
+				maskTank(graphics,
+						toRenderSpace(new Vector2(0, 0)),
+						tankRenderRadius * zoom,
+						simulation.inDebugMode() ? 100 : 255);
 
-			ui.render(graphics);
+				ui.render(graphics);
+
+				graphics.dispose();
+				bs.show();
+
+			} catch (ConcurrentModificationException ignored) {}
 		}
-		
-		graphics.dispose();
-		bs.show();
 	}
 
 	public float getTrackingScopeRadius() {
@@ -421,14 +516,15 @@ public class Renderer extends Canvas
 	public Vector2 toRenderSpace(Vector2 v)
 	{
 		if (track == null)
-			return v.rotate(rotate).mul(1 / simulation.getTank().getRadius())
+			return v.rotate(rotate)
+					.mul(1 / simulation.getTank().getRadius())
 					.add(pan.mul(1 / tankRenderRadius))
 					.mul(tankRenderRadius * zoom)
 					.add(tankRenderCoords);
 		else {
 			return v.sub(track.getPos())
-					.rotate(rotate).mul(1 / simulation.getTank().getRadius())
-					.mul(tankRenderRadius * zoom)
+					.rotate(rotate)
+					.mul(tankRenderRadius * zoom / simulation.getTank().getRadius())
 					.add(tankRenderCoords);
 		}
 	}
@@ -439,7 +535,7 @@ public class Renderer extends Canvas
 	}
 
 	public void setZoom(float d) {
-		targetZoom = (float) Math.pow(initialZoom + d, Math.log10(2 + initialZoom + d));
+		targetZoom = (float) (initialZoom + zoomRange * Math.tanh((d - 1f) / zoomSlowness));
 		if (targetZoom < 0.5) {
 			pan = new Vector2(0, 0);
 			targetZoom = 0.5f;
@@ -480,6 +576,7 @@ public class Renderer extends Canvas
 		track = null;
 		pan = new Vector2(0, 0);
 		targetZoom = 1;
+		zoom = 1;
 	}
 
 	public void toggleChemicalGrid() {

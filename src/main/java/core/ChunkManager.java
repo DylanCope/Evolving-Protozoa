@@ -1,12 +1,15 @@
 package core;
 
 import biology.Entity;
+import com.google.common.collect.Iterators;
 import utils.Vector2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 
 public class ChunkManager implements Serializable {
 
@@ -38,6 +41,37 @@ public class ChunkManager implements Serializable {
             for (int j = 0; j < nYChunks; j++)
                 this.chunks[toChunkID(i, j)] = new Chunk(i, j, this);
 
+    }
+
+    public <T extends Collidable> Iterator<T> broadScan(
+            Vector2 pos,
+            float range,
+            Function<Chunk, Iterator<T>> scanner
+    ) {
+        float x = pos.getX();
+        float y = pos.getY();
+
+        int iMin = this.toChunkX(x - range);
+        int iMax = this.toChunkX(x + range);
+        int jMin = this.toChunkY(y - range);
+        int jMax = this.toChunkY(y + range);
+
+        List<Iterator<T>> iterators = new ArrayList<>();
+        for (int i = iMin; i <= iMax; i++)
+            for (int j = jMin; j <= jMax; j++) {
+                Chunk chunk = getChunk(toChunkID(i, j));
+                iterators.add(scanner.apply(chunk));
+            }
+
+        return Iterators.concat(iterators.iterator());
+    }
+
+    public Iterator<Collidable> broadCollisionDetection(Vector2 pos, float range) {
+        return broadScan(pos, range, Chunk::getCollidables);
+    }
+
+    public Iterator<Entity> broadEntityDetection(Vector2 pos, float range) {
+        return broadScan(pos, range, chunk -> chunk.getEntities().iterator());
     }
 
     public int toChunkX(float tankX) {
@@ -82,7 +116,11 @@ public class ChunkManager implements Serializable {
     }
 
     public Chunk getChunk(Entity e) {
-        int chunkID = this.toChunkID(e.getPos().getX(), e.getPos().getY());
+        return getChunk(e.getPos());
+    }
+
+    public Chunk getChunk(Vector2 pos) {
+        int chunkID = this.toChunkID(pos.getX(), pos.getY());
         return getChunk(chunkID);
     }
 
@@ -142,5 +180,13 @@ public class ChunkManager implements Serializable {
 
     public int getNXChunks() {
         return nXChunks;
+    }
+
+    public void allocateToChunk(Rock rock) {
+        for (Vector2 p : rock.getPoints()) {
+            Chunk chunk = getChunk(p);
+            if (!chunk.contains(rock))
+                chunk.addRock(rock);
+        }
     }
 }

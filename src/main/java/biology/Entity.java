@@ -1,18 +1,13 @@
 package biology;
 
-import com.google.common.collect.Iterators;
-import core.ChunkManager;
-import core.Settings;
-import core.Simulation;
-import core.Tank;
+import core.*;
 import utils.Vector2;
 
 import java.awt.*;
 import java.io.Serializable;
-import java.util.List;
 import java.util.*;
 
-public abstract class Entity implements Serializable
+public abstract class Entity extends Collidable implements Serializable
 {
 	private static final long serialVersionUID = -4333766895269415282L;
 	private Vector2 pos, prevPos;
@@ -25,7 +20,7 @@ public abstract class Entity implements Serializable
 	private float health = 1f;
 	private float growthRate = 0.0f;
 	private int generation = 1;
-	protected int numCollisions = 0;
+	protected int numEntityCollisions = 0, rockCollisions = 0;
 	
 	private boolean dead = false;
 	private float nutrition;
@@ -62,15 +57,13 @@ public abstract class Entity implements Serializable
 
 	public void physicsUpdate(float delta) {
 		float subStepDelta = delta / Settings.physicsSubSteps;
-		numCollisions = 0;
+		numEntityCollisions = 0;
+		rockCollisions = 0;
+		ChunkManager chunkManager = tank.getChunkManager();
 		for (int i = 0; i < Settings.physicsSubSteps; i++) {
-			Iterator<Entity> entities = broadCollisionDetection(radius);
-			entities.forEachRemaining(e -> handlePotentialCollision(e, subStepDelta));
-//		applyForce(getDragForce());
+			Iterator<Collidable> entities = chunkManager.broadCollisionDetection(getPos(), radius);
+			entities.forEachRemaining(o -> handlePotentialCollision(o, subStepDelta));
 			acc.translate(getDragAcceleration());
-//			acc.translate(getBrownianAcceleration());
-//		vel.translate(force.scale(delta / getMass()));
-//			vel.scale(1f - 2*subStepDelta);
 			move(subStepDelta);
 			prevPos = pos;
 		}
@@ -90,24 +83,6 @@ public abstract class Entity implements Serializable
 		return vel.unit().scale(-fMag / getMass());
 	}
 
-	public Iterator<Entity> broadCollisionDetection(float range) {
-		float x = getPos().getX();
-		float y = getPos().getY();
-
-		ChunkManager manager = tank.getChunkManager();
-		int iMin = manager.toChunkX(x - range);
-		int iMax = manager.toChunkX(x + range);
-		int jMin = manager.toChunkY(y - range);
-		int jMax = manager.toChunkY(y + range);
-
-		List<Iterator<Entity>> entityIterators = new ArrayList<>();
-		for (int i = iMin; i <= iMax; i++)
-			for (int j = jMin; j <= jMax; j++)
-				entityIterators.add(manager.getChunk(manager.toChunkID(i, j)).getEntities().iterator());
-
-		return Iterators.concat(entityIterators.iterator());
-	}
-
 	public void handleInteractions(float delta) {
 		grow(delta);
 	}
@@ -124,6 +99,8 @@ public abstract class Entity implements Serializable
 	}
 
 	public float getGrowthRate() {
+		if (rockCollisions > 2)
+			return 0;
 		return growthRate;
 	}
 	
@@ -137,7 +114,68 @@ public abstract class Entity implements Serializable
 			(int) (2*radius)
 		);
 	}
-	
+
+	@Override
+	public boolean pointInside(Vector2 p) {
+		return false;
+	}
+
+	@Override
+	public boolean rayIntersects(Vector2 start, Vector2 end) {
+		return false;
+	}
+
+	@Override
+	public Vector2[] rayCollisions(Vector2 start, Vector2 end) {
+		Vector2 ray = end.sub(start).unit();
+		Vector2 p = getPos().sub(start);
+
+		float a = ray.len2();
+		float b = -2 * ray.dot(p);
+		float c = p.len2() - getRadius() * getRadius();
+
+		float d = b*b - 4*a*c;
+		boolean doesIntersect = d != 0;
+		if (!doesIntersect)
+			return null;
+
+		float l1 = (float) ((-b + Math.sqrt(d)) / (2*a));
+		float l2 = (float) ((-b - Math.sqrt(d)) / (2*a));
+
+		if (l1 > 0 || l2 > 0) {
+			return new Vector2[]{
+					start.add(ray.mul(l1)),
+					start.add(ray.mul(l2))
+			};
+		}
+		return null;
+	}
+
+	public boolean isCollidingWith(Collidable other) {
+		if (other instanceof Entity)
+			return isCollidingWith((Entity) other);
+		else if (other instanceof Rock)
+			return isCollidingWith((Rock) other);
+		return false;
+	}
+
+	public boolean isCollidingWith(Rock rock) {
+		Vector2[][] edges = rock.getEdges();
+		float r = getRadius();
+		Vector2 pos = getPos();
+
+		if (rock.pointInside(pos))
+			return true;
+
+		for (Vector2[] edge : edges) {
+			Vector2 dir = edge[1].sub(edge[0]);
+			Vector2 x = pos.sub(edge[0]);
+			if (lineIntersectCondition(lineIntersectionCoefficients(dir, x)))
+				return true;
+		}
+		return false;
+	}
+
 	public boolean isCollidingWith(Entity other)
 	{
 		float r = getRadius() + other.getRadius();
@@ -145,6 +183,13 @@ public abstract class Entity implements Serializable
 	}
 	
 	public abstract boolean isEdible();
+
+	public void handlePotentialCollision(Collidable other, float delta) {
+		if (other instanceof Entity)
+			handlePotentialCollision((Entity) other, delta);
+		else if (other instanceof Rock)
+			handlePotentialCollision((Rock) other, delta);
+	}
 
 	public void handlePotentialCollision(Entity e, float delta) {
 		if (e == this)
@@ -156,6 +201,7 @@ public abstract class Entity implements Serializable
 
 		if (sqDist < r*r)
 		{
+			numEntityCollisions++;
 			getPos().moveAway(e.getPos(), r);
 			e.getPos().moveAway(getPos(), r);
 
@@ -163,6 +209,56 @@ public abstract class Entity implements Serializable
 			Vector2 v2 = e.elasticCollision(this);
 			setVel(v1);
 			e.setVel(v2);
+		}
+	}
+
+	public float[] lineIntersectionCoefficients(Vector2 dir, Vector2 x) {
+		float r = getRadius();
+		float a = dir.len2();
+		float b = -2*dir.dot(x);
+		float c = x.len2() - r*r;
+		float disc = b*b - 4*a*c;
+		if (disc < 0)
+			return null;
+
+		float t1 = (float) ((-b + Math.sqrt(disc)) / (2*a));
+		float t2 = (float) ((-b - Math.sqrt(disc)) / (2*a));
+
+		return new float[]{t1, t2};
+	}
+
+	public boolean lineIntersectCondition(float[] coefs) {
+		if (coefs == null)
+			return false;
+		float t1 = coefs[0], t2 = coefs[1];
+		return (0 < t1 && t1 < 1) || (0 < t2 && t2 < 1);
+	}
+
+	public void handlePotentialCollision(Rock rock, float delta) {
+		Vector2[][] edges = rock.getEdges();
+		Vector2 pos = getPos();
+		float r = getRadius();
+
+		for (int i = 0; i < edges.length; i++) {
+			Vector2[] edge = edges[i];
+			Vector2 normal = rock.getNormals()[i];
+			Vector2 dir = edge[1].sub(edge[0]);
+			Vector2 x = pos.sub(edge[0]);
+
+			if (x.dot(normal) < 0)
+				continue;
+
+			float[] coefs = lineIntersectionCoefficients(dir, x);
+			if (lineIntersectCondition(coefs)) {
+				float t1 = coefs[0], t2 = coefs[1];
+				float t = (t1 + t2) / 2f;
+
+				float offset = r - x.sub(dir.mul(t)).len();
+
+				pos.translate(normal.mul(offset));
+				vel.translate(normal.mul(-2*normal.dot(vel)));
+				rockCollisions++;
+			}
 		}
 	}
 
@@ -190,10 +286,9 @@ public abstract class Entity implements Serializable
 		health = h;
 		if (health > 1) 
 			health = 1;
-		
+
 		if (health < 0.1)
 			setDead(true);
-
 	}
 
 	public void handleDeath() {
@@ -248,6 +343,7 @@ public abstract class Entity implements Serializable
 
 	public void setDead(boolean dead) {
 		this.dead = dead;
+		health = 0;
 	}
 
 	public Vector2 getVel() {
@@ -268,9 +364,9 @@ public abstract class Entity implements Serializable
 		Color healthyColour = getHealthyColour();
 		Color degradedColour = getFullyDegradedColour();
 		return new Color(
-			(int) (healthyColour.getRed() + (1 - health) * (degradedColour.getRed() - healthyColour.getRed())),
-			(int) (healthyColour.getGreen() + (1 - health) * (degradedColour.getGreen() - healthyColour.getGreen())),
-			(int) (healthyColour.getBlue() + (1 - health) * (degradedColour.getBlue() - healthyColour.getBlue()))
+			(int) (healthyColour.getRed() + (1 - getHealth()) * (degradedColour.getRed() - healthyColour.getRed())),
+			(int) (healthyColour.getGreen() + (1 - getHealth()) * (degradedColour.getGreen() - healthyColour.getGreen())),
+			(int) (healthyColour.getBlue() + (1 - getHealth()) * (degradedColour.getBlue() - healthyColour.getBlue()))
 		);
 	}
 

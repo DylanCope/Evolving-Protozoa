@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.Collection;
 
 public class ChemicalSolution implements Serializable {
+    public static final long serialVersionUID = 1L;
 
     private final float gridSize;
     private final float xMin;

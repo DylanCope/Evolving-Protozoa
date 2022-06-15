@@ -1,5 +1,6 @@
 package biology;
 
+import core.ChunkManager;
 import core.Settings;
 import core.Simulation;
 import core.Tank;
@@ -52,7 +53,7 @@ public class PlantPellet extends Pellet {
         return getRadius() > maxRadius &&
                 getCrowdingFactor() < Settings.plantCriticalCrowding &&
                 getHealth() > Settings.minHealthToSplit &&
-                numCollisions < 2;
+                numEntityCollisions < 2;
     }
 
     @Override
@@ -76,7 +77,8 @@ public class PlantPellet extends Pellet {
         super.update(delta);
 
         crowdingFactor = 0;
-        Iterator<Entity> entities = broadCollisionDetection(getRadius());
+        ChunkManager chunkManager = tank.getChunkManager();
+        Iterator<Entity> entities = chunkManager.broadEntityDetection(getPos(), getRadius());
         entities.forEachRemaining(this::updateCrowding);
 
         setHealth(getHealth() + Settings.plantRegen * delta * getGrowthRate());

@@ -3,6 +3,7 @@ package core;
 import java.io.Serializable;
 
 public class Chemical implements Serializable {
+    public static final long serialVersionUID = 1L;
     float currentPlantPheromoneDensity, nextPlantPheromoneDensity;
 
     public void propagate(float delta,

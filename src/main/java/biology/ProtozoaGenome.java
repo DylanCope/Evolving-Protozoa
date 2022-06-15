@@ -4,7 +4,6 @@ import core.Settings;
 import core.Simulation;
 import core.Tank;
 import neat.NetworkGenome;
-import neat.NeuronGene;
 import neat.SynapseGene;
 
 import java.awt.*;
@@ -17,6 +16,8 @@ import java.util.stream.Stream;
  */
 public class ProtozoaGenome implements Serializable
 {
+    public static final long serialVersionUID = 2421454107847378624L;
+    private int numMutations = 0;
     private final NetworkGenome networkGenome;
     private int retinaSize;
     private float retinaFoV;
@@ -25,8 +26,7 @@ public class ProtozoaGenome implements Serializable
     private float splitSize;
     private Color colour;
     private float mutationChance = Settings.globalMutationChance;
-    private int numMutations = 0;
-    private float maxTurn;
+    private final float maxTurn;
 
     public static final int actionSpaceSize = 2;
     public static final int nonVisualSensorSize = 4;
@@ -65,7 +65,8 @@ public class ProtozoaGenome implements Serializable
                           float growthRate,
                           float splitSize,
                           Color colour,
-                          NetworkGenome networkGenome)
+                          NetworkGenome networkGenome,
+                          float maxTurn)
     {
         this.retinaSize = retinaSize;
         this.radius = radius;
@@ -73,6 +74,7 @@ public class ProtozoaGenome implements Serializable
         this.growthRate = growthRate;
         this.splitSize = splitSize;
         this.colour = colour;
+        this.maxTurn = maxTurn;
     }
 
     private static float randomFoV() {
@@ -126,15 +128,40 @@ public class ProtozoaGenome implements Serializable
             numMutations++;
         }
         if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
-            spikes = Arrays.copyOf(spikes, spikes.length+1);
-            Protozoa.Spike spike = new Protozoa.Spike();
-            spike.length = (0.3f + 0.5f * Simulation.RANDOM.nextFloat()) * getRadius();
-            spike.angle = (float) (2 * Math.PI * Simulation.RANDOM.nextFloat());
-            spikes[spikes.length - 1] = spike;
+            float p = Simulation.RANDOM.nextFloat();
+            if (p < 0.333f || spikes.length == 0) { // Add new spike
+                spikes = Arrays.copyOf(spikes, spikes.length+1);
+                Protozoa.Spike spike = new Protozoa.Spike();
+                spike.length = (0.3f + 0.5f * Simulation.RANDOM.nextFloat()) * getRadius();
+                spike.angle = (float) (2 * Math.PI * Simulation.RANDOM.nextFloat());
+                spikes[spikes.length - 1] = spike;
+            } else if (p < 0.666f) { // Remove existing spike
+                int idxRemove = Simulation.RANDOM.nextInt(spikes.length);
+                Protozoa.Spike[] newSpikes = new Protozoa.Spike[spikes.length - 1];
+                int j = 0;
+                for (int i = 0; i < spikes.length; i++) {
+                    if (i == idxRemove)
+                        continue;
+                    newSpikes[j] = spikes[i];
+                    j++;
+                }
+                spikes = newSpikes;
+            } else { // Change existing spike
+                int idx = Simulation.RANDOM.nextInt(spikes.length);
+                if (Simulation.RANDOM.nextBoolean()) {
+                    spikes[idx].angle = (float) (2 * Math.PI * Simulation.RANDOM.nextDouble());
+                } else {
+                    spikes[idx].length = (0.3f + 0.5f * Simulation.RANDOM.nextFloat()) * getRadius();
+                }
+            }
             numMutations++;
         }
         if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
             retinaFoV = randomFoV();
+            numMutations++;
+        }
+        if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
+            retinaFoV = randomMaxTurn();
             numMutations++;
         }
         return this;
@@ -187,8 +214,10 @@ public class ProtozoaGenome implements Serializable
         float childSplitSize = Simulation.RANDOM.nextBoolean() ? splitSize : other.splitSize;
         float childGrowthRate = Simulation.RANDOM.nextBoolean() ? growthRate : other.growthRate;
         Color childColour = Simulation.RANDOM.nextBoolean() ? colour : other.colour;
+        float childMaxTurn = Simulation.RANDOM.nextBoolean() ? maxTurn : other.maxTurn;
         return Stream.of(new ProtozoaGenome(
-                childRetinaSize, childRadius, childGrowthRate, childSplitSize, childColour, childNetGenome
+                childRetinaSize, childRadius, childGrowthRate, childSplitSize,
+                childColour, childNetGenome, childMaxTurn
         ));
     }
 

@@ -1,8 +1,6 @@
 package biology;
 
-import core.Settings;
-import core.Simulation;
-import core.Tank;
+import core.*;
 import neat.NeuralNetwork;
 import utils.Vector2;
 
@@ -31,7 +29,6 @@ public class Protozoa extends Entity
 	private final float splitRadius;
 
 	private final Vector2 dir = new Vector2(0, 0);
-
 	public static class Spike implements Serializable {
 		private static final long serialVersionUID = 1L;
 		public float length;
@@ -66,43 +63,27 @@ public class Protozoa extends Entity
 	public Protozoa(Tank tank) throws MiscarriageException {
 		this(new ProtozoaGenome(), tank);
 	}
-	public void see(Entity e)
+
+	public void see(Collidable o)
 	{
-		Vector2 dr = e.getPos().sub(getPos());
 		float dirAngle = getDir().angle();
 
 		for (Retina.Cell cell : retina.getCells()) {
 			Vector2[] rays = cell.getRays();
 			for (int i = 0; i < rays.length; i++) {
-				Vector2 ray = rays[i].rotate(dirAngle);
-				boolean inView = doesRayIntersectCircle(ray, dr, e.getRadius());
+				Vector2 ray = rays[i].rotate(dirAngle).setLength(Settings.protozoaInteractRange);
+				Vector2[] collisions = o.rayCollisions(getPos(), getPos().add(ray));
+				if (collisions == null || collisions.length == 0)
+					continue;
 
-				float sqLen = dr.len2();
-				boolean isBlocked = false;
-				if (cell.rayIntersectedEntity(i))
-					isBlocked = sqLen > cell.entitySqLen(i);
+				float sqLen = Float.MAX_VALUE;
+				for (Vector2 collisionPoint : collisions)
+					sqLen = Math.min(sqLen, collisionPoint.sub(getPos()).len2());
 
-				if (inView && !isBlocked)
-					cell.set(i, e, sqLen);
-
+				if (sqLen < cell.collisionSqLen(i))
+					cell.set(i, o.getColor(), sqLen);
 			}
 		}
-	}
-
-	private static boolean doesRayIntersectCircle(Vector2 ray, Vector2 pos, float r) {
-		float a = ray.len2();
-		float b = -2 * ray.dot(pos);
-		float c = pos.len2() - r*r;
-
-		float d = b*b - 4*a*c;
-		boolean doesIntersect = d != 0;
-		if (!doesIntersect)
-			return false;
-
-		double l1 = (-b + Math.sqrt(d)) / (2*a);
-		double l2 = (-b - Math.sqrt(d)) / (2*a);
-
-		return l1 > 0 || l2 > 0;
 	}
 	
 	public void eat(Entity e, float delta)
@@ -152,6 +133,15 @@ public class Protozoa extends Entity
 		Protozoa child = genome.createChild(tank);
 		child.setRadius(stuntingFactor * child.getRadius());
 		return child;
+	}
+
+	public void interact(Collidable other, float delta) {
+		if (other instanceof Entity) {
+			interact((Entity) other, delta);
+		} else {
+			if (retina.numberOfCells() > 0)
+				see(other);
+		}
 	}
 
 	public void interact(Entity other, float delta) {
@@ -219,7 +209,9 @@ public class Protozoa extends Entity
 		nearbyPlants = 0;
 		wasJustDamaged = false;
 		retina.reset();
-		Iterator<Entity> entities = broadCollisionDetection(Settings.protozoaInteractRange);
+		ChunkManager chunkManager = tank.getChunkManager();
+		Iterator<Collidable> entities = chunkManager
+				.broadCollisionDetection(getPos(), Settings.protozoaInteractRange);
 		entities.forEachRemaining(e -> interact(e, delta));
 	}
 

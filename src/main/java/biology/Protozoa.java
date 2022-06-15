@@ -1,5 +1,6 @@
 package biology;
 
+import biology.genes.ProtozoaGenome;
 import core.*;
 import neat.NeuralNetwork;
 import utils.Vector2;
@@ -33,6 +34,16 @@ public class Protozoa extends Entity
 		private static final long serialVersionUID = 1L;
 		public float length;
 		public float angle;
+		public float growthRate;
+		public float currentLength = 0;
+
+		public void update(float delta) {
+			if (currentLength < length) {
+				currentLength += delta * growthRate;
+				if (currentLength > length)
+					currentLength = length;
+			}
+		}
 	}
 
 	private final Spike[] spikes;
@@ -260,7 +271,7 @@ public class Protozoa extends Entity
 		if (getRadius() > splitRadius)
 			growthRate *= getHealth() * splitRadius / (5 * getRadius());
 		for (Spike spike : spikes)
-			growthRate -= Settings.spikeGrowthPenalty * spike.length;
+			growthRate -= Settings.spikeGrowthPenalty * spike.growthRate;
 		return growthRate;
 	}
 
@@ -280,6 +291,9 @@ public class Protozoa extends Entity
 			handleDeath();
 
 		think(delta);
+
+		for (Spike spike : spikes)
+			spike.update(delta);
 	}
 	
 	public void render(Graphics g)
@@ -347,7 +361,7 @@ public class Protozoa extends Entity
 	}
 
 	public float getSpikeLength(Spike spike) {
-		return spike.length * getRadius() / splitRadius;
+		return spike.currentLength * getRadius() / splitRadius;
 	}
 
 	public Vector2 getDir() {

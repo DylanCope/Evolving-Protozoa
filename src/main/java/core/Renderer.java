@@ -1,13 +1,6 @@
 package core;
 
-import java.awt.BasicStroke;
-import java.awt.Canvas;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.awt.RenderingHints;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.util.*;
 
@@ -36,6 +29,7 @@ public class Renderer extends Canvas
 	private double lastRenderTime = 0;
 	private Entity track;
 	private final UI ui;
+	private boolean antiAliasing = Settings.antiAliasing;
 
 	private final HashMap<String, Integer> stats = new HashMap<>(5, 1);
 	private final Simulation simulation;
@@ -60,6 +54,7 @@ public class Renderer extends Canvas
 
 		zoom = 1f;
 		targetZoom = zoom;
+		zoomRange *= simulation.getTank().getRadius();
 
 		
 		ui = new UI(window, simulation, this);
@@ -474,14 +469,25 @@ public class Renderer extends Canvas
 
 		BufferStrategy bs = this.getBufferStrategy();
 		
-		if (bs == null) 
-		{
+		if (bs == null) {
 			this.createBufferStrategy(3);
 			return;
 		}
 		
 		Graphics2D graphics = (Graphics2D) bs.getDrawGraphics();
-		graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+//		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+//		GraphicsConfiguration gc = ge.getDefaultScreenDevice().getDefaultConfiguration();
+//		Graphics2D graphics = gc.createCompatibleVolatileImage(window.getWidth(), window.getHeight()).createGraphics();
+
+		if (antiAliasing)
+			graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		else
+			graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+
+//		graphics.setRenderingHint(
+//				RenderingHints.KEY_COLOR_RENDERING,
+//				RenderingHints.VALUE_COLOR_RENDER_SPEED);
+
 
 		zoom = targetZoom;
 		stats.put("Zoom", (int) (100 * zoom));
@@ -581,5 +587,9 @@ public class Renderer extends Canvas
 
 	public void toggleChemicalGrid() {
 		renderChemicals = !renderChemicals;
+	}
+
+	public void toggleAA() {
+		antiAliasing = !antiAliasing;
 	}
 }

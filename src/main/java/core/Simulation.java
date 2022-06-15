@@ -97,17 +97,8 @@ public class Simulation
 	{
 		tank = new Tank();
 		loadSettings();
+		tank.initialisePopulation();
 		tank.setGenomeFile(genomeFile);
-
-		for (int i = 0; i < Settings.numInitialProtozoa; i++) {
-			try {
-				tank.addRandom(new Protozoa(tank));
-			} catch (MiscarriageException ignored) {}
-		}
-
-		for (int i = 0; i < Settings.numInitialPlantPellets; i++)
-			tank.addRandom(new PlantPellet(tank));
-
 		makeHistorySnapshot();
 	}
 	

@@ -17,13 +17,17 @@ public final class Settings {
     public static final int maxMeat = 1000;
 
     // Tank settings
-    public static final int numInitialProtozoa = 300;
-    public static final int numInitialPlantPellets = 1000;
+    public static final int numInitialProtozoa = 30;
+    public static final int numInitialPlantPellets = 3000;
+    public static final boolean initialPopulationClustering = true;
+    public static final int numPopulationClusters = 7;
+    public static final float populationClusterRadius = 0.2f;
     public static final float tankRadius = 2.0f;
     public static final boolean sphericalTank = false;
-    public static final int numChunkBreaks = 20;
+    public static final int numChunkBreaks = 25;
     public static final float maxEntityRadius = 0.15f;
-    public static final float tankViscosity = 1f;
+    public static final float minEntityRadius = 0.005f;
+    public static final float tankViscosity = 3f;
     public static final float brownianFactor = 1000f;
     public static final float coefRestitution = 0.005f;
     public static final int numChemicalBreaks = numChunkBreaks * 8;
@@ -33,7 +37,8 @@ public final class Settings {
     public static final float maxRockSize = 0.15f;
     public static final float minRockSize = 0.05f;
     public static final float minRockSpikiness = (float) Math.toRadians(45);
-    public static final int rockGenerationIterations = 1200;
+    public static final float minRockOpeningSize = 0.08f;
+    public static final int rockGenerationIterations = 3000;
     public static final int rockSeedingIterations = 8;
     public static final float rockClustering = 0.99f;
 
@@ -41,7 +46,7 @@ public final class Settings {
     public static final float minProtozoanBirthRadius = 0.01f;
     public static final float maxProtozoanBirthRadius = 0.015f;
     public static final float protozoaStarvationFactor = 40f;
-    public static final int defaultRetinaSize = 5;
+    public static final int defaultRetinaSize = 0;
     public static final int maxRetinaSize = 16;
     public static final float minRetinaRayAngle = (float) Math.toRadians(10);
     public static final float minHealthToSplit = 0.5f;
@@ -51,6 +56,7 @@ public final class Settings {
     public static final float maxProtozoanGrowthRate = .2f;
     public static final int maxTurnAngle = 25;
     public static final float spikeGrowthPenalty = .02f;
+    public static final float maxSpikeGrowth = 0.1f;
     public static final float spikeDamage = 3f;
 
     public static final float globalMutationChance = 0.05f;
@@ -73,4 +79,9 @@ public final class Settings {
 
     public static final float statsDistanceScalar = 100.0f;
     public static final float statsTimeScalar = 100.0f;
+
+    // Rendering
+
+    public static final boolean showFPS = true;
+    public static final boolean antiAliasing = false;
 }

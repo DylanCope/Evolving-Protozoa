@@ -1,6 +1,7 @@
 package biology;
 
 import core.*;
+import utils.Geometry;
 import utils.Vector2;
 
 import java.awt.*;
@@ -63,10 +64,14 @@ public abstract class Entity extends Collidable implements Serializable
 		for (int i = 0; i < Settings.physicsSubSteps; i++) {
 			Iterator<Collidable> entities = chunkManager.broadCollisionDetection(getPos(), radius);
 			entities.forEachRemaining(o -> handlePotentialCollision(o, subStepDelta));
-			acc.translate(getDragAcceleration());
+//			accelerate(getDragAcceleration());
 			move(subStepDelta);
 			prevPos = pos;
 		}
+	}
+
+	public void accelerate(Vector2 da) {
+		acc.translate(da);
 	}
 
 	private Vector2 getBrownianAcceleration() {
@@ -168,9 +173,7 @@ public abstract class Entity extends Collidable implements Serializable
 			return true;
 
 		for (Vector2[] edge : edges) {
-			Vector2 dir = edge[1].sub(edge[0]);
-			Vector2 x = pos.sub(edge[0]);
-			if (lineIntersectCondition(lineIntersectionCoefficients(dir, x)))
+			if (Geometry.doesLineIntersectCircle(edge, pos, r))
 				return true;
 		}
 		return false;
@@ -191,9 +194,9 @@ public abstract class Entity extends Collidable implements Serializable
 			handlePotentialCollision((Rock) other, delta);
 	}
 
-	public void handlePotentialCollision(Entity e, float delta) {
+	public float handlePotentialCollision(Entity e, float delta) {
 		if (e == this)
-			return;
+			return 0;
 
 		float sqDist = e.getPos().squareDistanceTo(getPos());
 
@@ -210,34 +213,19 @@ public abstract class Entity extends Collidable implements Serializable
 			setVel(v1);
 			e.setVel(v2);
 		}
-	}
 
-	public float[] lineIntersectionCoefficients(Vector2 dir, Vector2 x) {
-		float r = getRadius();
-		float a = dir.len2();
-		float b = -2*dir.dot(x);
-		float c = x.len2() - r*r;
-		float disc = b*b - 4*a*c;
-		if (disc < 0)
-			return null;
-
-		float t1 = (float) ((-b + Math.sqrt(disc)) / (2*a));
-		float t2 = (float) ((-b - Math.sqrt(disc)) / (2*a));
-
-		return new float[]{t1, t2};
-	}
-
-	public boolean lineIntersectCondition(float[] coefs) {
-		if (coefs == null)
-			return false;
-		float t1 = coefs[0], t2 = coefs[1];
-		return (0 < t1 && t1 < 1) || (0 < t2 && t2 < 1);
+		return sqDist;
 	}
 
 	public void handlePotentialCollision(Rock rock, float delta) {
 		Vector2[][] edges = rock.getEdges();
 		Vector2 pos = getPos();
 		float r = getRadius();
+
+		if (rock.pointInside(pos)) {
+			setDead(true);
+			return;
+		}
 
 		for (int i = 0; i < edges.length; i++) {
 			Vector2[] edge = edges[i];
@@ -248,8 +236,8 @@ public abstract class Entity extends Collidable implements Serializable
 			if (x.dot(normal) < 0)
 				continue;
 
-			float[] coefs = lineIntersectionCoefficients(dir, x);
-			if (lineIntersectCondition(coefs)) {
+			float[] coefs = Geometry.circleIntersectLineCoefficients(dir, x, r);
+			if (Geometry.lineIntersectCondition(coefs)) {
 				float t1 = coefs[0], t2 = coefs[1];
 				float t = (t1 + t2) / 2f;
 
@@ -335,6 +323,8 @@ public abstract class Entity extends Collidable implements Serializable
 		this.radius = radius;
 		if (this.radius > Settings.maxEntityRadius)
 			this.radius = Settings.maxEntityRadius;
+		if (this.radius < Settings.minEntityRadius)
+			this.radius = Settings.minEntityRadius;
 	}
 
 	public boolean isDead() {
@@ -453,7 +443,7 @@ public abstract class Entity extends Collidable implements Serializable
 	}
 
 	public float getMassDensity() {
-		return 10000f;
+		return 1000f;
 	}
 
 //	@Override

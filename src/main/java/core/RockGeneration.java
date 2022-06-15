@@ -1,5 +1,7 @@
 package core;
 
+import biology.Entity;
+import utils.Geometry;
 import utils.Vector2;
 
 import java.util.ArrayList;
@@ -40,7 +42,8 @@ public class RockGeneration {
 
                 Vector2[] newEdge1 = new Vector2[]{p1, p3};
                 Vector2[] newEdge2 = new Vector2[]{p2, p3};
-                if (notInAnyRocks(newEdge1, newEdge2, tank.getRocks())) {
+                if (notInAnyRocks(newEdge1, newEdge2, tank.getRocks())
+                        && leavesOpening(p3, tank.getRocks(), Settings.minRockOpeningSize)) {
                     Rock rock = new Rock(p1, p2, p3);
                     tank.getRocks().add(rock);
                     unattachedRocks.add(rock);
@@ -71,6 +74,16 @@ public class RockGeneration {
             for (Vector2[] rockEdge : rock.getEdges())
                 if (Rock.edgesIntersect(rockEdge, e1) || Rock.edgesIntersect(rockEdge, e2))
                     return false;
+        return true;
+    }
+
+    private static boolean leavesOpening(Vector2 rockPoint, List<Rock> rocks, float openingSize) {
+        for (Rock rock : rocks) {
+            for (Vector2[] edge : rock.getEdges()) {
+                if (Geometry.doesLineIntersectCircle(edge, rockPoint, openingSize))
+                    return false;
+            }
+        }
         return true;
     }
 

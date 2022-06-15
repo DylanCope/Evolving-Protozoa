@@ -4,7 +4,8 @@ import java.io.Serializable;
 
 public class Vector2 implements Serializable
 {
-	private static final long serialVersionUID = 8642244552320036511L;
+    public static final Vector2 ZERO = new Vector2(0, 0);
+    private static final long serialVersionUID = 8642244552320036511L;
 	private float x;
 	private float y;
 	

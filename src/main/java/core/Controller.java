@@ -21,6 +21,7 @@ public class Controller
 		input.registerOnPressHandler(KeyEvent.VK_F3, simulation::toggleDebug);
 		input.registerOnPressHandler(KeyEvent.VK_F4, renderer::toggleChemicalGrid);
 		input.registerOnPressHandler(KeyEvent.VK_R, renderer::resetCamera);
+		input.registerOnPressHandler(KeyEvent.VK_F8, renderer::toggleAA);
 	}
 
 	private boolean isPosInChunk(Vector2 pos, Chunk chunk) {

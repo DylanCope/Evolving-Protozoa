@@ -14,30 +14,40 @@ public class PlantPellet extends Pellet {
 
     private final float maxRadius;
     private float crowdingFactor;
+    private final float plantAttractionFactor;
 
     public PlantPellet(float radius, Tank tank) {
         super(radius, tank);
         setGrowthRate((float) (Settings.minPlantGrowth + Settings.plantGrowthRange * Simulation.RANDOM.nextDouble()));
 
-        float range = Settings.maxPlantBirthRadius - Settings.minMaxPlantRadius;
-        maxRadius = (float) (Settings.minMaxPlantRadius + range * Simulation.RANDOM.nextDouble());
+        float range = Settings.maxPlantBirthRadius - radius;
+        maxRadius = (float) (radius + range * Simulation.RANDOM.nextDouble());
 
         setHealthyColour(new Color(
                 30 + Simulation.RANDOM.nextInt(105),
                 150  + Simulation.RANDOM.nextInt(100),
                 10  + Simulation.RANDOM.nextInt(100))
         );
+
+//        float range = Settings.maxPlantBirthRadius - Settings.minMaxPlantRadius;
+//        maxRadius = (float) (1e-3 + range * Simulation.RANDOM.nextDouble());
+        plantAttractionFactor = 1e-4f;
     }
 
     @Override
-    public void handlePotentialCollision(Entity e, float delta) {
-        super.handlePotentialCollision(e, delta);
-        if (e != this) {
-            Vector2 vecToOther = e.getPos().sub(getPos());
-            float distToOther = vecToOther.len();
-            if (distToOther - e.getRadius() <= 3*getRadius())
-                getPos().translate(vecToOther.scale(delta * 5e-4f/ vecToOther.len()));
+    public float handlePotentialCollision(Entity e, float delta) {
+        float sqDist = super.handlePotentialCollision(e, delta);
+//        if (e != this) {
+//            Vector2 vecToOther = e.getPos().sub(getPos());
+//            float distToOther = vecToOther.len();
+//            if (distToOther - e.getRadius() <= 3*getRadius())
+//                getPos().translate(vecToOther.scale(delta * 5e-4f/ vecToOther.len()));
+//        }
+        if (e != this && e instanceof PlantPellet) {
+            Vector2 acc = e.getPos().sub(getPos()).setLength(plantAttractionFactor / sqDist);
+            accelerate(acc);
         }
+        return sqDist;
     }
 
     private static float randomPlantRadius() {
@@ -51,14 +61,14 @@ public class PlantPellet extends Pellet {
 
     private boolean shouldSplit() {
         return getRadius() > maxRadius &&
-                getCrowdingFactor() < Settings.plantCriticalCrowding &&
-                getHealth() > Settings.minHealthToSplit &&
-                numEntityCollisions < 2;
+//                getCrowdingFactor() < Settings.plantCriticalCrowding &&
+                getHealth() > Settings.minHealthToSplit;
     }
 
     @Override
     public float getRadius() {
-        return (0.3f + 0.7f * getHealth()) * super.getRadius();
+        float r = (0.3f + 0.7f * getHealth()) * super.getRadius();
+        return Math.max(r, Settings.minEntityRadius);
     }
 
     public float getCrowdingFactor() {
@@ -106,6 +116,8 @@ public class PlantPellet extends Pellet {
     public HashMap<String, Float> getStats() {
         HashMap<String, Float> stats = super.getStats();
         stats.put("Growth Rate", Settings.statsDistanceScalar * getGrowthRate());
+        stats.put("Crowding Factor", crowdingFactor);
+        stats.put("Split Radius", Settings.statsDistanceScalar * maxRadius);
         return stats;
     }
 

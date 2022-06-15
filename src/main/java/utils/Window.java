@@ -24,7 +24,6 @@ public class Window extends Canvas implements Runnable, ActionListener
 	private Renderer renderer;
 	private Simulation simulation;
 	private Controller controller;
-	private Graphics2D graphics;
 	private int width, height;
 
 	private final Timer timer = new Timer((int) Application.refreshDelay, this);
@@ -79,10 +78,6 @@ public class Window extends Canvas implements Runnable, ActionListener
 	
 	public Input getInput() {
 		return input;
-	}
-	
-	public Graphics2D getGraphics() {
-		return graphics;
 	}
 
 	public int getWidth() {

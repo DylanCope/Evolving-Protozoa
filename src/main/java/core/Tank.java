@@ -3,9 +3,9 @@ package core;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import biology.*;
-import org.checkerframework.checker.units.qual.A;
 import utils.FileIO;
 import utils.Vector2;
 
@@ -45,23 +45,55 @@ public class Tank implements Iterable<Entity>, Serializable
 		elapsedTime = 0;
 	}
 
-	
-	public Vector2 randomPosition(float entityRadius) {
-		float rad = radius - 4*entityRadius;
+	public void initialisePopulation() {
+		Function<Float, Vector2> findPosition = this::randomPosition;
+		if (Settings.initialPopulationClustering) {
+			Vector2[] clusterCentres = new Vector2[Settings.numPopulationClusters];
+			for (int i = 0; i < clusterCentres.length; i++)
+				clusterCentres[i] = randomPosition(Settings.populationClusterRadius);
+
+			findPosition = r -> randomPosition(r, clusterCentres);
+		}
+
+		for (int i = 0; i < Settings.numInitialPlantPellets; i++)
+			addRandom(new PlantPellet(this), findPosition);
+
+		for (int i = 0; i < Settings.numInitialProtozoa; i++) {
+			try {
+				addRandom(new Protozoa(this), findPosition);
+			} catch (MiscarriageException ignored) {}
+		}
+	}
+
+	public Vector2 randomPosition(float entityRadius, Vector2[] clusterCentres) {
+		int clusterIdx = Simulation.RANDOM.nextInt(clusterCentres.length);
+		Vector2 clusterCentre = clusterCentres[clusterIdx];
+		return randomPosition(entityRadius, clusterCentre, Settings.populationClusterRadius);
+	}
+
+	public Vector2 randomPosition(float entityRadius, Vector2 centre, float clusterRadius) {
+		float rad = clusterRadius - 4*entityRadius;
 		float t = (float) (2 * Math.PI * Simulation.RANDOM.nextDouble());
 		float r = 2*entityRadius + rad * Simulation.RANDOM.nextFloat();
 		return new Vector2(
 				(float) (r * Math.cos(t)),
 				(float) (r * Math.sin(t))
-		);
+		).add(centre);
+	}
+
+	public Vector2 randomPosition(float entityRadius) {
+		return randomPosition(entityRadius, Vector2.ZERO, radius);
 	}
 
 	public void handleTankEdge(Entity e) {
 		float rPos = e.getPos().len();
 		if (Settings.sphericalTank && rPos - e.getRadius() > radius)
 			e.getPos().setLength(-0.98f * radius);
-		else if (rPos + e.getRadius() > radius)
+		else if (rPos + e.getRadius() > radius) {
 			e.getPos().setLength(radius - e.getRadius());
+			Vector2 normal = e.getPos().unit().scale(-1);
+			e.getVel().translate(normal.mul(-2*normal.dot(e.getVel())));
+		}
 
 	}
 
@@ -86,7 +118,7 @@ public class Tank implements Iterable<Entity>, Serializable
 		entities.parallelStream().forEach(e -> e.physicsUpdate(delta));
 		entities.parallelStream().forEach(this::handleDeadEntities);
 
-		chemicalSolution.update(delta, entities);
+//		chemicalSolution.update(delta, entities);
 
 	}
 
@@ -192,9 +224,9 @@ public class Tank implements Iterable<Entity>, Serializable
 		return rocks.stream().anyMatch(e::isCollidingWith);
 	}
 
-    public void addRandom(Entity e) {
+    public void addRandom(Entity e, Function<Float, Vector2> findPosition) {
 		for (int i = 0; i < 5; i++) {
-			e.setPos(randomPosition(e.getRadius()));
+			e.setPos(findPosition.apply(e.getRadius()));
 			if (!isCollidingWithAnything(e)) {
 				add(e);
 				return;

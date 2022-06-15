@@ -127,11 +127,13 @@ public class UI
 			info.get(2).setText("");
 
 
-		if (simulation.inDebugMode())
-			renderDebugStats(g);
+		renderDebugStats(g);
 	}
 
 	private void renderDebugStats(Graphics2D g) {
+		if (!simulation.inDebugMode() && !Settings.showFPS)
+			return;
+
 		int lineNumber = 0;
 		HashMap<String, Integer> stats = renderer.getStats();
 
@@ -153,7 +155,8 @@ public class UI
 		for (TextObject statText : statTexts) {
 			int y = (int) statText.getPosition().getY();
 			statText.setPosition(new Vector2(x, y));
-			statText.render(g);
+			if (simulation.inDebugMode() || (Settings.showFPS && statText.getText().equals("FPS")))
+				statText.render(g);
 		}
 	}
 

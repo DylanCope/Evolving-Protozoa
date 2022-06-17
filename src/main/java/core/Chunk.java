@@ -12,6 +12,8 @@ import java.util.stream.Stream;
 
 public class Chunk implements Serializable {
 
+    public static final long serialVersionUID = 4697424153087580763L;
+
     private final List<Entity> entities;
     private final List<Rock> rocks;
     private final int x;
@@ -66,5 +68,9 @@ public class Chunk implements Serializable {
 
     public Iterator<Collidable> getCollidables() {
         return Iterators.concat(entities.iterator(), rocks.iterator());
+    }
+
+    public Collection<Rock> getRocks() {
+        return rocks;
     }
 }

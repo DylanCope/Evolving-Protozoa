@@ -7,8 +7,8 @@ import utils.Vector2;
 
 import java.awt.*;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class Protozoa extends Entity 
 {
@@ -18,6 +18,11 @@ public class Protozoa extends Entity
 	private float totalConsumption = 0;
 	
 	private final ProtozoaGenome genome;
+
+	private ProtozoaGenome crossOverGenome;
+	private Protozoa mate;
+	private float timeMating = 0;
+
 	private Retina retina;
 	private final Brain brain;
 
@@ -25,11 +30,11 @@ public class Protozoa extends Entity
 	private final float attackFactor = 10f;
 	private final float consumeFactor = 50f;
 	private float deathRate = 0;
-	private int nearbyPlants = 0;
 
 	private final float splitRadius;
 
 	private final Vector2 dir = new Vector2(0, 0);
+
 	public static class Spike implements Serializable {
 		private static final long serialVersionUID = 1L;
 		public float length;
@@ -46,6 +51,21 @@ public class Protozoa extends Entity
 		}
 	}
 
+	public static class ContactSensor implements Serializable {
+		private static final long serialVersionUID = 1L;
+		public float angle;
+		public Collidable contact;
+
+		public void reset() {
+			contact = null;
+		}
+
+		public boolean inContact() {
+			return contact != null;
+		}
+	}
+
+	private final ContactSensor[] contactSensors;
 	private final Spike[] spikes;
 	public boolean wasJustDamaged = false;
 
@@ -69,10 +89,32 @@ public class Protozoa extends Entity
 			(float) (0.1f * Math.cos(t)),
 			(float) (0.1f * Math.sin(t))
 		);
+
+		contactSensors = new ContactSensor[Settings.numContactSensors];
+		for (int i = 0; i < Settings.numContactSensors; i++) {
+			contactSensors[i] = new ContactSensor();
+			contactSensors[i].angle = (float) (2 * Math.PI * i / Settings.numContactSensors);
+		}
 	}
 
 	public Protozoa(Tank tank) throws MiscarriageException {
 		this(new ProtozoaGenome(), tank);
+	}
+
+	public Vector2 getSensorPosition(ContactSensor sensor) {
+		return getPos().add(dir.rotate(sensor.angle).setLength(1.01f * getRadius()));
+	}
+
+	@Override
+	public boolean handlePotentialCollision(Collidable other, float delta) {
+		if (other != this) {
+			for (ContactSensor contactSensor : contactSensors) {
+				if (other.pointInside(getSensorPosition(contactSensor))) {
+					contactSensor.contact = other;
+				}
+			}
+		}
+		return super.handlePotentialCollision(other, delta);
 	}
 
 	public void see(Collidable o)
@@ -141,23 +183,13 @@ public class Protozoa extends Entity
 
 	private Protozoa createSplitChild(float r) throws MiscarriageException {
 		float stuntingFactor = r / getRadius();
-		Protozoa child = genome.createChild(tank);
+		Protozoa child = genome.createChild(tank, crossOverGenome);
 		child.setRadius(stuntingFactor * child.getRadius());
 		return child;
 	}
 
 	public void interact(Collidable other, float delta) {
-		if (other instanceof Entity) {
-			interact((Entity) other, delta);
-		} else {
-			if (retina.numberOfCells() > 0)
-				see(other);
-		}
-	}
-
-	public void interact(Entity other, float delta) {
-
-		if (other == this || other.getPos().sub(getPos()).len() > Settings.protozoaInteractRange)
+		if (other == this)
 			return;
 
 		if (isDead()) {
@@ -168,8 +200,15 @@ public class Protozoa extends Entity
 		if (retina.numberOfCells() > 0)
 			see(other);
 
-		if (other instanceof PlantPellet)
-			nearbyPlants++;
+		if (other instanceof Entity) {
+			interact((Entity) other, delta);
+		}
+	}
+
+	public void interact(Entity other, float delta) {
+
+		if (other.getPos().sub(getPos()).len() > Settings.protozoaInteractRange)
+			return;
 
 		if (shouldSplit()) {
 			super.burst(Protozoa.class, this::createSplitChild);
@@ -196,11 +235,16 @@ public class Protozoa extends Entity
 //				if (brain.wantToAttack(p))
 //					fight(p, delta);
 
-//				else if (brain.wantToMateWith(p) && p.brain.wantToMateWith(this)) {
-//					// Add some negative consequences of mating?
-//					Stream<Entity> children = genome.reproduce(this, p).map(Function.identity());
-//					return Streams.concat(newEntities, children);
-//				}
+				if (brain.wantToMateWith(p) && p.brain.wantToMateWith(this)) {
+					if (p != mate) {
+						timeMating = 0;
+						mate = p;
+					} else {
+						timeMating += delta;
+						if (timeMating >= Settings.matingTime)
+							crossOverGenome = p.getGenome();
+					}
+				}
 			}
 			else if (other.isEdible())
 				eat(other, delta);
@@ -217,7 +261,6 @@ public class Protozoa extends Entity
 	@Override
 	public void handleInteractions(float delta) {
 		super.handleInteractions(delta);
-		nearbyPlants = 0;
 		wasJustDamaged = false;
 		retina.reset();
 		ChunkManager chunkManager = tank.getChunkManager();
@@ -243,16 +286,17 @@ public class Protozoa extends Entity
 	}
 
 	@Override
-	public HashMap<String, Float> getStats() {
-		HashMap<String, Float> stats = super.getStats();
+	public Map<String, Float> getStats() {
+		Map<String, Float> stats = super.getStats();
 		stats.put("Growth Rate", Settings.statsDistanceScalar * getGrowthRate());
 		stats.put("Death Rate", 100 * deathRate);
 		stats.put("Split Radius", Settings.statsDistanceScalar * splitRadius);
 		stats.put("Max Turning", genome.getMaxTurn());
-		if (genome != null) {
-			stats.put("Mutations", (float) genome.getNumMutations());
-			stats.put("Genetic Size", Settings.statsDistanceScalar * genome.getRadius());
-		}
+		stats.put("Mutations", (float) genome.getNumMutations());
+		stats.put("Genetic Size", Settings.statsDistanceScalar * genome.getRadius());
+		stats.put("Has Mated", crossOverGenome == null ? 0f : 1f);
+		if (spikes.length > 0)
+			stats.put("Num Spikes", (float) spikes.length);
 		if (brain instanceof NNBrain) {
 			NeuralNetwork nn = ((NNBrain) brain).network;
 			stats.put("Network Depth", (float) nn.getDepth());
@@ -272,6 +316,7 @@ public class Protozoa extends Entity
 			growthRate *= getHealth() * splitRadius / (5 * getRadius());
 		for (Spike spike : spikes)
 			growthRate -= Settings.spikeGrowthPenalty * spike.growthRate;
+		growthRate -= Settings.retinaCellGrowthCost * retina.numberOfCells();
 		return growthRate;
 	}
 
@@ -294,6 +339,9 @@ public class Protozoa extends Entity
 
 		for (Spike spike : spikes)
 			spike.update(delta);
+
+		for (ContactSensor contactSensor : contactSensors)
+			contactSensor.reset();
 	}
 	
 	public void render(Graphics g)
@@ -352,10 +400,6 @@ public class Protozoa extends Entity
 		return brain;
 	}
 
-	public int numNearbyPlants() {
-		return nearbyPlants;
-	}
-
 	public Spike[] getSpikes() {
 		return spikes;
 	}
@@ -366,5 +410,17 @@ public class Protozoa extends Entity
 
 	public Vector2 getDir() {
 		return dir;
+	}
+
+	public ContactSensor[] getContactSensors() {
+		return contactSensors;
+	}
+
+	public boolean isHarbouringCrossover() {
+		return crossOverGenome != null;
+	}
+
+	public Protozoa getMate() {
+		return mate;
 	}
 }

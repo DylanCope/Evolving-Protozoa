@@ -21,9 +21,7 @@ public class Tank implements Iterable<Entity>, Serializable
 	private final ChunkManager chunkManager;
 	private final ChemicalSolution chemicalSolution;
 	private final List<Rock> rocks;
-	private int generation = 1;
-	private int protozoaBorn = 0;
-	private int totalEntitiesAdded = 0;
+	private int generation = 1, protozoaBorn = 0, totalEntitiesAdded = 0, crossoverEvents = 0;
 
 	private String genomeFile = null;
 	private final List<String> genomesToWrite = new ArrayList<>();
@@ -118,15 +116,20 @@ public class Tank implements Iterable<Entity>, Serializable
 		entities.parallelStream().forEach(e -> e.physicsUpdate(delta));
 		entities.parallelStream().forEach(this::handleDeadEntities);
 
+		updateCounts(entities);
 //		chemicalSolution.update(delta, entities);
 
+	}
+
+	private void updateCounts(Collection<Entity> entities) {
+		entityCounts.clear();
+		for (Entity e : entities)
+			entityCounts.put(e.getClass(), 1 + entityCounts.getOrDefault(e.getClass(), 0));
 	}
 
 	private void handleDeadEntities(Entity e) {
 		if (!e.isDead())
 			return;
-
-		entityCounts.put(e.getClass(), -1 + entityCounts.get(e.getClass()));
 		e.handleDeath();
 	}
 
@@ -158,8 +161,6 @@ public class Tank implements Iterable<Entity>, Serializable
 
 		if (e instanceof Protozoa)
 			handleNewProtozoa((Protozoa) e);
-
-		entityCounts.put(e.getClass(), 1 + entityCounts.getOrDefault(e.getClass(), 0));
 	}
 
 	public Collection<Entity> getEntities() {
@@ -167,17 +168,18 @@ public class Tank implements Iterable<Entity>, Serializable
 	}
 
 	public Map<String, Float> getStats() {
-		Map<String, Float> stats = new HashMap<>();
-		stats.put("Number of Protozoa", (float) numberOfProtozoa());
-		stats.put("Number of Plant Pellets", (float) entityCounts.getOrDefault(PlantPellet.class, 0));
-		stats.put("Number of Meat Pellets", (float) entityCounts.getOrDefault(MeatPellet.class, 0));
+		Map<String, Float> stats = new TreeMap<>();
+		stats.put("Protozoa", (float) numberOfProtozoa());
+		stats.put("Plants", (float) entityCounts.getOrDefault(PlantPellet.class, 0));
+		stats.put("Meat Pellets", (float) entityCounts.getOrDefault(MeatPellet.class, 0));
 		stats.put("Max Generation", (float) generation);
 		stats.put("Time Elapsed", elapsedTime);
 		stats.put("Protozoa Born", (float) protozoaBorn);
 		stats.put("Total Entities Born", (float) totalEntitiesAdded);
+		stats.put("Crossover Events", (float) crossoverEvents);
 
 		Collection<Entity> entities = chunkManager.getAllEntities();
-		float n = (float) entities.size();
+		float n = (float) numberOfProtozoa();
 		for (Entity e : entities) {
 			if (e instanceof Protozoa) {
 				for (Map.Entry<String, Float> stat : e.getStats().entrySet()) {
@@ -248,5 +250,9 @@ public class Tank implements Iterable<Entity>, Serializable
 
 	public List<Rock> getRocks() {
 		return rocks;
+	}
+
+	public void registerCrossoverEvent() {
+		crossoverEvents++;
 	}
 }

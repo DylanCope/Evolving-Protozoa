@@ -2,7 +2,9 @@ package biology.genes;
 
 import core.Settings;
 
-public class ProtozoaGrowthRateGene extends BoundedFloatGene {
+import java.io.Serializable;
+
+public class ProtozoaGrowthRateGene extends BoundedFloatGene implements Serializable {
 
     public ProtozoaGrowthRateGene() {
         super(Settings.minProtozoanGrowthRate, Settings.maxProtozoanGrowthRate);

@@ -18,6 +18,7 @@ public class Controller
 		this.simulation = simulation;
 		this.renderer = renderer;
 
+		input.registerOnPressHandler(KeyEvent.VK_F1, renderer.getUI()::toggleShowFPS);
 		input.registerOnPressHandler(KeyEvent.VK_F3, simulation::toggleDebug);
 		input.registerOnPressHandler(KeyEvent.VK_F4, renderer::toggleChemicalGrid);
 		input.registerOnPressHandler(KeyEvent.VK_R, renderer::resetCamera);

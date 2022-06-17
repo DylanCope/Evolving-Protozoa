@@ -24,7 +24,8 @@ public class UI
 	private final TextObject title;
 	private final ArrayList<TextObject> info;
 	private final ArrayList<TextObject> debugInfo;
-	private final int infoTextSize;
+	private final int infoTextSize, textAwayFromEdge;
+	private boolean showFPS = Settings.showFPS;
 
 	public UI(Window window, Simulation simulation, Renderer renderer)
 	{
@@ -62,6 +63,7 @@ public class UI
 
 		debugInfo = new ArrayList<>();
 		debugInfo.add(fpsText);
+		textAwayFromEdge = window.getWidth() / 60;
 	}
 
 	public float getYPosLHS(int i) {
@@ -71,28 +73,44 @@ public class UI
 	public float getYPosRHS(int i) {
 		return 1.3f*infoTextSize*i + window.getHeight() / 20f;
 	}
-	
+
+	private int renderStats(Graphics2D g, int lineNumber, Map<String, Float> stats) {
+
+		for (Map.Entry<String, Float> entityStat : stats.entrySet()) {
+			lineNumber++;
+			String text = entityStat.getKey() + ": " + TextStyle.toString(entityStat.getValue(), 2);
+			TextObject statText = new TextObject(
+					text, infoTextSize,
+					new Vector2(textAwayFromEdge, getYPosLHS(lineNumber))
+			);
+			statText.setColor(Color.WHITE.darker());
+			statText.render(g);
+		}
+		return lineNumber;
+	}
+
 	public void render(Graphics2D g)
 	{
 		title.render(g);
 
-		int textAwayFromEdge = window.getWidth() / 60;
-
-		int lineNumber;
-		for (lineNumber = 0; lineNumber < info.size(); lineNumber++)
-			info.get(lineNumber).setPosition(new Vector2(textAwayFromEdge, getYPosLHS(lineNumber)));
-
-		
-		info.get(0).setText("Number of pellets: " + simulation.getTank().numberOfPellets());
-		info.get(0).render(g);
-		info.get(1).setText("Number of protozoa: " + simulation.getTank().numberOfProtozoa());
-		info.get(1).render(g);
-		info.get(2).setText("Generation: " + simulation.getGeneration());
-		info.get(2).render(g);
-		lineNumber++;
+		int lineNumber = 0;
 
 		Entity tracked = renderer.getTracked();
-		if (tracked != null) {
+		if (tracked == null) {
+			Map<String, Float> tankStats = simulation.getTank().getStats();
+			lineNumber = renderStats(g, lineNumber, tankStats);
+
+		} else {
+			for (lineNumber = 0; lineNumber < info.size(); lineNumber++)
+				info.get(lineNumber).setPosition(new Vector2(textAwayFromEdge, getYPosLHS(lineNumber)));
+
+
+			info.get(0).setText("Number of pellets: " + simulation.getTank().numberOfPellets());
+			info.get(0).render(g);
+			info.get(1).setText("Number of protozoa: " + simulation.getTank().numberOfProtozoa());
+			info.get(1).render(g);
+			lineNumber++;
+
 			if (tracked.isDead() && !tracked.getChildren().isEmpty()) {
 				renderer.track(tracked.getChildren().iterator().next());
 				tracked = renderer.getTracked();
@@ -106,34 +124,28 @@ public class UI
 			statsTitle.setColor(Color.WHITE.darker());
 			statsTitle.render(g);
 
-			HashMap<String, Float> stats = tracked.getStats();
-			for (Map.Entry<String, Float> entityStat : stats.entrySet()) {
-				lineNumber++;
-				String text = entityStat.getKey() + ": " + TextStyle.toString(entityStat.getValue(), 2);
-				TextObject statText = new TextObject(
-						text, infoTextSize,
-						new Vector2(textAwayFromEdge, getYPosLHS(lineNumber))
-				);
-				statText.setColor(Color.WHITE.darker());
-				statText.render(g);
-			}
+			lineNumber++;
+
+			renderStats(g, lineNumber++, tracked.getStats());
 
 			if (tracked instanceof Protozoa && ((Protozoa) tracked).getBrain() instanceof NNBrain) {
 				NNBrain brain = (NNBrain) ((Protozoa) tracked).getBrain();
 				renderBrainNetwork(brain.network, g);
 			}
 		}
-		else
-			info.get(2).setText("");
-
 
 		renderDebugStats(g);
 	}
 
+	public void toggleShowFPS() {
+		showFPS = !showFPS;
+	}
+
 	private void renderDebugStats(Graphics2D g) {
-		if (!simulation.inDebugMode() && !Settings.showFPS)
+		if (!simulation.inDebugMode() && !showFPS)
 			return;
 
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 		int lineNumber = 0;
 		HashMap<String, Integer> stats = renderer.getStats();
 
@@ -155,9 +167,14 @@ public class UI
 		for (TextObject statText : statTexts) {
 			int y = (int) statText.getPosition().getY();
 			statText.setPosition(new Vector2(x, y));
-			if (simulation.inDebugMode() || (Settings.showFPS && statText.getText().equals("FPS")))
+			if (simulation.inDebugMode() || (showFPS && statText.getText().contains("FPS")))
 				statText.render(g);
 		}
+
+		if (renderer.antiAliasing)
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		else
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 	}
 
 	private void renderBrainNetwork(NeuralNetwork nn, Graphics2D g) {

@@ -4,9 +4,10 @@ import biology.Protozoa;
 import core.Settings;
 import core.Simulation;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class ProtozoaSpikesGene extends Gene<Protozoa.Spike[]> {
+public class ProtozoaSpikesGene extends Gene<Protozoa.Spike[]> implements Serializable {
 
     public ProtozoaSpikesGene() {
         super();
@@ -56,7 +57,7 @@ public class ProtozoaSpikesGene extends Gene<Protozoa.Spike[]> {
         spike.growthRate = randomSpikeGrowthRate();
         newSpikes[spikes.length] = spike;
 
-        return createNew(newSpikes);
+        return createNew(newSpikes, getNumMutations() + 1);
     }
 
     private <G extends Gene<Protozoa.Spike[]>> G removeSpike() {
@@ -70,7 +71,8 @@ public class ProtozoaSpikesGene extends Gene<Protozoa.Spike[]> {
             newSpikes[j] = spikes[i];
             j++;
         }
-        return createNew(newSpikes);
+
+        return createNew(newSpikes, getNumMutations() + 1);
     }
 
     private <G extends Gene<Protozoa.Spike[]>> G mutateRandomSpike(Gene<?>[] genome) {
@@ -80,16 +82,18 @@ public class ProtozoaSpikesGene extends Gene<Protozoa.Spike[]> {
         int nSpikeProperties = 3;
         float p = Simulation.RANDOM.nextFloat();
 
+        Protozoa.Spike newSpike = new Protozoa.Spike();
         if (p < 1f / nSpikeProperties) {
-            spikes[idx].angle = randomAngle();
+            newSpike.angle = randomAngle();
         } else if (p < 2f / nSpikeProperties) {
             float radius = getProtozoaMaxRadius(genome);
-            spikes[idx].length = randomSpikeLength(radius);
+            newSpike.length = randomSpikeLength(radius);
         } else {
-            spikes[idx].growthRate = randomSpikeGrowthRate();
+            newSpike.growthRate = randomSpikeGrowthRate();
         }
+        newSpikes[idx] = newSpike;
 
-        return createNew(newSpikes);
+        return createNew(newSpikes, getNumMutations() + 1);
     }
 
     @Override

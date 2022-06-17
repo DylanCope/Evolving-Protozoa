@@ -29,7 +29,7 @@ public class Renderer extends Canvas
 	private double lastRenderTime = 0;
 	private Entity track;
 	private final UI ui;
-	private boolean antiAliasing = Settings.antiAliasing;
+	public boolean antiAliasing = Settings.antiAliasing;
 
 	private final HashMap<String, Integer> stats = new HashMap<>(5, 1);
 	private final Simulation simulation;
@@ -169,20 +169,25 @@ public class Renderer extends Canvas
 		if (r >= 0.005 * window.getHeight() && p.getRetina().numberOfCells() > 0)
 			retina(g, p);
 
-		if (stats.get("FPS") > 10 && r >= 0.01 * window.getHeight()) {
-			Polygon nucleus = new Polygon();
-			float dt = (float) (2 * Math.PI / (16.0));
-			float t0 = p.getVel().angle();
-			for (float t = 0; t < 2 * Math.PI; t += dt) {
-				float percent = (float) (((t * t * p.id) % (1 / 7.0)) + (2 / 5.0));
-				float radius = toRenderSpace(percent * p.getRadius());
-				int x = (int) (radius * (0.1 + Math.cos(t + t0)) + pos.getX());
-				int y = (int) (radius * (-0.1 + Math.sin(t + t0)) + pos.getY());
-				nucleus.addPoint(x, y);
+		if (stats.get("FPS") > 10 && r >= 10) {
+			if (p.isHarbouringCrossover()) {
+				Polygon nucleus = new Polygon();
+				float dt = (float) (2 * Math.PI / (7.0));
+				float t0 = p.getVel().angle();
+				Random random = new Random(p.id + p.getMate().id);
+				for (float t = 0; t < 2 * Math.PI; t += dt) {
+					float percent = 0.1f + 0.2f * random.nextFloat();
+					float radius = toRenderSpace(percent * p.getRadius());
+					int x = (int) (radius * (0.1 + Math.cos(t + t0)) + pos.getX());
+					int y = (int) (radius * (-0.1 + Math.sin(t + t0)) + pos.getY());
+					nucleus.addPoint(x, y);
+				}
+				Color b = p.getMate().getColor().brighter();
+				g.setColor(new Color(b.getRed(), b.getGreen(), b.getBlue(), 50));
+				g.fillPolygon(nucleus);
 			}
 			Color b = p.getColor().brighter();
-			g.setColor(new Color(b.getRed(), b.getGreen(), b.getBlue(), 50));
-			g.fillPolygon(nucleus);
+			fillCircle(g, pos, 3 * r / 7f, new Color(b.getRed(), b.getGreen(), b.getBlue(), 50));
 		}
 	}
 
@@ -213,8 +218,18 @@ public class Renderer extends Canvas
 		g.setStroke(s);
 	}
 
+	public void fillCircle(Graphics2D g, Vector2 pos, float r, Color c) {
+		g.setColor(c);
+		g.fillOval(
+				(int)(pos.getX() - r),
+				(int)(pos.getY() - r),
+				(int)(2*r),
+				(int)(2*r));
+	}
+
 	public void drawOutlinedCircle(Graphics2D g, Vector2 pos, float r, Color c, Color outline) {
 
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 		g.setColor(c);
 		g.fillOval(
 				(int)(pos.getX() - r),
@@ -222,7 +237,12 @@ public class Renderer extends Canvas
 				(int)(2*r),
 				(int)(2*r));
 
-		if (r >= 0.01 * window.getHeight() && !superSimpleRender)
+		if (antiAliasing)
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		else
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+
+		if (r >= 10 && !superSimpleRender)
 			drawCircle(g, pos, r, outline);
 	}
 
@@ -247,7 +267,7 @@ public class Renderer extends Canvas
 
 	public boolean pointOnScreen(int x, int y) {
 		return 0 <= x && x <= window.getWidth() &&
-				0 <= y && y <= window.getHeight();
+			   0 <= y && y <= window.getHeight();
 	}
 
 	public boolean chunkInView(Chunk chunk) {
@@ -256,9 +276,9 @@ public class Renderer extends Canvas
 		int originY = (int) chunkCoords.getY();
 		int chunkSize = toRenderSpace(simulation.getTank().getChunkManager().getChunkSize());
 		return pointOnScreen(originX, originY) ||
-				pointOnScreen(originX + chunkSize, originY) ||
-				pointOnScreen(originX, originY + chunkSize) ||
-				pointOnScreen(originX + chunkSize, originY + chunkSize);
+			   pointOnScreen(originX + chunkSize, originY) ||
+			   pointOnScreen(originX, originY + chunkSize) ||
+			   pointOnScreen(originX + chunkSize, originY + chunkSize);
 	}
 
 	public void renderChunk(Graphics2D g, Chunk chunk) {
@@ -275,6 +295,8 @@ public class Renderer extends Canvas
 			renderChunk(g, chunk);
 
 		if (simulation.inDebugMode() && track != null) {
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+
 			ChunkManager chunkManager = tank.getChunkManager();
 			Iterator<Collidable> collisionEntities = chunkManager.broadCollisionDetection(
 					track.getPos(), track.getRadius());
@@ -289,7 +311,18 @@ public class Renderer extends Canvas
 				interactEntities.forEachRemaining(
 						e -> drawCollisionBounds(g, e, 1.1f * e.getRadius(), Color.WHITE.darker())
 				);
+
+				Protozoa p = (Protozoa) track;
+				for (Protozoa.ContactSensor sensor : p.getContactSensors()) {
+					Vector2 sensorPos = p.getSensorPosition(sensor);
+					fillCircle(g, toRenderSpace(sensorPos), 2, Color.WHITE.darker());
+				}
 			}
+
+			if (antiAliasing)
+				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			else
+				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 		}
 	}
 
@@ -316,21 +349,47 @@ public class Renderer extends Canvas
 					simulation.inDebugMode() ? 100 : 255
 			);
 			g.setColor(color);
+
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 			g.fillPolygon(xPoints, yPoints, screenPoints.length);
+
+			if (antiAliasing)
+				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			else
+				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+
 			g.setColor(color.darker());
-			g.drawPolygon(xPoints, yPoints, screenPoints.length);
+			Stroke s = g.getStroke();
+			g.setStroke(new BasicStroke(toRenderSpace(0.02f * Settings.maxRockSize)));
+//			g.drawPolygon(xPoints, yPoints, screenPoints.length);
+			for (int i = 0; i < rock.getEdges().length; i++) {
+				if (rock.getEdgeAttachedState(i))
+					continue;
+				Vector2[] edge = rock.getEdge(i);
+				Vector2 start = toRenderSpace(edge[0]);
+				Vector2 end = toRenderSpace(edge[1]);
+				g.drawLine((int) start.getX(), (int) start.getY(),
+						   (int) end.getX(), (int) end.getY());
+			}
+			g.setStroke(s);
 
 			if (simulation.inDebugMode()) {
+				g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 				g.setColor(Color.YELLOW.darker());
 				for (int i = 0; i < 3; i++) {
 					Vector2[] edge = rock.getEdge(i);
 					Vector2 edgeCentre = edge[0].add(edge[1]).scale(0.5f);
-					Vector2 normalStart = edgeCentre.sub(rock.getNormals()[i].mul(0.01f));
-					Vector2 normalEnd = edgeCentre.add(rock.getNormals()[i].mul(0.01f));
+					Vector2 normalStart = edgeCentre;
+					Vector2 normalEnd = edgeCentre.add(rock.getNormals()[i].mul(0.005f));
 					Vector2 a = toRenderSpace(normalStart);
 					Vector2 b = toRenderSpace(normalEnd);
 					g.drawLine((int) a.getX(), (int) a.getY(), (int) b.getX(), (int) b.getY());
 				}
+
+				if (antiAliasing)
+					g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				else
+					g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 			}
 		}
 	}
@@ -371,7 +430,7 @@ public class Renderer extends Canvas
 			Vector2 start = toRenderSpace(edge[0]);
 			Vector2 end = toRenderSpace(edge[1]);
 			g.drawLine((int) start.getX(), (int) start.getY(),
-					(int) end.getX(), (int) end.getY());
+					   (int) end.getX(), (int) end.getY());
 		}
 		g.setStroke(s);
 	}
@@ -450,6 +509,7 @@ public class Renderer extends Canvas
 		}
 
 		if (simulation.inDebugMode()) {
+			graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 			graphics.setColor(Color.YELLOW.darker());
 			ChunkManager chunkManager = simulation.getTank().getChunkManager();
 			int w = toRenderSpace(chunkManager.getChunkSize());
@@ -457,6 +517,11 @@ public class Renderer extends Canvas
 				Vector2 chunkCoords = toRenderSpace(chunk.getTankCoords());
 				graphics.drawRect((int) chunkCoords.getX(), (int) chunkCoords.getY(), w, w);
 			}
+
+			if (antiAliasing)
+				graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			else
+				graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 		}
 	}
 	
@@ -542,12 +607,12 @@ public class Renderer extends Canvas
 
 	public void setZoom(float d) {
 		targetZoom = (float) (initialZoom + zoomRange * Math.tanh((d - 1f) / zoomSlowness));
-		if (targetZoom < 0.5) {
+		if (targetZoom < 0) {
 			pan = new Vector2(0, 0);
-			targetZoom = 0.5f;
+			targetZoom = 0.01f;
 		}
-		if (targetZoom > 20)
-			targetZoom = 20;
+//		if (targetZoom > 20)
+//			targetZoom = 20;
 	}
 
 	public void setPan(Vector2 delta) {
@@ -591,5 +656,9 @@ public class Renderer extends Canvas
 
 	public void toggleAA() {
 		antiAliasing = !antiAliasing;
+	}
+
+	public UI getUI() {
+		return ui;
 	}
 }

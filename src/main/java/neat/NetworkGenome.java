@@ -9,7 +9,7 @@ import java.util.Random;
 
 public class NetworkGenome implements Serializable
 {
-
+	public static final long serialVersionUID = 6145947068527764820L;
 	private NeuronGene[] sensorNeuronGenes, outputNeuronGenes, hiddenNeuronGenes;
 	private int nNeuronGenes;
 	private SynapseGene[] synapseGenes;
@@ -27,18 +27,18 @@ public class NetworkGenome implements Serializable
 
 	public void setProperties(NetworkGenome other)
 	{
-		this.sensorNeuronGenes = other.sensorNeuronGenes;
-		this.outputNeuronGenes = other.outputNeuronGenes;
-		this.hiddenNeuronGenes = other.hiddenNeuronGenes;
-		this.nNeuronGenes = other.nNeuronGenes;
-		this.synapseGenes = other.synapseGenes;
-		this.random = other.random;
-		this.mutationChance = other.mutationChance;
-		this.defaultActivation = other.defaultActivation;
-		this.fitness = other.fitness;
-		this.numMutations = other.numMutations;
-		this.nSensors = other.nSensors;
-		this.nOutputs = other.nOutputs;
+		sensorNeuronGenes = other.sensorNeuronGenes;
+		outputNeuronGenes = other.outputNeuronGenes;
+		hiddenNeuronGenes = other.hiddenNeuronGenes;
+		synapseGenes = other.synapseGenes;
+		nNeuronGenes = other.nNeuronGenes;
+		random = other.random;
+		mutationChance = other.mutationChance;
+		defaultActivation = other.defaultActivation;
+		fitness = other.fitness;
+		numMutations = other.numMutations;
+		nSensors = other.nSensors;
+		nOutputs = other.nOutputs;
 	}
 
 	public NetworkGenome(int numInputs, int numOutputs)
@@ -72,7 +72,6 @@ public class NetworkGenome implements Serializable
 
 		this.defaultActivation = defaultActivation;
 	}
-
 
 	public void addSensor() {
 		NeuronGene n = new NeuronGene(
@@ -108,85 +107,81 @@ public class NetworkGenome implements Serializable
 		g.setDisabled(true);
 	}
 
-	private SynapseGene getSynapseGene(NeuronGene in, NeuronGene out) {
+	private int getSynapseGeneIndex(NeuronGene in, NeuronGene out) {
 
-		SynapseGene g = null;
 		for (int i = 0; i < synapseGenes.length - 2; i++) {
 			if (synapseGenes[i].getIn().equals(in) &&
 					synapseGenes[i].getOut().equals(out) &&
 					!synapseGenes[i].isDisabled()) {
-				g = synapseGenes[i];
-				break;
+				return i;
 			}
 		}
-
-		return g;
+		return -1;
 	}
 	
 	private void mutateConnection(NeuronGene in, NeuronGene out) {
 		numMutations++;
 
-		SynapseGene g = getSynapseGene(in, out);
+		int geneIndex = getSynapseGeneIndex(in, out);
 
-		if (g == null) {
+		if (geneIndex == -1) {
 			synapseGenes = Arrays.copyOf(synapseGenes, synapseGenes.length + 1);
 			synapseGenes[synapseGenes.length - 1] = new SynapseGene(in, out);
 		} else {
+			SynapseGene g = synapseGenes[geneIndex];
 			if (random.nextBoolean())
 				createHiddenBetween(g);
 			else
-				g.setWeight((float) (random.nextDouble()*2 - 1));
+				synapseGenes[geneIndex] = new SynapseGene(in, out, g.getInnovation());
 		}
 	}
 	
 	public void mutate()
 	{
-		if (random.nextDouble() <= mutationChance) {
-			int i = random.nextInt(sensorNeuronGenes.length + hiddenNeuronGenes.length);
-			NeuronGene in, out;
-			if (i < sensorNeuronGenes.length)
-				in = sensorNeuronGenes[i];
-			else in = hiddenNeuronGenes[i - sensorNeuronGenes.length];
+		int i = random.nextInt(sensorNeuronGenes.length + hiddenNeuronGenes.length);
+		NeuronGene in, out;
+		if (i < sensorNeuronGenes.length)
+			in = sensorNeuronGenes[i];
+		else in = hiddenNeuronGenes[i - sensorNeuronGenes.length];
 
-			int j = random.nextInt(hiddenNeuronGenes.length + outputNeuronGenes.length);
-			if (j < hiddenNeuronGenes.length)
-				out = hiddenNeuronGenes[j];
-			else out = outputNeuronGenes[j - hiddenNeuronGenes.length];
+		int j = random.nextInt(hiddenNeuronGenes.length + outputNeuronGenes.length);
+		if (j < hiddenNeuronGenes.length)
+			out = hiddenNeuronGenes[j];
+		else out = outputNeuronGenes[j - hiddenNeuronGenes.length];
 
-			mutateConnection(in, out);
-		}
+		mutateConnection(in, out);
 	}
 	
-	public NetworkGenome crossover(NetworkGenome other)
-	{
-		NetworkGenome G = new NetworkGenome();
-
-//		G.synapseGenes = new TreeSet<>();
+//	public NetworkGenome crossover(NetworkGenome other)
+//	{
+//		NetworkGenome G = new NetworkGenome();
 //
-//		if (other.fitness > fitness) {
-//			G.synapseGenes.addAll(other.synapseGenes);
-//			G.synapseGenes.addAll(synapseGenes);
-//		}
-//		else {
-//			G.synapseGenes.addAll(synapseGenes);
-//			G.synapseGenes.addAll(other.synapseGenes);
-//		}
+////		G.synapseGenes = new TreeSet<>();
+////
+////		if (other.fitness > fitness) {
+////			G.synapseGenes.addAll(other.synapseGenes);
+////			G.synapseGenes.addAll(synapseGenes);
+////		}
+////		else {
+////			G.synapseGenes.addAll(synapseGenes);
+////			G.synapseGenes.addAll(other.synapseGenes);
+////		}
+////
+////		G.neuronGenes = new HashSet<>();
+////		for (SynapseGene s : G.synapseGenes) {
+////			G.neuronGenes.add(s.getIn());
+////			G.neuronGenes.add(s.getOut());
+////		}
 //
-//		G.neuronGenes = new HashSet<>();
-//		for (SynapseGene s : G.synapseGenes) {
-//			G.neuronGenes.add(s.getIn());
-//			G.neuronGenes.add(s.getOut());
-//		}
-
-		return G;
-	}
-
-	public NetworkGenome reproduce(NetworkGenome other)
-	{
-		NetworkGenome childGenome = crossover(other);
-		childGenome.mutate();
-		return childGenome;
-	}
+//		return G;
+//	}
+//
+//	public NetworkGenome reproduce(NetworkGenome other)
+//	{
+//		NetworkGenome childGenome = crossover(other);
+//		childGenome.mutate();
+//		return childGenome;
+//	}
 
 	private int maxNeuronId() {
 		int id = 0;
@@ -267,5 +262,9 @@ public class NetworkGenome implements Serializable
 
 	public int getNumMutations() {
 		return numMutations;
+	}
+
+	public int numberOfSensors() {
+		return nSensors;
 	}
 }

@@ -16,6 +16,12 @@ public class NeuronGene implements Comparable<NeuronGene>, Serializable
         this.activation = activation;
     }
 
+    public NeuronGene(NeuronGene g) {
+        id = g.id;
+        type = g.type;
+        activation = g.activation;
+    }
+
     @Override
     public int compareTo(NeuronGene o) {
         return id - o.id;

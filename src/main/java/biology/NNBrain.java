@@ -33,6 +33,9 @@ public class NNBrain implements Brain {
         inputs[i++] = p.getHealth() * 2 - 1;
         inputs[i++] = 2 * p.getRadius() / p.getGenome().getSplitRadius() - 1;
 
+        for (Protozoa.ContactSensor sensor : p.getContactSensors())
+            inputs[i++] = sensor.inContact() ? 1f : 0f;
+
         ChemicalSolution chemicalSolution = p.getTank().getChemicalSolution();
         int chemicalX = chemicalSolution.toChemicalGridX(p.getPos().getX());
         int chemicalY = chemicalSolution.toChemicalGridY(p.getPos().getY());
@@ -75,7 +78,7 @@ public class NNBrain implements Brain {
 
     @Override
     public boolean wantToMateWith(Protozoa p) {
-        return outputs[3] > 0;
+        return outputs[2] > 0;
     }
 
     @Override

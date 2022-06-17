@@ -15,8 +15,8 @@ public class Application
 	
 	public static void main(String[] args)
 	{
-		simulation = new Simulation(Settings.simulationSeed);
-//		simulation = new Simulation(Settings.simulationSeed, "nesoi-voltorb-maxime");
+//		simulation = new Simulation(Settings.simulationSeed);
+		simulation = new Simulation(Settings.simulationSeed, "thalassa-beedrill-dolores");
 		try {
 			if (!(args.length > 0 && args[0].equals("noui"))) {
 				TextStyle.loadFonts();

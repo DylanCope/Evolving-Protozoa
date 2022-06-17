@@ -122,7 +122,7 @@ public abstract class Entity extends Collidable implements Serializable
 
 	@Override
 	public boolean pointInside(Vector2 p) {
-		return false;
+		return Geometry.isPointInsideCircle(getPos(), getRadius(), p);
 	}
 
 	@Override
@@ -187,16 +187,17 @@ public abstract class Entity extends Collidable implements Serializable
 	
 	public abstract boolean isEdible();
 
-	public void handlePotentialCollision(Collidable other, float delta) {
+	public boolean handlePotentialCollision(Collidable other, float delta) {
 		if (other instanceof Entity)
-			handlePotentialCollision((Entity) other, delta);
+			return handlePotentialCollision((Entity) other, delta);
 		else if (other instanceof Rock)
-			handlePotentialCollision((Rock) other, delta);
+			return handlePotentialCollision((Rock) other, delta);
+		return false;
 	}
 
-	public float handlePotentialCollision(Entity e, float delta) {
+	public boolean handlePotentialCollision(Entity e, float delta) {
 		if (e == this)
-			return 0;
+			return false;
 
 		float sqDist = e.getPos().squareDistanceTo(getPos());
 
@@ -214,17 +215,17 @@ public abstract class Entity extends Collidable implements Serializable
 			e.setVel(v2);
 		}
 
-		return sqDist;
+		return true;
 	}
 
-	public void handlePotentialCollision(Rock rock, float delta) {
+	public boolean handlePotentialCollision(Rock rock, float delta) {
 		Vector2[][] edges = rock.getEdges();
 		Vector2 pos = getPos();
 		float r = getRadius();
 
 		if (rock.pointInside(pos)) {
 			setDead(true);
-			return;
+			return true;
 		}
 
 		for (int i = 0; i < edges.length; i++) {
@@ -233,7 +234,7 @@ public abstract class Entity extends Collidable implements Serializable
 			Vector2 dir = edge[1].sub(edge[0]);
 			Vector2 x = pos.sub(edge[0]);
 
-			if (x.dot(normal) < 0)
+			if (vel.dot(normal) > 0)
 				continue;
 
 			float[] coefs = Geometry.circleIntersectLineCoefficients(dir, x, r);
@@ -246,8 +247,10 @@ public abstract class Entity extends Collidable implements Serializable
 				pos.translate(normal.mul(offset));
 				vel.translate(normal.mul(-2*normal.dot(vel)));
 				rockCollisions++;
+				return true;
 			}
 		}
+		return false;
 	}
 
 	public Vector2 elasticCollision(Entity e) {
@@ -285,8 +288,8 @@ public abstract class Entity extends Collidable implements Serializable
 
 	public abstract String getPrettyName();
 
-	public HashMap<String, Float> getStats() {
-		HashMap<String, Float> stats = new HashMap<>();
+	public Map<String, Float> getStats() {
+		TreeMap<String, Float> stats = new TreeMap<>();
 		stats.put("Age", 100 * timeAlive);
 		stats.put("Health", 100 * getHealth());
 		stats.put("Size", Settings.statsDistanceScalar * getRadius());
@@ -295,8 +298,8 @@ public abstract class Entity extends Collidable implements Serializable
 		return stats;
 	}
 
-	public HashMap<String, Float> getDebugStats() {
-		HashMap<String, Float> stats = new HashMap<>();
+	public Map<String, Float> getDebugStats() {
+		TreeMap<String, Float> stats = new TreeMap<>();
 		stats.put("Position X", Settings.statsDistanceScalar * getPos().getX());
 		stats.put("Position Y", Settings.statsDistanceScalar * getPos().getY());
 		return stats;

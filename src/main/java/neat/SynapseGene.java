@@ -13,12 +13,16 @@ public class SynapseGene implements Comparable<SynapseGene>, Serializable
     private float weight;
     private boolean disabled;
 
-    public SynapseGene(NeuronGene in, NeuronGene out) {
+    public SynapseGene(NeuronGene in, NeuronGene out, int innovation) {
         this.in = in;
         this.out = out;
         this.weight = (float) (2*Simulation.RANDOM.nextDouble() - 1);
         disabled = false;
-        innovation = globalInnovation++;
+        this.innovation =  innovation;
+    }
+
+    public SynapseGene(NeuronGene in, NeuronGene out) {
+        this(in, out, globalInnovation++);
     }
 
     @Override

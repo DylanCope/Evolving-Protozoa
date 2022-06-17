@@ -5,11 +5,11 @@ import core.Settings;
 import core.Simulation;
 import core.Tank;
 import neat.NetworkGenome;
-import neat.SynapseGene;
 
 import java.awt.*;
 import java.io.Serializable;
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  * Created by dylan on 28/05/2017.
@@ -17,21 +17,20 @@ import java.util.stream.Stream;
 public class ProtozoaGenome implements Serializable
 {
     public static final long serialVersionUID = 2421454107847378624L;
-    private int numMutations = 0;
     private final Gene<?>[] genes;
     private float mutationChance = Settings.globalMutationChance;
-    public static final int actionSpaceSize = 2;
+    public static final int actionSpaceSize = 3;
     public static final int nonVisualSensorSize = 4;
 
     public ProtozoaGenome(ProtozoaGenome parentGenome) {
         mutationChance = parentGenome.mutationChance;
-        numMutations = parentGenome.numMutations;
-        genes = parentGenome.genes;
+        genes = Arrays.copyOf(parentGenome.genes, parentGenome.genes.length);
     }
 
     public ProtozoaGenome()
     {
-        int numInputs = 3 * Settings.defaultRetinaSize + nonVisualSensorSize + 1;
+        int numInputs = expectedNetworkInputSize(Settings.defaultRetinaSize);
+
         NetworkGenome networkGenome = new NetworkGenome(numInputs, actionSpaceSize);
         genes = new Gene<?>[]{
                 new NetworkGene(networkGenome),
@@ -46,19 +45,42 @@ public class ProtozoaGenome implements Serializable
         };
     }
 
-    public ProtozoaGenome(Gene<?>[] genes)
-    {
+    public int expectedNetworkInputSize(int retinaSize) {
+        return 3 * retinaSize
+                + nonVisualSensorSize
+                + 1 + Settings.numContactSensors;
+    }
+
+    public ProtozoaGenome(Gene<?>[] genes) {
         this.genes = genes;
+        NetworkGenome networkGenome = getGeneValue(NetworkGene.class);
+        int retinaSize = getGeneValue(RetinaSizeGene.class);
+        while (networkGenome.numberOfSensors() < expectedNetworkInputSize(retinaSize))
+            networkGenome.addSensor();
     }
 
     public ProtozoaGenome mutate() {
+        Gene<?>[] newGenes = Arrays.copyOf(genes, genes.length);
         for (int i = 0; i < genes.length; i++) {
             if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
-                genes[i] = genes[i].mutate(genes);
-                numMutations++;
+                newGenes[i] = genes[i].mutate(newGenes);
+            } else {
+                newGenes[i] = genes[i];
             }
         }
-        return this;
+        return new ProtozoaGenome(newGenes);
+    }
+
+    public ProtozoaGenome crossover(ProtozoaGenome other) {
+        Gene<?>[] newGenes = Arrays.copyOf(genes, genes.length);
+        for (int i = 0; i < genes.length; i++) {
+            if (Simulation.RANDOM.nextBoolean()) {
+                newGenes[i] = genes[i];
+            } else {
+                newGenes[i] = other.genes[i];
+            }
+        }
+        return new ProtozoaGenome(newGenes);
     }
 
     private <T> T getGeneValue(Class<? extends Gene<T>> clazz) {
@@ -131,12 +153,24 @@ public class ProtozoaGenome implements Serializable
         ProtozoaGenome childGenome = new ProtozoaGenome(this);
         return childGenome.mutate().phenotype(tank);
     }
+
+    public Protozoa createChild(Tank tank, ProtozoaGenome otherGenome) throws MiscarriageException {
+        if (otherGenome == null)
+            return createChild(tank);
+        tank.registerCrossoverEvent();
+        ProtozoaGenome childGenome = crossover(otherGenome);
+        return childGenome.mutate().phenotype(tank);
+    }
+
     public Color getColour() {
         return getGeneValue(ProtozoaColorGene.class);
     }
 
     public int getNumMutations() {
-        return numMutations + getGeneValue(NetworkGene.class).getNumMutations();
+        int numMutations = 0;
+        for (Gene<?> gene : genes)
+            numMutations += gene.getNumMutations();
+        return numMutations;
     }
 
     public Protozoa.Spike[] getSpikes() {

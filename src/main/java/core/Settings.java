@@ -9,11 +9,11 @@ public final class Settings {
     public static final float timeBetweenSaves = 500.0f;
     public static final float historySnapshotTime = 2.0f;
     public static final boolean writeGenomes = false;
-    public static final boolean finishOnProtozoaExtinction = false;
+    public static final boolean finishOnProtozoaExtinction = true;
     public static final int physicsSubSteps = 3;
 
     public static final int maxPlants = 8000;
-    public static final int maxProtozoa = 10000;
+    public static final int maxProtozoa = 5000;
     public static final int maxMeat = 1000;
 
     // Tank settings
@@ -48,6 +48,8 @@ public final class Settings {
     public static final float protozoaStarvationFactor = 40f;
     public static final int defaultRetinaSize = 0;
     public static final int maxRetinaSize = 16;
+    public static final float retinaCellGrowthCost = .03f;
+    public static final int numContactSensors = 6;
     public static final float minRetinaRayAngle = (float) Math.toRadians(10);
     public static final float minHealthToSplit = 0.5f;
     public static final float maxProtozoanSplitRadius = 0.03f;
@@ -58,7 +60,7 @@ public final class Settings {
     public static final float spikeGrowthPenalty = .02f;
     public static final float maxSpikeGrowth = 0.1f;
     public static final float spikeDamage = 3f;
-
+    public static final float matingTime = 0.1f;
     public static final float globalMutationChance = 0.05f;
     public static final float protozoaInteractRange = 0.15f;
     public static final float eatingConversionRation = 0.75f;
@@ -82,6 +84,6 @@ public final class Settings {
 
     // Rendering
 
-    public static final boolean showFPS = true;
-    public static final boolean antiAliasing = false;
+    public static final boolean showFPS = false;
+    public static final boolean antiAliasing = true;
 }

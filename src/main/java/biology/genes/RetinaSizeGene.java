@@ -5,7 +5,9 @@ import core.Settings;
 import core.Simulation;
 import neat.NetworkGenome;
 
-public class RetinaSizeGene extends Gene<Integer> {
+import java.io.Serializable;
+
+public class RetinaSizeGene extends Gene<Integer> implements Serializable {
 
     public RetinaSizeGene() {
         super();
@@ -21,27 +23,28 @@ public class RetinaSizeGene extends Gene<Integer> {
     }
 
     @Override
-    public <G extends Gene<Integer>> G mutate(Gene<?>[] genome) {
+    public <G extends Gene<Integer>> G mutate(Gene<?>[] genes) {
         int size = getValue();
-        if (size >= Settings.maxRetinaSize)
+        if (size == Settings.maxRetinaSize)
             return (G) this;
 
-        if (size == 0 || Simulation.RANDOM.nextBoolean()) {
-            size++;
-            NetworkGenome networkGenome = getNetworkGenome(genome);
-            networkGenome.addSensor();
-            networkGenome.addSensor();
-            networkGenome.addSensor();
-        }
-        return createNew(size);
+        addNetworkSensors(genes);
+        return createNew(size + 1, getNumMutations() + 1);
     }
 
-    private NetworkGenome getNetworkGenome(Gene<?>[] genes) {
-        for (Gene<?> gene : genes) {
-            if (gene instanceof NetworkGene)
-                return ((NetworkGene) gene).getValue();
+    private void addNetworkSensors(Gene<?>[] genes) {
+        for (int i = 0; i < genes.length; i++) {
+            Gene<?> gene = genes[i];
+            if (gene instanceof NetworkGene) {
+                NetworkGene networkGene = (NetworkGene) gene;
+                NetworkGenome currentNetworkGenome = ((NetworkGene) gene).getValue();
+                NetworkGenome newNetworkGenome = new NetworkGenome(currentNetworkGenome);
+                newNetworkGenome.addSensor();
+                newNetworkGenome.addSensor();
+                newNetworkGenome.addSensor();
+                genes[i] = networkGene.createNew(newNetworkGenome);
+            }
         }
-        return null;
     }
 
     @Override

@@ -25,7 +25,7 @@ public class Simulation
 	private double updateDelay = Application.refreshDelay / 1000.0, lastUpdateTime = 0;
 	
 	public static Random RANDOM;
-	private boolean debug = false;
+	private boolean debug = false, delayUpdate = true;
 
 	private final String name;
 	private final String genomeFile, historyFile;
@@ -54,6 +54,19 @@ public class Simulation
 
 		newSaveDir();
 		loadMostRecentTank();
+		loadSettings();
+	}
+
+	public Simulation(long seed, String name, String save)
+	{
+		RANDOM = new Random(seed);
+		simulate = true;
+		this.name = name;
+		genomeFile = "saves/" + name + "/genomes.csv";
+		historyFile = "saves/" + name + "/history.csv";
+
+		newSaveDir();
+		loadTank("saves/" + name + "/tank/" + save);
 		loadSettings();
 	}
 
@@ -133,7 +146,7 @@ public class Simulation
 
 	public void simulate() {
 		while (simulate) {
-			if (updateDelay > 0) {
+			if (delayUpdate && updateDelay > 0) {
 				double currTime = Utils.getTimeSeconds();
 				if ((currTime - lastUpdateTime) > updateDelay) {
 					update();
@@ -227,5 +240,9 @@ public class Simulation
 
 	public void setUpdateDelay(float updateDelay) {
 		this.updateDelay = updateDelay;
+	}
+
+	public void toggleUpdateDelay() {
+		delayUpdate = !delayUpdate;
 	}
 }

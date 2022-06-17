@@ -1,6 +1,8 @@
 package biology.genes;
 
-public class ProtozoaFOVGene extends BoundedFloatGene {
+import java.io.Serializable;
+
+public class ProtozoaFOVGene extends BoundedFloatGene implements Serializable {
 
     public ProtozoaFOVGene() {
         super((float) Math.toRadians(20), (float) Math.toRadians(300));

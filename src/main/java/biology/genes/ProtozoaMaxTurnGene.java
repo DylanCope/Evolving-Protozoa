@@ -2,7 +2,9 @@ package biology.genes;
 
 import core.Settings;
 
-public class ProtozoaMaxTurnGene extends BoundedFloatGene {
+import java.io.Serializable;
+
+public class ProtozoaMaxTurnGene extends BoundedFloatGene implements Serializable {
 
     public ProtozoaMaxTurnGene() {
         super((float) Math.toRadians(3), (float) Math.toRadians(15));

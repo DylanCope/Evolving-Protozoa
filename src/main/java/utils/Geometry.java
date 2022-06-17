@@ -20,7 +20,8 @@ public class Geometry {
         if (coefs == null)
             return false;
         float t1 = coefs[0], t2 = coefs[1];
-        return (0 < t1 && t1 < 1) || (0 < t2 && t2 < 1);
+        float eps = 1e-3f;
+        return (eps < t1 && t1 < 1 - eps) || (eps < t2 && t2 < 1 - eps);
     }
 
     public static boolean doesLineIntersectCircle(Vector2[] line, Vector2 circlePos, float circleR) {
@@ -30,4 +31,7 @@ public class Geometry {
         return lineIntersectCondition(intersectionCoefs);
     }
 
+    public static boolean isPointInsideCircle(Vector2 circlePos, float radius, Vector2 p) {
+        return circlePos.sub(p).len2() <= radius * radius;
+    }
 }

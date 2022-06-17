@@ -5,6 +5,7 @@ import core.Tank;
 import utils.Vector2;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public abstract class Pellet extends Entity
 {
@@ -27,8 +28,8 @@ public abstract class Pellet extends Entity
 	}
 
 	@Override
-	public HashMap<String, Float> getStats() {
-		HashMap<String, Float> stats = super.getStats();
+	public Map<String, Float> getStats() {
+		Map<String, Float> stats = super.getStats();
 		stats.put("Nutrition", getNutrition());
 		return stats;
 	}

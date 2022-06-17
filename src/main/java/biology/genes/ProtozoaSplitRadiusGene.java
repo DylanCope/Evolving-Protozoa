@@ -2,7 +2,9 @@ package biology.genes;
 
 import core.Settings;
 
-public class ProtozoaSplitRadiusGene extends BoundedFloatGene {
+import java.io.Serializable;
+
+public class ProtozoaSplitRadiusGene extends BoundedFloatGene implements Serializable {
 
     public ProtozoaSplitRadiusGene() {
         super(Settings.minProtozoanSplitRadius, Settings.maxProtozoanSplitRadius);

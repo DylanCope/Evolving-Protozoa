@@ -2,7 +2,9 @@ package biology.genes;
 
 import core.Simulation;
 
-public abstract class BoundedFloatGene extends Gene<Float>  {
+import java.io.Serializable;
+
+public abstract class BoundedFloatGene extends Gene<Float> implements Serializable {
     float minValue, maxValue;
 
     public BoundedFloatGene(float minValue, float maxValue) {

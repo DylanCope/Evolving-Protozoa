@@ -2,7 +2,9 @@ package biology.genes;
 
 import core.Settings;
 
-public class ProtozoaRadiusGene extends BoundedFloatGene {
+import java.io.Serializable;
+
+public class ProtozoaRadiusGene extends BoundedFloatGene implements Serializable {
 
     public ProtozoaRadiusGene() {
         super(Settings.minProtozoanBirthRadius, Settings.maxProtozoanBirthRadius);

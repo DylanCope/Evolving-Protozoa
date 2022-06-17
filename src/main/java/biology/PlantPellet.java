@@ -7,10 +7,11 @@ import core.Tank;
 import utils.Vector2;
 
 import java.awt.*;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class PlantPellet extends Pellet {
+    public static final long serialVersionUID = -3975433688803760076L;
 
     private final float maxRadius;
     private float crowdingFactor;
@@ -35,19 +36,14 @@ public class PlantPellet extends Pellet {
     }
 
     @Override
-    public float handlePotentialCollision(Entity e, float delta) {
-        float sqDist = super.handlePotentialCollision(e, delta);
-//        if (e != this) {
-//            Vector2 vecToOther = e.getPos().sub(getPos());
-//            float distToOther = vecToOther.len();
-//            if (distToOther - e.getRadius() <= 3*getRadius())
-//                getPos().translate(vecToOther.scale(delta * 5e-4f/ vecToOther.len()));
-//        }
+    public boolean handlePotentialCollision(Entity e, float delta) {
+        boolean collision = super.handlePotentialCollision(e, delta);
+        float sqDist = e.getPos().sub(getPos()).len2();
         if (e != this && e instanceof PlantPellet) {
             Vector2 acc = e.getPos().sub(getPos()).setLength(plantAttractionFactor / sqDist);
             accelerate(acc);
         }
-        return sqDist;
+        return collision;
     }
 
     private static float randomPlantRadius() {
@@ -113,8 +109,8 @@ public class PlantPellet extends Pellet {
         return growthRate;
     }
 
-    public HashMap<String, Float> getStats() {
-        HashMap<String, Float> stats = super.getStats();
+    public Map<String, Float> getStats() {
+        Map<String, Float> stats = super.getStats();
         stats.put("Growth Rate", Settings.statsDistanceScalar * getGrowthRate());
         stats.put("Crowding Factor", crowdingFactor);
         stats.put("Split Radius", Settings.statsDistanceScalar * maxRadius);

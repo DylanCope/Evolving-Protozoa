@@ -65,6 +65,7 @@ public class REPL implements Runnable
                     case "toggleui":
                         System.out.println("Toggling UI.");
                         window.getFrame().setVisible(!window.getFrame().isVisible());
+                        simulation.toggleUpdateDelay();
                         break;
                     default:
                         System.out.println("Command not recognised.");

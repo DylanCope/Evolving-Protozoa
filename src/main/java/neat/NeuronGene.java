@@ -1,6 +1,7 @@
 package neat;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class NeuronGene implements Comparable<NeuronGene>, Serializable
 {
@@ -32,6 +33,11 @@ public class NeuronGene implements Comparable<NeuronGene>, Serializable
         if (o instanceof NeuronGene)
             return ((NeuronGene) o).getId() == id;
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 
     @Override

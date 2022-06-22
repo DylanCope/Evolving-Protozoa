@@ -1,18 +1,14 @@
 package utils;
 
-import java.awt.Canvas;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JFrame;
-import javax.swing.Timer;
-
+import core.Application;
 import core.Controller;
 import core.Renderer;
 import core.Simulation;
-import core.Application;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Window extends Canvas implements Runnable, ActionListener
 {
@@ -33,6 +29,8 @@ public class Window extends Canvas implements Runnable, ActionListener
 		Dimension d = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 		width = (int) d.getWidth();
 		height = (int) d.getHeight();
+//		width = 1920;
+//		height = 1080;
 		this.simulation = simulation;
 		input = new Input();
 

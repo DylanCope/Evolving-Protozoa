@@ -30,6 +30,7 @@ public class Protozoa extends Entity
 	private final float attackFactor = 10f;
 	private final float consumeFactor = 50f;
 	private float deathRate = 0;
+	private float herbivoreFactor = 1f;
 
 	private final float splitRadius;
 
@@ -77,6 +78,7 @@ public class Protozoa extends Entity
 		brain = genome.brain();
 		retina = genome.retina();
 		spikes = genome.getSpikes();
+		herbivoreFactor = genome.getHerbivoreFactor();
 
 		setRadius(genome.getRadius());
 		setHealthyColour(genome.getColour());
@@ -142,8 +144,16 @@ public class Protozoa extends Entity
 	public void eat(Entity e, float delta)
 	{
 		float consumed = consumeFactor * delta * e.getNutrition();
+		if (e instanceof PlantPellet) {
+			if (spikes.length > 0)
+				consumed *= Math.pow(Settings.spikePlantConsumptionPenalty, spikes.length);
+			consumed *= herbivoreFactor;
+			getVel().scale(1 / herbivoreFactor);
+		} else if (e instanceof MeatPellet) {
+			consumed /= herbivoreFactor;
+		}
 		totalConsumption += consumed;
-		setHealth(getHealth() + Settings.eatingConversionRation * consumed);
+		setHealth(getHealth() + Settings.eatingConversionRatio * consumed);
 		e.setHealth(e.getHealth() - consumed);
 	}
 
@@ -174,7 +184,9 @@ public class Protozoa extends Entity
 	{
 		brain.tick(this);
 		dir.turn(delta * 80 * brain.turn(this));
-		setVel(dir.mul(Math.abs(brain.speed(this))));
+		float spikeDecay = (float) Math.pow(Settings.spikeMovementPenalty, spikes.length);
+		setVel(dir.mul(Math.abs(spikeDecay * brain.speed(this))));
+//		accelerate(dir.mul(Math.abs(spikeDecay * brain.speed(this))  / delta));
 	}
 
 	private boolean shouldSplit() {
@@ -214,6 +226,7 @@ public class Protozoa extends Entity
 			super.burst(Protozoa.class, this::createSplitChild);
 			return;
 		}
+
 		float r = getRadius() + other.getRadius();
 		float d = other.getPos().distanceTo(getPos());
 
@@ -231,9 +244,6 @@ public class Protozoa extends Entity
 			if (other instanceof Protozoa)
 			{
 				Protozoa p = (Protozoa) other;
-
-//				if (brain.wantToAttack(p))
-//					fight(p, delta);
 
 				if (brain.wantToMateWith(p) && p.brain.wantToMateWith(this)) {
 					if (p != mate) {
@@ -306,6 +316,7 @@ public class Protozoa extends Entity
 			stats.put("Retina Cells", (float) retina.numberOfCells());
 			stats.put("Retina FoV", (float) Math.toDegrees(retina.getFov()));
 		}
+		stats.put("Herbivore Factor", herbivoreFactor);
 		return stats;
 	}
 
@@ -323,6 +334,7 @@ public class Protozoa extends Entity
 	public void age(float delta) {
 		deathRate = getRadius() * delta * Settings.protozoaStarvationFactor;
 		deathRate *= 0.75f + 0.25f * getSpeed();
+		deathRate *= (float) Math.pow(Settings.spikeDeathRatePenalty, spikes.length);
 		setHealth(getHealth() * (1 - deathRate));
 	}
 

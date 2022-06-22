@@ -2,10 +2,13 @@ package neat;
 
 import core.Settings;
 import core.Simulation;
+import org.checkerframework.checker.units.qual.A;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class NetworkGenome implements Serializable
 {
@@ -73,6 +76,22 @@ public class NetworkGenome implements Serializable
 		this.defaultActivation = defaultActivation;
 	}
 
+	public NetworkGenome(NeuronGene[] sensorGenes,
+						 NeuronGene[] outputGenes,
+						 NeuronGene[] hiddenGenes,
+						 SynapseGene[] synapseGenes,
+						 Neuron.Activation activation) {
+		this.sensorNeuronGenes = sensorGenes;
+		this.outputNeuronGenes = outputGenes;
+		this.hiddenNeuronGenes = hiddenGenes;
+		this.synapseGenes = synapseGenes;
+		this.defaultActivation = activation;
+
+		nSensors = sensorGenes.length;
+		nOutputs = outputGenes.length;
+		nNeuronGenes = nSensors + nOutputs + hiddenGenes.length;
+	}
+
 	public void addSensor() {
 		NeuronGene n = new NeuronGene(
 				nNeuronGenes++, Neuron.Type.SENSOR, Neuron.Activation.LINEAR
@@ -97,8 +116,8 @@ public class NetworkGenome implements Serializable
 		hiddenNeuronGenes = Arrays.copyOf(hiddenNeuronGenes, hiddenNeuronGenes.length + 1);
 		hiddenNeuronGenes[hiddenNeuronGenes.length - 1] = n;
 
-		SynapseGene inConnection = new SynapseGene(g.getIn(), n);
-		SynapseGene outConnection = new SynapseGene(n, g.getOut());
+		SynapseGene inConnection = new SynapseGene(g.getIn(), n, 1f);
+		SynapseGene outConnection = new SynapseGene(n, g.getOut(), g.getWeight());
 
 		synapseGenes = Arrays.copyOf(synapseGenes, synapseGenes.length + 2);
 		synapseGenes[synapseGenes.length - 2] = inConnection;
@@ -132,7 +151,7 @@ public class NetworkGenome implements Serializable
 			if (random.nextBoolean())
 				createHiddenBetween(g);
 			else
-				synapseGenes[geneIndex] = new SynapseGene(in, out, g.getInnovation());
+				synapseGenes[geneIndex] = new SynapseGene(in, out, SynapseGene.randomInitialWeight(), g.getInnovation());
 		}
 	}
 	
@@ -152,36 +171,71 @@ public class NetworkGenome implements Serializable
 		mutateConnection(in, out);
 	}
 	
-//	public NetworkGenome crossover(NetworkGenome other)
-//	{
-//		NetworkGenome G = new NetworkGenome();
-//
-////		G.synapseGenes = new TreeSet<>();
-////
-////		if (other.fitness > fitness) {
-////			G.synapseGenes.addAll(other.synapseGenes);
-////			G.synapseGenes.addAll(synapseGenes);
-////		}
-////		else {
-////			G.synapseGenes.addAll(synapseGenes);
-////			G.synapseGenes.addAll(other.synapseGenes);
-////		}
-////
-////		G.neuronGenes = new HashSet<>();
-////		for (SynapseGene s : G.synapseGenes) {
-////			G.neuronGenes.add(s.getIn());
-////			G.neuronGenes.add(s.getOut());
-////		}
-//
-//		return G;
-//	}
-//
-//	public NetworkGenome reproduce(NetworkGenome other)
-//	{
-//		NetworkGenome childGenome = crossover(other);
-//		childGenome.mutate();
-//		return childGenome;
-//	}
+	public NetworkGenome crossover(NetworkGenome other)
+	{
+		Map<Integer, SynapseGene> myConnections = Arrays.stream(synapseGenes)
+				.collect(Collectors.toMap(SynapseGene::getInnovation, Function.identity()));
+		Map<Integer, SynapseGene> theirConnections = Arrays.stream(other.synapseGenes)
+				.collect(Collectors.toMap(SynapseGene::getInnovation, Function.identity()));
+
+		Set<Integer> innovationNumbers = new HashSet<>();
+		innovationNumbers.addAll(myConnections.keySet());
+		innovationNumbers.addAll(theirConnections.keySet());
+
+		HashSet<SynapseGene> childSynapses = new HashSet<>();
+
+		for (int innovation : innovationNumbers) {
+			boolean iContain = myConnections.containsKey(innovation);
+			boolean theyContain = theirConnections.containsKey(innovation);
+			SynapseGene g;
+			if (iContain && theyContain) {
+				g = Simulation.RANDOM.nextBoolean() ?
+						myConnections.get(innovation) :
+						theirConnections.get(innovation);
+				if (g.isDisabled() && Simulation.RANDOM.nextFloat() < Settings.globalMutationChance)
+					g.setDisabled(false);
+				childSynapses.add(g);
+				continue;
+
+			} else if (iContain) {
+				g = myConnections.get(innovation);
+			} else {
+				g = theirConnections.get(innovation);
+			}
+
+			if (g.getIn().getType().equals(Neuron.Type.SENSOR) || Simulation.RANDOM.nextBoolean())
+				childSynapses.add(g);
+		}
+
+		SynapseGene[] childSynapseArray = childSynapses.toArray(new SynapseGene[0]);
+
+		Set<NeuronGene> neuronGenes = childSynapses.stream()
+				.flatMap(s -> Stream.of(s.getIn(), s.getOut()))
+				.collect(Collectors.toSet());
+
+		NeuronGene[] childSensorGenes = neuronGenes.stream()
+				.filter(n -> n.getType().equals(Neuron.Type.SENSOR))
+				.sorted(Comparator.comparingInt(NeuronGene::getId))
+				.toArray(NeuronGene[]::new);
+
+		NeuronGene[] childOutputGenes = neuronGenes.stream()
+				.filter(n -> n.getType().equals(Neuron.Type.OUTPUT))
+				.sorted(Comparator.comparingInt(NeuronGene::getId))
+				.toArray(NeuronGene[]::new);
+
+		NeuronGene[] childHiddenGenes = neuronGenes.stream()
+				.filter(n -> n.getType().equals(Neuron.Type.HIDDEN))
+				.sorted(Comparator.comparingInt(NeuronGene::getId))
+				.toArray(NeuronGene[]::new);
+
+		return new NetworkGenome(
+				childSensorGenes,
+				childOutputGenes,
+				childHiddenGenes,
+				childSynapseArray,
+				defaultActivation
+		);
+	}
 
 	private int maxNeuronId() {
 		int id = 0;
@@ -228,11 +282,15 @@ public class NetworkGenome implements Serializable
 		Arrays.fill(inputCounts, 0);
 		for (SynapseGene g : synapseGenes) {
 			int i = inputCounts[g.getOut().getId()]++;
-			neurons[g.getOut().getId()].getInputs()[i] = neurons[g.getIn().getId()];
-			neurons[g.getOut().getId()].getWeights()[i] = g.getWeight();
+			try {
+				neurons[g.getOut().getId()].getInputs()[i] = neurons[g.getIn().getId()];
+				neurons[g.getOut().getId()].getWeights()[i] = g.getWeight();
+			} catch (ArrayIndexOutOfBoundsException e) {
+				System.out.println("asdf");
+			}
 		}
 
-		return new NeuralNetwork(neurons, nSensors, nOutputs);
+		return new NeuralNetwork(neurons);
 	}
 
 	public float distance(NetworkGenome other)

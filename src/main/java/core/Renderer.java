@@ -26,7 +26,8 @@ public class Renderer extends Canvas
 	private double zoomRange = 5, zoomSlowness = 8;
 	private boolean superSimpleRender = false, renderChemicals = false;
 	private final float rotate = 0;
-	private double lastRenderTime = 0;
+	private double lastFPSTime = 0;
+	private int framesRendered = 0;
 	private Entity track;
 	private final UI ui;
 	public boolean antiAliasing = Settings.antiAliasing;
@@ -45,6 +46,8 @@ public class Renderer extends Canvas
 		stats.put("Chunks Rendered", 0);
 		stats.put("Protozoa Rendered", 0);
 		stats.put("Pellets Rendered", 0);
+		stats.put("Broad Collision", 0);
+		stats.put("Broad Interact", 0);
 		stats.put("Zoom", 0);
 		
 		tankRenderRadius = window.getHeight() / 2.0f;
@@ -61,7 +64,7 @@ public class Renderer extends Canvas
 		
 		requestFocus();
 		setFocusable(true);
-		lastRenderTime = Utils.getTimeSeconds();
+		lastFPSTime = Utils.getTimeSeconds();
 	}
 	
 	public void retina(Graphics2D g, Protozoa p)
@@ -228,14 +231,24 @@ public class Renderer extends Canvas
 	}
 
 	public void drawOutlinedCircle(Graphics2D g, Vector2 pos, float r, Color c, Color outline) {
-
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 		g.setColor(c);
-		g.fillOval(
-				(int)(pos.getX() - r),
-				(int)(pos.getY() - r),
-				(int)(2*r),
-				(int)(2*r));
+
+		if (r <= 3) {
+			int l = Math.max((int) r, 1);
+			g.fillRect(
+					(int)(pos.getX() - l),
+					(int)(pos.getY() - l),
+					(int)(2*l),
+					(int)(2*l));
+		}
+		else {
+			g.fillOval(
+					(int)(pos.getX() - r),
+					(int)(pos.getY() - r),
+					(int)(2*r),
+					(int)(2*r));
+		}
 
 		if (antiAliasing)
 			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -249,13 +262,23 @@ public class Renderer extends Canvas
 	public void drawOutlinedCircle(Graphics2D g, Vector2 pos, float r, Color c) {
 		drawOutlinedCircle(g, pos, r, c, c.darker());
 	}
+
+	public void drawOutlinedCircle(Graphics2D g, Vector2 pos, float r, Color c, float edgeAlpha) {
+		Color edgeColour = c.darker();
+		if (edgeAlpha < 1)
+			edgeColour = new Color(
+					edgeColour.getRed(), edgeColour.getGreen(), edgeColour.getBlue(), (int) (255 * edgeAlpha)
+			);
+		drawOutlinedCircle(g, pos, r, c, edgeColour);
+	}
 	
 	public void pellet(Graphics2D g, Pellet p)
 	{
 		Vector2 pos = toRenderSpace(p.getPos());
 		float r = toRenderSpace(p.getRadius());
 		drawOutlinedCircle(g, pos, r, p.getColor());
-		stats.put("Pellets Rendered", stats.get("Pellets Rendered") + 1);
+		if (simulation.inDebugMode())
+			stats.put("Pellets Rendered", stats.get("Pellets Rendered") + 1);
 	}
 
 	public void renderEntity(Graphics2D g, Entity e) {
@@ -283,7 +306,8 @@ public class Renderer extends Canvas
 
 	public void renderChunk(Graphics2D g, Chunk chunk) {
 		if (chunkInView(chunk)) {
-			stats.put("Chunks Rendered", stats.get("Chunks Rendered") + 1);
+			if (simulation.inDebugMode())
+				stats.put("Chunks Rendered", stats.get("Chunks Rendered") + 1);
 			for (Entity e : chunk.getEntities())
 				renderEntity(g, e);
 		}
@@ -301,7 +325,10 @@ public class Renderer extends Canvas
 			Iterator<Collidable> collisionEntities = chunkManager.broadCollisionDetection(
 					track.getPos(), track.getRadius());
 			collisionEntities.forEachRemaining(
-					o -> drawCollisionBounds(g, o, Color.RED.darker())
+					o -> {
+						stats.put("Broad Collision", 1 + stats.getOrDefault("Broad Collision", 0));
+						drawCollisionBounds(g, o, Color.RED.darker());
+					}
 			);
 
 			if (track instanceof Protozoa) {
@@ -309,7 +336,10 @@ public class Renderer extends Canvas
 				Iterator<Entity> interactEntities = chunkManager.broadEntityDetection(
 						track.getPos(), Settings.protozoaInteractRange);
 				interactEntities.forEachRemaining(
-						e -> drawCollisionBounds(g, e, 1.1f * e.getRadius(), Color.WHITE.darker())
+						e -> {
+							stats.put("Broad Interact", 1 + stats.getOrDefault("Broad Interact", 0));
+							drawCollisionBounds(g, e, 1.1f * e.getRadius(), Color.WHITE.darker());
+						}
 				);
 
 				Protozoa p = (Protozoa) track;
@@ -363,7 +393,7 @@ public class Renderer extends Canvas
 			g.setStroke(new BasicStroke(toRenderSpace(0.02f * Settings.maxRockSize)));
 //			g.drawPolygon(xPoints, yPoints, screenPoints.length);
 			for (int i = 0; i < rock.getEdges().length; i++) {
-				if (rock.getEdgeAttachedState(i))
+				if (rock.isEdgeAttached(i))
 					continue;
 				Vector2[] edge = rock.getEdge(i);
 				Vector2 start = toRenderSpace(edge[0]);
@@ -424,7 +454,7 @@ public class Renderer extends Canvas
 		g.setStroke(new BasicStroke(strokeSize));
 		g.setColor(color);
 		for (int i = 0; i < rock.getEdges().length; i++) {
-			if (rock.getEdgeAttachedState(i))
+			if (rock.isEdgeAttached(i))
 				continue;
 			Vector2[] edge = rock.getEdge(i);
 			Vector2 start = toRenderSpace(edge[0]);
@@ -527,10 +557,16 @@ public class Renderer extends Canvas
 	
 	public void render()
 	{
+		int fps = stats.get("FPS");
 		stats.replaceAll((s, v) -> 0);
-		stats.put("FPS", (int) (1 / (Utils.getTimeSeconds() - lastRenderTime)));
+		stats.put("FPS", fps);
+		double fpsDT = Utils.getTimeSeconds() - lastFPSTime;
+		if (fpsDT >= 1) {
+			stats.put("FPS", (int) (framesRendered / fpsDT));
+			framesRendered = 0;
+			lastFPSTime = Utils.getTimeSeconds();
+		}
 		superSimpleRender = stats.get("FPS") <= 5;
-		lastRenderTime = Utils.getTimeSeconds();
 
 		BufferStrategy bs = this.getBufferStrategy();
 		
@@ -565,7 +601,6 @@ public class Renderer extends Canvas
 						tankRenderCoords,
 						getTracked() != null ? getTrackingScopeRadius() : tankRenderRadius,
 						simulation.inDebugMode() ? 150 : 200);
-
 				maskTank(graphics,
 						toRenderSpace(new Vector2(0, 0)),
 						tankRenderRadius * zoom,
@@ -575,6 +610,7 @@ public class Renderer extends Canvas
 
 				graphics.dispose();
 				bs.show();
+				framesRendered++;
 
 			} catch (ConcurrentModificationException ignored) {}
 		}
@@ -606,7 +642,7 @@ public class Renderer extends Canvas
 	}
 
 	public void setZoom(float d) {
-		targetZoom = (float) (initialZoom + zoomRange * Math.tanh((d - 1f) / zoomSlowness));
+		targetZoom = (float) (initialZoom + zoomRange * (d - 1f) / zoomSlowness);
 		if (targetZoom < 0) {
 			pan = new Vector2(0, 0);
 			targetZoom = 0.01f;

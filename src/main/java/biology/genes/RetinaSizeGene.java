@@ -28,21 +28,23 @@ public class RetinaSizeGene extends Gene<Integer> implements Serializable {
         if (size == Settings.maxRetinaSize)
             return (G) this;
 
-        addNetworkSensors(genes);
-        return createNew(size + 1, getNumMutations() + 1);
+        int newSize = size + 1;
+        addNetworkSensors(genes, newSize);
+        return createNew(newSize, getNumMutations() + 1);
     }
 
-    private void addNetworkSensors(Gene<?>[] genes) {
+    private void addNetworkSensors(Gene<?>[] genes, int retinaSize) {
         for (int i = 0; i < genes.length; i++) {
             Gene<?> gene = genes[i];
             if (gene instanceof NetworkGene) {
                 NetworkGene networkGene = (NetworkGene) gene;
                 NetworkGenome currentNetworkGenome = ((NetworkGene) gene).getValue();
                 NetworkGenome newNetworkGenome = new NetworkGenome(currentNetworkGenome);
-                newNetworkGenome.addSensor();
-                newNetworkGenome.addSensor();
-                newNetworkGenome.addSensor();
+                while (newNetworkGenome.numberOfSensors() < ProtozoaGenome.expectedNetworkInputSize(retinaSize))
+                    newNetworkGenome.addSensor();
+
                 genes[i] = networkGene.createNew(newNetworkGenome);
+                return;
             }
         }
     }

@@ -67,6 +67,10 @@ public class REPL implements Runnable
                         window.getFrame().setVisible(!window.getFrame().isVisible());
                         simulation.toggleUpdateDelay();
                         break;
+                    case "pause":
+                        simulation.togglePause();
+                        System.out.println("Toggling pause.");
+                        break;
                     default:
                         System.out.println("Command not recognised.");
                         break;

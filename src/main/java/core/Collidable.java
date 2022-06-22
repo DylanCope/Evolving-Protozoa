@@ -12,4 +12,8 @@ public abstract class Collidable {
 
     public abstract Color getColor();
 
+    public abstract Vector2[] getBoundingBox();
+
+    public abstract boolean handlePotentialCollision(Collidable other, float delta);
+
 }

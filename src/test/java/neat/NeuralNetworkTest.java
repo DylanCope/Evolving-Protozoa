@@ -16,25 +16,26 @@ public class NeuralNetworkTest
 {
     private NeuralNetwork simpleFullyConnected()
     {
-        Neuron n1, n2, n3, n4, n5, n6;
-        n1 = new Neuron(0, Collections.emptyList(), Collections.emptyList());
-        n2 = new Neuron(1, Collections.emptyList(), Collections.emptyList());
-        n1.setType(Neuron.Type.SENSOR); n2.setType(Neuron.Type.SENSOR);
-        n1.setActivation(Neuron.Activation.LINEAR); n2.setActivation(Neuron.Activation.LINEAR);
-
-        n3 = new Neuron(2, Arrays.asList(n1, n2), Arrays.asList(5.0,  1.0));
-        n4 = new Neuron(3, Arrays.asList(n1, n2), Arrays.asList(-4.0, 6.0));
-        n5 = new Neuron(4, Arrays.asList(n1, n2), Arrays.asList(9.1,  7.0));
-        n3.setType(Neuron.Type.HIDDEN); n4.setType(Neuron.Type.HIDDEN); n5.setType(Neuron.Type.HIDDEN);
-        n3.setActivation(Neuron.Activation.LINEAR); n4.setActivation(Neuron.Activation.LINEAR);
-        n5.setActivation(Neuron.Activation.LINEAR);
-
-        n6 = new Neuron(5, Arrays.asList(n3, n4, n5), Arrays.asList(1.0, 4.0, -2.3));
-        n6.setType(Neuron.Type.OUTPUT);
-        n6.setActivation(Neuron.Activation.LINEAR);
-
-        List<Neuron> neurons = Arrays.asList(n1, n2, n3, n4, n5, n6);
-        return new NeuralNetwork(new HashSet<>(neurons));
+//        Neuron n1, n2, n3, n4, n5, n6;
+//        n1 = new Neuron(0, Collections.emptyList(), Collections.emptyList());
+//        n2 = new Neuron(1, Collections.emptyList(), Collections.emptyList());
+//        n1.setType(Neuron.Type.SENSOR); n2.setType(Neuron.Type.SENSOR);
+//        n1.setActivation(Neuron.Activation.LINEAR); n2.setActivation(Neuron.Activation.LINEAR);
+//
+//        n3 = new Neuron(2, Arrays.asList(n1, n2), Arrays.asList(5.0,  1.0));
+//        n4 = new Neuron(3, Arrays.asList(n1, n2), Arrays.asList(-4.0, 6.0));
+//        n5 = new Neuron(4, Arrays.asList(n1, n2), Arrays.asList(9.1,  7.0));
+//        n3.setType(Neuron.Type.HIDDEN); n4.setType(Neuron.Type.HIDDEN); n5.setType(Neuron.Type.HIDDEN);
+//        n3.setActivation(Neuron.Activation.LINEAR); n4.setActivation(Neuron.Activation.LINEAR);
+//        n5.setActivation(Neuron.Activation.LINEAR);
+//
+//        n6 = new Neuron(5, Arrays.asList(n3, n4, n5), Arrays.asList(1.0, 4.0, -2.3));
+//        n6.setType(Neuron.Type.OUTPUT);
+//        n6.setActivation(Neuron.Activation.LINEAR);
+//
+//        Neuron[] neurons = new Neuron[]{n1, n2, n3, n4, n5, n6};
+//        return new NeuralNetwork(neurons);
+        return null;
     }
 
     @Test

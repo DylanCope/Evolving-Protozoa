@@ -27,6 +27,7 @@ public class Tank implements Iterable<Entity>, Serializable
 	private final List<String> genomesToWrite = new ArrayList<>();
 
 	private final List<Entity> entitiesToAdd = new ArrayList<>();
+	private boolean hasInitialised;
 
 	public Tank() 
 	{
@@ -37,19 +38,37 @@ public class Tank implements Iterable<Entity>, Serializable
 		chemicalSolution = new ChemicalSolution(-radius, radius, -radius, radius, chemicalGridSize);
 
 		rocks = new ArrayList<>();
-		RockGeneration.generateRocks(this);
-		rocks.forEach(chunkManager::allocateToChunk);
 
 		elapsedTime = 0;
+		hasInitialised = false;
 	}
 
-	public void initialisePopulation() {
-		Function<Float, Vector2> findPosition = this::randomPosition;
-		if (Settings.initialPopulationClustering) {
-			Vector2[] clusterCentres = new Vector2[Settings.numPopulationClusters];
-			for (int i = 0; i < clusterCentres.length; i++)
-				clusterCentres[i] = randomPosition(Settings.populationClusterRadius);
+	public void initialise() {
+		if (!hasInitialised) {
 
+			Vector2[] clusterCentres = null;
+			if (Settings.initialPopulationClustering) {
+				clusterCentres = new Vector2[Settings.numRingClusters];
+				for (int i = 0; i < clusterCentres.length; i++) {
+					clusterCentres[i] = randomPosition(Settings.populationClusterRadius);
+					RockGeneration.generateRingOfRocks(this, clusterCentres[i], Settings.populationClusterRadius*5);
+				}
+			}
+			RockGeneration.generateRocks(this);
+
+			rocks.forEach(chunkManager::allocateToChunk);
+			initialisePopulation(Arrays.copyOfRange(clusterCentres, 0, Settings.numPopulationClusters));
+			hasInitialised = true;
+		}
+	}
+
+	public boolean hasBeenInitialised() {
+		return hasInitialised;
+	}
+
+	public void initialisePopulation(Vector2[] clusterCentres) {
+		Function<Float, Vector2> findPosition = this::randomPosition;
+		if (clusterCentres != null) {
 			findPosition = r -> randomPosition(r, clusterCentres);
 		}
 
@@ -61,6 +80,13 @@ public class Tank implements Iterable<Entity>, Serializable
 				addRandom(new Protozoa(this), findPosition);
 			} catch (MiscarriageException ignored) {}
 		}
+	}
+
+	public void initialisePopulation() {
+		Vector2[] clusterCentres = new Vector2[Settings.numPopulationClusters];
+		for (int i = 0; i < clusterCentres.length; i++)
+			clusterCentres[i] = randomPosition(Settings.populationClusterRadius);
+		initialisePopulation(clusterCentres);
 	}
 
 	public Vector2 randomPosition(float entityRadius, Vector2[] clusterCentres) {

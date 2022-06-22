@@ -23,6 +23,15 @@ public class NetworkGene extends Gene<NetworkGenome> implements Serializable {
         return networkGenome;
     }
 
+//    @Override
+//    public Gene<?> crossover(Gene<?> other) {
+//        if (other instanceof  NetworkGene) {
+//            NetworkGenome otherNG = ((NetworkGene) other).getValue();
+//            return createNew(getValue().crossover(otherNG));
+//        }
+//        return super.crossover(other);
+//    }
+
     @Override
     public int getNumMutations() {
         return getValue().getNumMutations();

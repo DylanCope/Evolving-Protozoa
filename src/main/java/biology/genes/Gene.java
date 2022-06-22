@@ -31,7 +31,7 @@ public abstract class Gene<T> implements Serializable {
         return this.createNew(getNewValue(), numMutations + 1);
     }
 
-    public Gene<T> crossover(Gene<T> other) {
+    public Gene<?> crossover(Gene<?> other) {
         if (Simulation.RANDOM.nextBoolean())
             return this;
         else

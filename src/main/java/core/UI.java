@@ -21,7 +21,7 @@ public class UI
 	private final Window window;
 	private final Simulation simulation;
 	private final Renderer renderer;
-	private final TextObject title;
+	private final TextObject title, creatingTank;
 	private final ArrayList<TextObject> info;
 	private final ArrayList<TextObject> debugInfo;
 	private final int infoTextSize, textAwayFromEdge;
@@ -51,7 +51,6 @@ public class UI
 		TextObject trackingFitness = new TextObject("Generation", infoTextSize);
 		trackingFitness.setColor(Color.WHITE.darker());
 
-
 		info.add(protozoaText);
 		info.add(pelletText);
 		info.add(trackingFitness);
@@ -64,6 +63,10 @@ public class UI
 		debugInfo = new ArrayList<>();
 		debugInfo.add(fpsText);
 		textAwayFromEdge = window.getWidth() / 60;
+
+		creatingTank = new TextObject("Generating Initial Tank...", infoTextSize,
+				new Vector2(textAwayFromEdge, getYPosLHS(1)));
+		creatingTank.setColor(Color.WHITE.darker());
 	}
 
 	public float getYPosLHS(int i) {
@@ -77,7 +80,6 @@ public class UI
 	private int renderStats(Graphics2D g, int lineNumber, Map<String, Float> stats) {
 
 		for (Map.Entry<String, Float> entityStat : stats.entrySet()) {
-			lineNumber++;
 			String text = entityStat.getKey() + ": " + TextStyle.toString(entityStat.getValue(), 2);
 			TextObject statText = new TextObject(
 					text, infoTextSize,
@@ -85,6 +87,7 @@ public class UI
 			);
 			statText.setColor(Color.WHITE.darker());
 			statText.render(g);
+			lineNumber++;
 		}
 		return lineNumber;
 	}
@@ -94,6 +97,11 @@ public class UI
 		title.render(g);
 
 		int lineNumber = 0;
+
+		if (!simulation.getTank().hasBeenInitialised()) {
+			creatingTank.render(g);
+			return;
+		}
 
 		Entity tracked = renderer.getTracked();
 		if (tracked == null) {
@@ -236,11 +244,13 @@ public class UI
 				colour = new Color(
 						30, (int) (50 + state * 150), 30
 				);
-			} else {
+			} else if (state < 0) {
 				state = state < -1 ? -1 : state;
 				colour = new Color(
 						(int) (50 - state * 150), 30, 30
 				);
+			} else {
+				colour = new Color(10, 10, 10);
 			}
 
 			g.setColor(colour);

@@ -11,7 +11,7 @@ import java.util.*;
 public abstract class Entity extends Collidable implements Serializable
 {
 	private static final long serialVersionUID = -4333766895269415282L;
-	private Vector2 pos, prevPos;
+	private Vector2 pos;
 	private Vector2 vel = new Vector2(0, 0);
 	private final Vector2 acc = new Vector2(0, 0);
 	private float radius;
@@ -51,8 +51,6 @@ public abstract class Entity extends Collidable implements Serializable
 	}
 
 	public void resetPhysics() {
-		if (prevPos == null)
-			prevPos = pos;
 		acc.set(0, 0);
 	}
 
@@ -66,7 +64,6 @@ public abstract class Entity extends Collidable implements Serializable
 			entities.forEachRemaining(o -> handlePotentialCollision(o, subStepDelta));
 //			accelerate(getDragAcceleration());
 			move(subStepDelta);
-			prevPos = pos;
 		}
 	}
 
@@ -187,6 +184,7 @@ public abstract class Entity extends Collidable implements Serializable
 	
 	public abstract boolean isEdible();
 
+	@Override
 	public boolean handlePotentialCollision(Collidable other, float delta) {
 		if (other instanceof Entity)
 			return handlePotentialCollision((Entity) other, delta);
@@ -270,6 +268,8 @@ public abstract class Entity extends Collidable implements Serializable
 			vel.setLength(Settings.maxEntitySpeed);
 		Vector2 dx = vel.mul(delta).translate(acc.mul(delta * delta));
 		pos.translate(dx);
+		if (Float.isNaN(pos.getX()) || Float.isNaN(pos.getY()))
+			setDead(true);
 	}
 
 	public void setHealth(float h)
@@ -391,10 +391,6 @@ public abstract class Entity extends Collidable implements Serializable
 		return nutrition;
 	}
 
-	public void setNutrition(float nutrition) {
-		this.nutrition = nutrition;
-	}
-
 	public int getGeneration() {
 		return generation;
 	}
@@ -447,6 +443,13 @@ public abstract class Entity extends Collidable implements Serializable
 
 	public float getMassDensity() {
 		return 1000f;
+	}
+
+	public Vector2[] getBoundingBox() {
+		float x = pos.getX();
+		float y = pos.getY();
+		float r = getRadius();
+		return new Vector2[]{new Vector2(x - r, y - r), new Vector2(x + r, y + r)};
 	}
 
 //	@Override

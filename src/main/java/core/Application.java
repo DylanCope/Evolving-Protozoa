@@ -11,12 +11,13 @@ public class Application
 	public static Simulation simulation;
 	public static Window window;
 	
-	public static final float refreshDelay = 1000 / 60f;
+	public static final float refreshDelay = 1000 / 120f;
 	
 	public static void main(String[] args)
 	{
-//		simulation = new Simulation(Settings.simulationSeed);
-		simulation = new Simulation(Settings.simulationSeed, "thalassa-beedrill-dolores");
+		simulation = new Simulation(Settings.simulationSeed);
+//		simulation = new Simulation(Settings.simulationSeed, "chaos-arbok-eius");
+//		simulation = new Simulation(Settings.simulationSeed, "aion-exeggutor-non");
 		try {
 			if (!(args.length > 0 && args[0].equals("noui"))) {
 				TextStyle.loadFonts();

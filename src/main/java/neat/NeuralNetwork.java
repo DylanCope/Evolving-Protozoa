@@ -20,13 +20,20 @@ public class NeuralNetwork implements Serializable
     private boolean computedGraphics = false;
     private int nodeSpacing;
 
-    public NeuralNetwork(Neuron[] neurons, int nInputs, int nOutputs) {
+    public NeuralNetwork(Neuron[] neurons) {
         this.neurons = neurons;
-        this.nInputs = nInputs;
 
-        for (Neuron neuron : neurons)
+        int nSensors = 0;
+        int nOutputs = 0;
+        for (Neuron neuron : neurons) {
             if (neuron == null)
                 throw new IllegalArgumentException("Cannot handle null neurons.");
+            else if (neuron.getType().equals(Neuron.Type.SENSOR))
+                nSensors++;
+            else if (neuron.getType().equals(Neuron.Type.OUTPUT))
+                nOutputs++;
+        }
+        this.nInputs = nSensors;
 
         inputNeurons = new Neuron[nInputs];
         int i = 0;

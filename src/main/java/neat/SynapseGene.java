@@ -4,6 +4,7 @@ package neat;
 import core.Simulation;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class SynapseGene implements Comparable<SynapseGene>, Serializable
 {
@@ -13,24 +14,29 @@ public class SynapseGene implements Comparable<SynapseGene>, Serializable
     private float weight;
     private boolean disabled;
 
-    public SynapseGene(NeuronGene in, NeuronGene out, int innovation) {
+    public SynapseGene(NeuronGene in, NeuronGene out, float weight, int innovation) {
         this.in = in;
         this.out = out;
-        this.weight = (float) (2*Simulation.RANDOM.nextDouble() - 1);
         disabled = false;
+        this.weight = weight;
         this.innovation =  innovation;
     }
 
+    public SynapseGene(NeuronGene in, NeuronGene out, float weight) {
+        this(in, out, weight, globalInnovation++);
+    }
+
+    public static float randomInitialWeight() {
+        return (float) (2*Simulation.RANDOM.nextDouble() - 1);
+    }
+
     public SynapseGene(NeuronGene in, NeuronGene out) {
-        this(in, out, globalInnovation++);
+        this(in, out, randomInitialWeight(), globalInnovation++);
     }
 
     @Override
     public int compareTo(SynapseGene g) {
-        if (!equals(g)) {
-            return innovation - g.innovation;
-        }
-        return -1;
+        return innovation - g.innovation;
     }
 
     @Override
@@ -40,10 +46,14 @@ public class SynapseGene implements Comparable<SynapseGene>, Serializable
             NeuronGene otherIn = otherSynGene.in;
             NeuronGene otherOut = otherSynGene.out;
             return in.equals(otherIn)
-                    && out.equals(otherOut)
-                    && innovation == otherSynGene.getInnovation();
+                    && out.equals(otherOut);
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(in.getId(), out.getId());
     }
 
     @Override

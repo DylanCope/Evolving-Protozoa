@@ -1,7 +1,6 @@
 package core;
 
 import biology.MeatPellet;
-import biology.MiscarriageException;
 import biology.PlantPellet;
 import biology.Protozoa;
 import com.github.javafaker.Faker;
@@ -20,7 +19,7 @@ import java.util.stream.Stream;
 public class Simulation
 {
 	private Tank tank;
-	private boolean simulate;
+	private boolean simulate, pause = false;
 	private float timeDilation = 1, timeSinceSave = 0, timeSinceSnapshot = 0;
 	private double updateDelay = Application.refreshDelay / 1000.0, lastUpdateTime = 0;
 	
@@ -40,7 +39,7 @@ public class Simulation
 		genomeFile = "saves/" + name + "/genomes.csv";
 		historyFile = "saves/" + name + "/history.csv";
 		newSaveDir();
-		initDefaultTank();
+		newDefaultTank();
 		loadSettings();
 	}
 
@@ -106,15 +105,18 @@ public class Simulation
 		this(new Random().nextLong());
 	}
 	
-	public void initDefaultTank()
+	public void newDefaultTank()
 	{
 		tank = new Tank();
 		loadSettings();
-		tank.initialisePopulation();
 		tank.setGenomeFile(genomeFile);
 		makeHistorySnapshot();
 	}
-	
+
+	public void setupTank() {
+		tank.initialise();
+	}
+
 	public void loadTank(String filename)
 	{
 		try {
@@ -122,7 +124,7 @@ public class Simulation
 			System.out.println("Loaded tank at: " + filename);
 		} catch (IOException | ClassNotFoundException e) {
 			System.out.println("Unable to load tank at " + filename + " because: " + e.getMessage());
-			initDefaultTank();
+			newDefaultTank();
 		}
 	}
 
@@ -136,16 +138,20 @@ public class Simulation
 
 				lastFilePath.ifPresentOrElse(
 						path -> loadTank(path.toString().replace(".dat", "")),
-						this::initDefaultTank
+						this::newDefaultTank
 				);
 			} catch (IOException e) {
-				initDefaultTank();
+				newDefaultTank();
 			}
-		else initDefaultTank();
+		else newDefaultTank();
 	}
 
 	public void simulate() {
+		setupTank();
 		while (simulate) {
+			if (pause)
+				continue;
+
 			if (delayUpdate && updateDelay > 0) {
 				double currTime = Utils.getTimeSeconds();
 				if ((currTime - lastUpdateTime) > updateDelay) {
@@ -222,6 +228,10 @@ public class Simulation
 
 	public void toggleDebug() {
 		debug = !debug;
+	}
+
+	public void togglePause() {
+		pause = !pause;
 	}
 
 	public boolean inDebugMode() {

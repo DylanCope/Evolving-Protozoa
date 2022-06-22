@@ -1,5 +1,6 @@
 package core;
 
+import biology.Entity;
 import utils.Vector2;
 
 import java.awt.*;
@@ -14,6 +15,7 @@ public class Rock extends Collidable implements Serializable {
     private final boolean[] edgeAttachStates;
     private final Vector2 centre;
     private final Vector2[] normals;
+    private final Vector2[] boundingBox;
     private final Color colour;
 
     public Rock(Vector2 p1, Vector2 p2, Vector2 p3) {
@@ -27,6 +29,7 @@ public class Rock extends Collidable implements Serializable {
         centre = computeCentre();
         normals = computeNormals();
         colour = randomRockColour();
+        boundingBox = computeBounds();
     }
 
     private Vector2 computeCentre() {
@@ -36,11 +39,30 @@ public class Rock extends Collidable implements Serializable {
         return c.scale(1f / points.length);
     }
 
+    private Vector2[] computeBounds() {
+        float minX = Math.min(points[0].getX(), Math.min(points[1].getX(), points[2].getX()));
+        float minY = Math.min(points[0].getY(), Math.min(points[1].getY(), points[2].getY()));
+        float maxX = Math.max(points[0].getX(), Math.max(points[1].getX(), points[2].getX()));
+        float maxY = Math.max(points[0].getY(), Math.max(points[1].getY(), points[2].getY()));
+        return new Vector2[]{new Vector2(minX, minY), new Vector2(maxX, maxY)};
+    }
+
+    public Vector2[] getBoundingBox() {
+        return boundingBox;
+    }
+
+    @Override
+    public boolean handlePotentialCollision(Collidable other, float delta) {
+        if (other instanceof Entity)
+            return ((Entity) other).handlePotentialCollision(this, delta);
+        return false;
+    }
+
     public Vector2[][] getEdges() {
         return edges;
     }
 
-    public boolean getEdgeAttachedState(int edgeIdx) {
+    public boolean isEdgeAttached(int edgeIdx) {
         return edgeAttachStates[edgeIdx];
     }
 
@@ -103,7 +125,7 @@ public class Rock extends Collidable implements Serializable {
         Vector2 dirRay = ray[1].sub(ray[0]);
         ArrayList<Vector2> collisions = new ArrayList<>(edges.length * 2);
         for (int i = 0; i < edges.length; i++) {
-            if (getEdgeAttachedState(i))
+            if (isEdgeAttached(i))
                 continue;
 
             Vector2[] edge = edges[i];
@@ -173,5 +195,13 @@ public class Rock extends Collidable implements Serializable {
         int tone = 80 + Simulation.RANDOM.nextInt(20);
         int yellowing = Simulation.RANDOM.nextInt(20);
         return new Color(tone + yellowing, tone + yellowing, tone);
+    }
+
+    public boolean allEdgesAttached() {
+        return isEdgeAttached(0) && isEdgeAttached(1) && isEdgeAttached(2);
+    }
+
+    public Vector2 getCentre() {
+        return centre;
     }
 }

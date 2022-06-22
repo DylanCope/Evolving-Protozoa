@@ -5,6 +5,7 @@ import core.Settings;
 import core.Simulation;
 import core.Tank;
 import neat.NetworkGenome;
+import neat.NeuralNetwork;
 
 import java.awt.*;
 import java.io.Serializable;
@@ -42,10 +43,11 @@ public class ProtozoaGenome implements Serializable
                 new ProtozoaRadiusGene(),
                 new ProtozoaSpikesGene(),
                 new ProtozoaSplitRadiusGene(),
+                new HerbivoreFactorGene(),
         };
     }
 
-    public int expectedNetworkInputSize(int retinaSize) {
+    public static int expectedNetworkInputSize(int retinaSize) {
         return 3 * retinaSize
                 + nonVisualSensorSize
                 + 1 + Settings.numContactSensors;
@@ -73,13 +75,8 @@ public class ProtozoaGenome implements Serializable
 
     public ProtozoaGenome crossover(ProtozoaGenome other) {
         Gene<?>[] newGenes = Arrays.copyOf(genes, genes.length);
-        for (int i = 0; i < genes.length; i++) {
-            if (Simulation.RANDOM.nextBoolean()) {
-                newGenes[i] = genes[i];
-            } else {
-                newGenes[i] = other.genes[i];
-            }
-        }
+        for (int i = 0; i < genes.length; i++)
+            newGenes[i] = genes[i].crossover(other.genes[i]);
         return new ProtozoaGenome(newGenes);
     }
 
@@ -96,7 +93,10 @@ public class ProtozoaGenome implements Serializable
         float maxTurn = getMaxTurn();
         NetworkGenome networkGenome = getGeneValue(NetworkGene.class);
         try {
-            return new NNBrain(networkGenome.phenotype(), maxTurn);
+            NeuralNetwork nn = networkGenome.phenotype();
+            if (nn.getInputSize() < expectedNetworkInputSize(retina().numberOfCells()))
+                throw new MiscarriageException();
+            return new NNBrain(nn, maxTurn);
         } catch (IllegalArgumentException e) {
             throw new MiscarriageException();
         }
@@ -179,5 +179,9 @@ public class ProtozoaGenome implements Serializable
 
     public float getMaxTurn() {
         return getFloatGeneValue(ProtozoaMaxTurnGene.class);
+    }
+
+    public float getHerbivoreFactor() {
+        return getGeneValue(HerbivoreFactorGene.class);
     }
 }

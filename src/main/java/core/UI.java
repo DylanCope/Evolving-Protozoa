@@ -40,7 +40,7 @@ public class UI
 		title.setColor(Color.WHITE);
 		
 		info = new ArrayList<>();
-		infoTextSize = window.getHeight() / 45;
+		infoTextSize = window.getHeight() / 50;
 
 		TextObject pelletText = new TextObject("Number of pellets: ", infoTextSize);
 		pelletText.setColor(Color.WHITE.darker());

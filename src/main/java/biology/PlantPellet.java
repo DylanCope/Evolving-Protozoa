@@ -32,7 +32,9 @@ public class PlantPellet extends Pellet {
 
 //        float range = Settings.maxPlantBirthRadius - Settings.minMaxPlantRadius;
 //        maxRadius = (float) (1e-3 + range * Simulation.RANDOM.nextDouble());
-        plantAttractionFactor = 2e-4f;
+        plantAttractionFactor = 1e-7f;
+//        plantAttractionFactor = 0f;
+//        plantAttractionFactor = 5e-6f;
     }
 
     @Override
@@ -40,9 +42,9 @@ public class PlantPellet extends Pellet {
         boolean collision = super.handlePotentialCollision(e, delta);
         float sqDist = e.getPos().sub(getPos()).len2();
         float r = getRadius() + e.getRadius();
-        if (e != this && e instanceof PlantPellet && sqDist > r*r) {
-            Vector2 acc = e.getPos().sub(getPos()).setLength(plantAttractionFactor / sqDist);
-            accelerate(acc);
+        if (e != this && e instanceof PlantPellet && sqDist > 1.01f*r*r && !isAttached(e)) {
+            Vector2 f = e.getPos().sub(getPos()).setLength(plantAttractionFactor / sqDist);
+            accelerate(f.mul(1 / getMass()));
         }
         return collision;
     }
@@ -58,7 +60,6 @@ public class PlantPellet extends Pellet {
 
     private boolean shouldSplit() {
         return getRadius() > maxRadius &&
-//                getCrowdingFactor() < Settings.plantCriticalCrowding &&
                 getHealth() > Settings.minHealthToSplit;
     }
 

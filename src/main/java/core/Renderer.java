@@ -312,9 +312,41 @@ public class Renderer extends Canvas
 				renderEntity(g, e);
 		}
 	}
+
+	public void renderEntityAttachments(Graphics2D g, Entity e) {
+		float r1 = toRenderSpace(e.getRadius());
+		Vector2 ePos = toRenderSpace(e.getPos());
+		if (circleNotVisible(ePos, r1) || e.getAttachedEntities().isEmpty())
+			return;
+
+		Color eColor = e.getColor();
+		int red = eColor.getRed();
+		int green = eColor.getGreen();
+		int blue = eColor.getBlue();
+
+		for (Entity attached : e.getAttachedEntities()) {
+			float r2 = toRenderSpace(attached.getRadius());
+			float r = Math.min(r1, r2);
+			Stroke s = g.getStroke();
+			g.setStroke(new BasicStroke(1.5f * r));
+			Vector2 attachedPos = toRenderSpace(attached.getPos());
+			Color attachedColor = attached.getColor();
+			g.setColor(new Color(
+					(red + attachedColor.getRed()) / 2,
+					(green + attachedColor.getGreen()) / 2,
+					(blue + attachedColor.getBlue()) / 2
+			).brighter());
+			g.drawLine((int) ePos.getX(), (int) ePos.getY(),
+					(int) attachedPos.getX(), (int) attachedPos.getY());
+			g.setStroke(s);
+		}
+	}
 	
 	public void entities(Graphics2D g, Tank tank)
 	{
+		for (Chunk chunk : tank.getChunkManager().getChunks())
+			for (Entity e : chunk.getEntities())
+				renderEntityAttachments(g, e);
 		for (Chunk chunk : tank.getChunkManager().getChunks())
 			renderChunk(g, chunk);
 

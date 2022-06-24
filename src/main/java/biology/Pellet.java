@@ -19,10 +19,10 @@ public abstract class Pellet extends Entity
 		super(tank);
 		this.setRadius(radius);
 
-		setVel(new Vector2(
-				(float) ((0.5 - Simulation.RANDOM.nextDouble()) / 30.0),
-				(float) ((0.5 - Simulation.RANDOM.nextDouble()) / 30.0)
-		));
+//		setVel(new Vector2(
+//				(float) ((0.5 - Simulation.RANDOM.nextDouble()) / 30.0),
+//				(float) ((0.5 - Simulation.RANDOM.nextDouble()) / 30.0)
+//		));
 
 //		setNutrition((float) (0.25 * radius));
 	}

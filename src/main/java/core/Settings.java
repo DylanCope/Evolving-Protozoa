@@ -5,27 +5,27 @@ public final class Settings {
     public static final long simulationSeed = 42;
     public static final float simulationUpdateDelta = 5f / 1000f;
     public static final float maxProtozoaSpeed = .01f;
-    public static final float maxEntitySpeed = .05f;
+    public static final float maxEntitySpeed = 5e-5f;
     public static final float timeBetweenSaves = 500.0f;
     public static final float historySnapshotTime = 2.0f;
     public static final boolean writeGenomes = false;
-    public static final boolean finishOnProtozoaExtinction = true;
-    public static final int physicsSubSteps = 3;
+    public static final boolean finishOnProtozoaExtinction = false;
+    public static final int physicsSubSteps = 8;
 
     public static final int maxPlants = 7000;
     public static final int maxProtozoa = 1500;
     public static final int maxMeat = 1000;
 
     // Tank settings
-    public static final int numInitialProtozoa = 10;
-    public static final int numInitialPlantPellets = 0;//3000;
+    public static final int numInitialProtozoa = 30;
+    public static final int numInitialPlantPellets = 3000;
     public static final boolean initialPopulationClustering = true;
     public static final int numRingClusters = 4;
     public static final int numPopulationClusters = 3;
     public static final float populationClusterRadius = 0.3f;
-    public static final float tankRadius = 3.0f / 10;
+    public static final float tankRadius = 3.0f;
     public static final boolean sphericalTank = false;
-    public static final int numChunkBreaks = 5; //25 * 3;
+    public static final int numChunkBreaks = 25 * 3;
     public static final float maxEntityRadius = 0.15f;
     public static final float minEntityRadius = 0.005f;
     public static final float tankViscosity = .1f;

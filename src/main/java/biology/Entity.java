@@ -7,12 +7,12 @@ import utils.Vector2;
 import java.awt.*;
 import java.io.Serializable;
 import java.util.*;
+import java.util.List;
 
 public abstract class Entity extends Collidable implements Serializable
 {
 	private static final long serialVersionUID = -4333766895269415282L;
-	private Vector2 pos;
-	private Vector2 vel = new Vector2(0, 0);
+	private Vector2 pos, prevPos, vel;
 	private final Vector2 acc = new Vector2(0, 0);
 	private float radius;
 	private Color healthyColour, fullyDegradedColour;
@@ -26,6 +26,7 @@ public abstract class Entity extends Collidable implements Serializable
 	private boolean dead = false;
 	private float nutrition;
 	protected boolean hasHandledDeath = false;
+	private final HashSet<Entity> attachedEntities, toAttach;
 
 	public Tank getTank() {
 		return tank;
@@ -44,10 +45,26 @@ public abstract class Entity extends Collidable implements Serializable
 	{
 		this.tank = tank;
 		healthyColour = new Color(255, 255, 255);
+		attachedEntities = new HashSet<>(0);
+		toAttach = new HashSet<>(0);
 	}
 	
 	public void update(float delta) {
 		timeAlive += delta;
+		if (!toAttach.isEmpty()) {
+			attachedEntities.addAll(toAttach);
+			toAttach.clear();
+		}
+		attachedEntities.removeIf(this::detachCondition);
+	}
+
+	public boolean detachCondition(Entity e) {
+		if (e.isDead())
+			return true;
+		float dist = e.getPos().sub(getPos()).len();
+		float maxDist = 1.3f * (e.getRadius() + getRadius());
+		float minDist = 0.95f * (e.getRadius() + getRadius());
+		return dist > maxDist || dist < minDist;
 	}
 
 	public void resetPhysics() {
@@ -58,13 +75,33 @@ public abstract class Entity extends Collidable implements Serializable
 		float subStepDelta = delta / Settings.physicsSubSteps;
 		numEntityCollisions = 0;
 		rockCollisions = 0;
+		for (int i = 0; i < Settings.physicsSubSteps; i++)
+			physicsStep(subStepDelta);
+	}
+
+	public void physicsStep(float delta) {
+		for (Entity attached : attachedEntities)
+			handleAttachConstraint(attached);
+
 		ChunkManager chunkManager = tank.getChunkManager();
-		for (int i = 0; i < Settings.physicsSubSteps; i++) {
-			Iterator<Collidable> entities = chunkManager.broadCollisionDetection(getPos(), radius);
-			entities.forEachRemaining(o -> handlePotentialCollision(o, subStepDelta));
-			accelerate(getDragAcceleration());
-			move(subStepDelta);
-		}
+		Iterator<Collidable> entities = chunkManager.broadCollisionDetection(getPos(), radius);
+		entities.forEachRemaining(o -> handlePotentialCollision(o, delta));
+		if (prevPos == null)
+			prevPos = pos.copy();
+
+		vel = pos.sub(prevPos).mul(1 / delta);
+//		accelerate(getDragAcceleration());
+		move(delta);
+	}
+
+	private void handleAttachConstraint(Entity attached) {
+		Vector2 axis = getPos().sub(attached.getPos());
+		float dist = axis.len();
+		float targetDist = 1.1f * (getRadius() + attached.getRadius());
+		float offset = targetDist - dist;
+		Vector2 axisNorm = axis.unit();
+		getPos().translate(axisNorm.mul(0.5f * offset));
+		attached.getPos().translate(axisNorm.mul(-0.5f * offset));
 	}
 
 	public void accelerate(Vector2 da) {
@@ -83,7 +120,7 @@ public abstract class Entity extends Collidable implements Serializable
 //		 https://galileo.phys.virginia.edu/classes/152.mf1i.spring02/Stokes_Law.htm
 //		float fMag = Settings.tankViscosity * vel.len2();
 		float fMag = (float) (6 * Math.PI * Settings.tankViscosity * vel.len());
-		return vel.mul(-fMag / getMass());
+		return vel.unit().mul(-fMag / getMass());
 	}
 
 	public void handleInteractions(float delta) {
@@ -106,16 +143,18 @@ public abstract class Entity extends Collidable implements Serializable
 			return 0;
 		return growthRate;
 	}
-	
-	public void render(Graphics g)
-	{
-		g.setColor(getColor());
-		g.fillOval(
-			(int) (getPos().getX() - radius),
-			(int) (getPos().getY() - radius),
-			(int) (2*radius),
-			(int) (2*radius)
-		);
+
+	public synchronized void attach(Entity e) {
+		if (!attachedEntities.contains(e))
+			toAttach.add(e);
+	}
+
+	public HashSet<Entity> getAttachedEntities() {
+		return attachedEntities;
+	}
+
+	public boolean isAttached(Entity e) {
+		return attachedEntities.contains(e);
 	}
 
 	@Override
@@ -179,6 +218,8 @@ public abstract class Entity extends Collidable implements Serializable
 
 	public boolean isCollidingWith(Entity other)
 	{
+		if (other == this)
+			return false;
 		float r = getRadius() + other.getRadius();
 		return other.getPos().squareDistanceTo(getPos()) < r*r;
 	}
@@ -205,13 +246,18 @@ public abstract class Entity extends Collidable implements Serializable
 		if (sqDist < r*r)
 		{
 			numEntityCollisions++;
-			getPos().moveAway(e.getPos(), r);
-			e.getPos().moveAway(getPos(), r);
-
-			Vector2 v1 = elasticCollision(e);
-			Vector2 v2 = e.elasticCollision(this);
-			setVel(v1);
-			e.setVel(v2);
+			float mr = e.getMass() / (e.getMass() + getMass());
+//			getPos().moveAway(e.getPos(), mr * r);
+//			e.getPos().moveAway(getPos(), (1 - mr) * r);
+//			getPos().moveAway(e.getPos(), r);
+//			e.getPos().moveAway(getPos(), r);
+			Vector2 axis = getPos().sub(e.getPos());
+			float dist = axis.len();
+			float targetDist = (getRadius() + e.getRadius());
+			float offset = targetDist - dist;
+			Vector2 axisNorm = axis.unit();
+			getPos().translate(axisNorm.mul(mr * offset));
+			e.getPos().translate(axisNorm.mul(-(1 - mr) * offset));
 		}
 
 		return true;
@@ -233,7 +279,7 @@ public abstract class Entity extends Collidable implements Serializable
 			Vector2 dir = edge[1].sub(edge[0]);
 			Vector2 x = pos.sub(edge[0]);
 
-			if (vel.dot(normal) > 0)
+			if (dir.dot(normal) > 0)
 				continue;
 
 			float[] coefs = Geometry.circleIntersectLineCoefficients(dir, x, r);
@@ -244,7 +290,7 @@ public abstract class Entity extends Collidable implements Serializable
 				float offset = r - x.sub(dir.mul(t)).len();
 
 				pos.translate(normal.mul(offset));
-				vel.translate(normal.mul(-2*normal.dot(vel)));
+//				vel.translate(normal.mul(-2*normal.dot(vel)));
 				rockCollisions++;
 				return true;
 			}
@@ -265,10 +311,17 @@ public abstract class Entity extends Collidable implements Serializable
 
 	public void move(float delta)
 	{
-		if (vel.len2() > Settings.maxEntitySpeed * Settings.maxEntitySpeed)
-			vel.setLength(Settings.maxEntitySpeed);
-		Vector2 dx = vel.mul(delta).translate(acc.mul(delta * delta));
+//		Vector2 dx = vel.mul(delta).translate(acc.mul(delta * delta));
+//		if (prevPos == null)
+//			prevPos = pos.copy();
+
+		Vector2 verletVel = pos.sub(prevPos).mul(0.999f);
+		Vector2 dx = verletVel.translate(acc.mul(delta * delta));
+		if (dx.len2() > Settings.maxEntitySpeed * Settings.maxEntitySpeed)
+			dx.setLength(Settings.maxEntitySpeed);
+		prevPos.set(pos);
 		pos.translate(dx);
+
 		if (Float.isNaN(pos.getX()) || Float.isNaN(pos.getY()))
 			setDead(true);
 	}
@@ -341,18 +394,20 @@ public abstract class Entity extends Collidable implements Serializable
 	}
 
 	public Vector2 getVel() {
+		if (vel == null)
+			return new Vector2(0, 0);
 		return vel;
 	}
 
-	public void setVel(Vector2 vel) {
-		this.vel = vel;
-	}
+//	public void setVel(Vector2 vel) {
+//		this.vel = vel;
+//	}
 
-	public void setSpeed(float speed) {
-		vel.setLength(speed);
+	public float getSpeed() {
+		if (vel == null)
+			return 0f;
+		return vel.len();
 	}
-
-	public float getSpeed() { return vel.len(); }
 
 	public Color getColor() {
 		Color healthyColour = getHealthyColour();
@@ -425,12 +480,18 @@ public abstract class Entity extends Collidable implements Serializable
 				T e = createChild.apply(getRadius() * p);
 				e.setPos(getPos().add(dir.mul(2 * e.getRadius())));
 				e.setGeneration(getGeneration() + 1);
+				for (Entity otherChild : children)
+					e.handlePotentialCollision(otherChild, 0);
 				children.add(e);
-				tank.add(e);
 			} catch (MiscarriageException ignored) {}
-
 			angle += 2 * Math.PI / nChildren;
 		}
+
+		for (int j = 0; j < 8; j++)
+			for (Entity child1 : children)
+				for (Entity child2 : children)
+					child1.handlePotentialCollision(child2, 0);
+		children.forEach(tank::add);
 	}
 
 	public Collection<Entity> getChildren() {

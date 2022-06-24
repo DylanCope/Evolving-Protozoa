@@ -6,9 +6,10 @@ import core.*;
 import neat.NeuralNetwork;
 import utils.Vector2;
 
-import java.awt.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class Protozoa extends Entity 
@@ -190,14 +191,21 @@ public class Protozoa extends Entity
 		dir.turn(delta * 80 * brain.turn(this));
 		float spikeDecay = (float) Math.pow(Settings.spikeMovementPenalty, spikes.length);
 		float sizePenalty = getRadius() / splitRadius; // smaller flagella generate less impulse
-//		setVel(dir.mul(Math.abs(spikeDecay * brain.speed(this))));
-		Vector2 impulse = dir.mul(sizePenalty * spikeDecay * brain.speed(this));
-		float impulseMag = impulse.len();
-		float work = 0.5f * impulseMag * (2 * getVel().len() + impulseMag / getMass());
+		float speed = Math.abs(brain.speed(this));
+		Vector2 vel = dir.mul(sizePenalty * spikeDecay * speed);
+		float work = .5f * getMass() * vel.len2();
 		if (availableEnergy > work) {
 			availableEnergy -= work;
-			accelerate(impulse.scale( 1 / (getMass() * delta)));
+			getPos().translate(vel.scale(delta));
 		}
+//		setVel(dir.mul(Math.abs(spikeDecay * brain.speed(this))));
+//		Vector2 impulse = dir.mul(sizePenalty * spikeDecay * brain.speed(this));
+//		float impulseMag = impulse.len();
+//		float work = 0.5f * impulseMag * (2 * getVel().len() + impulseMag / getMass());
+//		if (availableEnergy > work) {
+//			availableEnergy -= work;
+//			accelerate(impulse.scale( 1 / (getMass() * delta)));
+//		}
 	}
 
 	private boolean shouldSplit() {
@@ -366,29 +374,7 @@ public class Protozoa extends Entity
 		for (ContactSensor contactSensor : contactSensors)
 			contactSensor.reset();
 	}
-	
-	public void render(Graphics g)
-	{
-		super.render(g);
-		
-		float r0 = 1;
-		float r1 = 0.8f;
-		for (Retina.Cell cell : retina)
-		{
-			float x = (float) Math.cos(cell.getAngle() + getDir().angle());
-			float y = (float) Math.sin(cell.getAngle() + getDir().angle());
-			float len = (float) Math.sqrt(x*x + y*y);
-			float r2 = r1;// + 0.5 * (1 - r1) * (1 + Math.cos(2*Math.PI*cell.angle));
-			g.setColor(cell.getColour());
-			g.drawLine(
-					(int) (getPos().getX() + (x * getRadius() * r0) / len),
-					(int) (getPos().getY() + (y * getRadius() * r0) / len),
-					(int) (getPos().getX() + (x * getRadius() * r2) / len),
-					(int) (getPos().getY() + (y * getRadius() * r2) / len)
-			);
-		}
-	}
-	
+
 	@Override
 	public float getNutrition() {
 		return 20 * getHealth() * getRadius();

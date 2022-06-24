@@ -1,5 +1,6 @@
 package biology;
 
+import biology.genes.GeneticFloatTrait;
 import biology.genes.ProtozoaGenome;
 import core.*;
 import neat.NeuralNetwork;
@@ -30,9 +31,12 @@ public class Protozoa extends Entity
 	private final float attackFactor = 10f;
 	private final float consumeFactor = 50f;
 	private float deathRate = 0;
-	private float herbivoreFactor = 1f;
-
+	private final float herbivoreFactor;
+	@GeneticFloatTrait(
+			min = Settings.minProtozoanSplitRadius,
+			max = Settings.maxProtozoanSplitRadius)
 	private final float splitRadius;
+	private float availableEnergy = 1;
 
 	private final Vector2 dir = new Vector2(0, 0);
 
@@ -185,8 +189,15 @@ public class Protozoa extends Entity
 		brain.tick(this);
 		dir.turn(delta * 80 * brain.turn(this));
 		float spikeDecay = (float) Math.pow(Settings.spikeMovementPenalty, spikes.length);
-		setVel(dir.mul(Math.abs(spikeDecay * brain.speed(this))));
-//		accelerate(dir.mul(Math.abs(spikeDecay * brain.speed(this))  / delta));
+		float sizePenalty = getRadius() / splitRadius; // smaller flagella generate less impulse
+//		setVel(dir.mul(Math.abs(spikeDecay * brain.speed(this))));
+		Vector2 impulse = dir.mul(sizePenalty * spikeDecay * brain.speed(this));
+		float impulseMag = impulse.len();
+		float work = 0.5f * impulseMag * (2 * getVel().len() + impulseMag / getMass());
+		if (availableEnergy > work) {
+			availableEnergy -= work;
+			accelerate(impulse.scale( 1 / (getMass() * delta)));
+		}
 	}
 
 	private boolean shouldSplit() {

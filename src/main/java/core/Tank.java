@@ -47,17 +47,20 @@ public class Tank implements Iterable<Entity>, Serializable
 		if (!hasInitialised) {
 
 			Vector2[] clusterCentres = null;
-			if (Settings.initialPopulationClustering) {
-				clusterCentres = new Vector2[Settings.numRingClusters];
-				for (int i = 0; i < clusterCentres.length; i++) {
-					clusterCentres[i] = randomPosition(Settings.populationClusterRadius);
-					RockGeneration.generateRingOfRocks(this, clusterCentres[i], Settings.populationClusterRadius*5);
-				}
-			}
-			RockGeneration.generateRocks(this);
-
-			rocks.forEach(chunkManager::allocateToChunk);
-			initialisePopulation(Arrays.copyOfRange(clusterCentres, 0, Settings.numPopulationClusters));
+//			if (Settings.initialPopulationClustering) {
+//				clusterCentres = new Vector2[Settings.numRingClusters];
+//				for (int i = 0; i < clusterCentres.length; i++) {
+//					clusterCentres[i] = randomPosition(Settings.populationClusterRadius);
+//					RockGeneration.generateRingOfRocks(this, clusterCentres[i], Settings.populationClusterRadius*5);
+//				}
+//			}
+//			RockGeneration.generateRocks(this);
+//
+//			rocks.forEach(chunkManager::allocateToChunk);
+			if (clusterCentres != null)
+				initialisePopulation(Arrays.copyOfRange(clusterCentres, 0, Settings.numPopulationClusters));
+			else
+				initialisePopulation();
 			hasInitialised = true;
 		}
 	}

@@ -62,7 +62,7 @@ public abstract class Entity extends Collidable implements Serializable
 		for (int i = 0; i < Settings.physicsSubSteps; i++) {
 			Iterator<Collidable> entities = chunkManager.broadCollisionDetection(getPos(), radius);
 			entities.forEachRemaining(o -> handlePotentialCollision(o, subStepDelta));
-//			accelerate(getDragAcceleration());
+			accelerate(getDragAcceleration());
 			move(subStepDelta);
 		}
 	}
@@ -81,8 +81,9 @@ public abstract class Entity extends Collidable implements Serializable
 
 	public Vector2 getDragAcceleration() {
 //		 https://galileo.phys.virginia.edu/classes/152.mf1i.spring02/Stokes_Law.htm
-		float fMag = Settings.tankViscosity * vel.len2();
-		return vel.unit().scale(-fMag / getMass());
+//		float fMag = Settings.tankViscosity * vel.len2();
+		float fMag = (float) (6 * Math.PI * Settings.tankViscosity * vel.len());
+		return vel.mul(-fMag / getMass());
 	}
 
 	public void handleInteractions(float delta) {

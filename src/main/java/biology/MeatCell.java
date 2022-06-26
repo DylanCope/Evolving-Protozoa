@@ -1,16 +1,16 @@
 package biology;
 
 import core.Simulation;
-import core.Tank;
+import env.Tank;
 
 import java.awt.*;
 
-public class MeatPellet extends Pellet {
+public class MeatCell extends EdibleCell {
 
     private float rotteness = 0.0f;
 
-    public MeatPellet(float radius, Tank tank) {
-        super(radius, tank);
+    public MeatCell(float radius, Tank tank) {
+        super(radius, Food.Type.Meat, tank);
 
         int r = 150 + Simulation.RANDOM.nextInt(105);
         int g = 25  + Simulation.RANDOM.nextInt(100);
@@ -37,10 +37,5 @@ public class MeatPellet extends Pellet {
     @Override
     public String getPrettyName() {
         return "Meat";
-    }
-
-    @Override
-    public float getNutrition() {
-        return super.getNutrition() * (10 * (1 - rotteness) - 2);
     }
 }

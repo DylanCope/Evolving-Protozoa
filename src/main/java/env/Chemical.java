@@ -1,4 +1,6 @@
-package core;
+package env;
+
+import core.Settings;
 
 import java.io.Serializable;
 

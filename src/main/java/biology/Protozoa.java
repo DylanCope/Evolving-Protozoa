@@ -3,21 +3,19 @@ package biology;
 import biology.genes.GeneticFloatTrait;
 import biology.genes.ProtozoaGenome;
 import core.*;
+import env.Tank;
 import neat.NeuralNetwork;
 import utils.Vector2;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
-public class Protozoa extends Entity 
+public class Protozoa extends Cell
 {
 
 	private static final long serialVersionUID = 2314292760446370751L;
 	public transient int id = Simulation.RANDOM.nextInt();
-	private float totalConsumption = 0;
 	
 	private final ProtozoaGenome genome;
 
@@ -37,7 +35,6 @@ public class Protozoa extends Entity
 			min = Settings.minProtozoanSplitRadius,
 			max = Settings.maxProtozoanSplitRadius)
 	private final float splitRadius;
-	private float availableEnergy = 1;
 
 	private final Vector2 dir = new Vector2(0, 0);
 
@@ -102,6 +99,9 @@ public class Protozoa extends Entity
 			contactSensors[i] = new ContactSensor();
 			contactSensors[i].angle = (float) (2 * Math.PI * i / Settings.numContactSensors);
 		}
+
+		setDigestionRate(Food.Type.Meat, 1 / herbivoreFactor);
+		setDigestionRate(Food.Type.Plant, herbivoreFactor);
 	}
 
 	public Protozoa(Tank tank) throws MiscarriageException {
@@ -146,20 +146,17 @@ public class Protozoa extends Entity
 		}
 	}
 	
-	public void eat(Entity e, float delta)
+	public void eat(EdibleCell e, float delta)
 	{
-		float consumed = consumeFactor * delta * e.getNutrition();
-		if (e instanceof PlantPellet) {
+		float extraction = 1f;
+		if (e instanceof PlantCell) {
 			if (spikes.length > 0)
-				consumed *= Math.pow(Settings.spikePlantConsumptionPenalty, spikes.length);
-			consumed *= herbivoreFactor;
-			getVel().scale(1 / herbivoreFactor);
-		} else if (e instanceof MeatPellet) {
-			consumed /= herbivoreFactor;
+				extraction *= Math.pow(Settings.spikePlantConsumptionPenalty, spikes.length);
+			extraction *= herbivoreFactor;
+		} else if (e instanceof MeatCell) {
+			extraction /= herbivoreFactor;
 		}
-		totalConsumption += consumed;
-		setHealth(getHealth() + Settings.eatingConversionRatio * consumed);
-		e.setHealth(e.getHealth() - consumed);
+		extractFood(e, extraction * delta);
 	}
 
 	public void damage(float damage) {
@@ -194,18 +191,10 @@ public class Protozoa extends Entity
 		float speed = Math.abs(brain.speed(this));
 		Vector2 vel = dir.mul(sizePenalty * spikeDecay * speed);
 		float work = .5f * getMass() * vel.len2();
-		if (availableEnergy > work) {
-			availableEnergy -= work;
+		if (enoughEnergyAvailable(work)) {
+			useEnergy(work);
 			getPos().translate(vel.scale(delta));
 		}
-//		setVel(dir.mul(Math.abs(spikeDecay * brain.speed(this))));
-//		Vector2 impulse = dir.mul(sizePenalty * spikeDecay * brain.speed(this));
-//		float impulseMag = impulse.len();
-//		float work = 0.5f * impulseMag * (2 * getVel().len() + impulseMag / getMass());
-//		if (availableEnergy > work) {
-//			availableEnergy -= work;
-//			accelerate(impulse.scale( 1 / (getMass() * delta)));
-//		}
 	}
 
 	private boolean shouldSplit() {
@@ -214,7 +203,7 @@ public class Protozoa extends Entity
 
 	private Protozoa createSplitChild(float r) throws MiscarriageException {
 		float stuntingFactor = r / getRadius();
-		Protozoa child = genome.createChild(tank, crossOverGenome);
+		Protozoa child = genome.createChild(getTank(), crossOverGenome);
 		child.setRadius(stuntingFactor * child.getRadius());
 		return child;
 	}
@@ -231,12 +220,12 @@ public class Protozoa extends Entity
 		if (retina.numberOfCells() > 0)
 			see(other);
 
-		if (other instanceof Entity) {
-			interact((Entity) other, delta);
+		if (other instanceof Cell) {
+			interact((Cell) other, delta);
 		}
 	}
 
-	public void interact(Entity other, float delta) {
+	public void interact(Cell other, float delta) {
 
 		if (other.getPos().sub(getPos()).len() > Settings.protozoaInteractRange)
 			return;
@@ -276,12 +265,12 @@ public class Protozoa extends Entity
 				}
 			}
 			else if (other.isEdible())
-				eat(other, delta);
+				eat((EdibleCell) other, delta);
 
 		}
 	}
 
-	private boolean spikeInContact(Spike spike, float spikeLen, Entity other) {
+	private boolean spikeInContact(Spike spike, float spikeLen, Cell other) {
 		Vector2 spikeStartPos = getDir().unit().rotate(spike.angle).setLength(getRadius()).translate(getPos());
 		Vector2 spikeEndPos = spikeStartPos.add(spikeStartPos.sub(getPos()).setLength(spikeLen));
 		return other.getPos().sub(spikeEndPos).len2() < other.getRadius() * other.getRadius();
@@ -292,14 +281,19 @@ public class Protozoa extends Entity
 		super.handleInteractions(delta);
 		wasJustDamaged = false;
 		retina.reset();
-		ChunkManager chunkManager = tank.getChunkManager();
+		ChunkManager chunkManager = getTank().getChunkManager();
 		Iterator<Collidable> entities = chunkManager
 				.broadCollisionDetection(getPos(), Settings.protozoaInteractRange);
 		entities.forEachRemaining(e -> interact(e, delta));
 	}
 
+	@Override
+	public void handleOcclusionBindingInteraction(CellAdhesion.CellBinding binding, float delta) {
+
+	}
+
 	private void breakIntoPellets() {
-		burst(MeatPellet.class, r -> new MeatPellet(r, tank));
+		burst(MeatCell.class, r -> new MeatCell(r, getTank()));
 	}
 
 	public void handleDeath() {
@@ -317,7 +311,6 @@ public class Protozoa extends Entity
 	@Override
 	public Map<String, Float> getStats() {
 		Map<String, Float> stats = super.getStats();
-		stats.put("Growth Rate", Settings.statsDistanceScalar * getGrowthRate());
 		stats.put("Death Rate", 100 * deathRate);
 		stats.put("Split Radius", Settings.statsDistanceScalar * splitRadius);
 		stats.put("Max Turning", genome.getMaxTurn());
@@ -373,11 +366,6 @@ public class Protozoa extends Entity
 
 		for (ContactSensor contactSensor : contactSensors)
 			contactSensor.reset();
-	}
-
-	@Override
-	public float getNutrition() {
-		return 20 * getHealth() * getRadius();
 	}
 
 	@Override

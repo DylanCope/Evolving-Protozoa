@@ -1,9 +1,10 @@
 package core;
 
-import biology.MeatPellet;
-import biology.PlantPellet;
+import biology.MeatCell;
+import biology.PlantCell;
 import biology.Protozoa;
 import com.github.javafaker.Faker;
+import env.Tank;
 import utils.FileIO;
 import utils.Utils;
 
@@ -70,9 +71,9 @@ public class Simulation
 	}
 
 	private void loadSettings() {
-		tank.entityCapacities.put(Protozoa.class, Settings.maxProtozoa);
-		tank.entityCapacities.put(PlantPellet.class, Settings.maxPlants);
-		tank.entityCapacities.put(MeatPellet.class, Settings.maxMeat);
+		tank.cellCapacities.put(Protozoa.class, Settings.maxProtozoa);
+		tank.cellCapacities.put(PlantCell.class, Settings.maxPlants);
+		tank.cellCapacities.put(MeatCell.class, Settings.maxMeat);
 	}
 
 	private void newSaveDir() {
@@ -240,7 +241,7 @@ public class Simulation
 
 	public Tank getTank() { return tank; }
 
-	public int getGeneration() { return tank.getGeneration(); }
+	public long getGeneration() { return tank.getGeneration(); }
 
 	public float getElapsedTime() { return tank.getElapsedTime(); }
 

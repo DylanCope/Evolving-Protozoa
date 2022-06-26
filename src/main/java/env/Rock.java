@@ -1,6 +1,8 @@
-package core;
+package env;
 
-import biology.Entity;
+import biology.Cell;
+import core.Collidable;
+import core.Simulation;
 import utils.Vector2;
 
 import java.awt.*;
@@ -53,8 +55,8 @@ public class Rock extends Collidable implements Serializable {
 
     @Override
     public boolean handlePotentialCollision(Collidable other, float delta) {
-        if (other instanceof Entity)
-            return ((Entity) other).handlePotentialCollision(this, delta);
+        if (other instanceof Cell)
+            return ((Cell) other).handlePotentialCollision(this, delta);
         return false;
     }
 

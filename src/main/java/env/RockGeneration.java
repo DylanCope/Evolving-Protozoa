@@ -1,11 +1,12 @@
-package core;
+package env;
 
+import core.Settings;
+import core.Simulation;
 import utils.Geometry;
 import utils.Vector2;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class RockGeneration {
 

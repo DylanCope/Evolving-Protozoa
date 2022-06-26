@@ -4,13 +4,13 @@ import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.util.*;
 
+import biology.*;
+import env.ChemicalSolution;
+import env.Rock;
+import env.Tank;
 import utils.Utils;
 import utils.Vector2;
 import utils.Window;
-import biology.Entity;
-import biology.Pellet;
-import biology.Protozoa;
-import biology.Retina;
 
 public class Renderer extends Canvas
 {	
@@ -28,7 +28,7 @@ public class Renderer extends Canvas
 	private final float rotate = 0;
 	private double lastFPSTime = 0;
 	private int framesRendered = 0;
-	private Entity track;
+	private Cell track;
 	private final UI ui;
 	public boolean antiAliasing = Settings.antiAliasing;
 
@@ -272,7 +272,7 @@ public class Renderer extends Canvas
 		drawOutlinedCircle(g, pos, r, c, edgeColour);
 	}
 	
-	public void pellet(Graphics2D g, Pellet p)
+	public void pellet(Graphics2D g, EdibleCell p)
 	{
 		Vector2 pos = toRenderSpace(p.getPos());
 		float r = toRenderSpace(p.getRadius());
@@ -281,11 +281,11 @@ public class Renderer extends Canvas
 			stats.put("Pellets Rendered", stats.get("Pellets Rendered") + 1);
 	}
 
-	public void renderEntity(Graphics2D g, Entity e) {
+	public void renderEntity(Graphics2D g, Cell e) {
 		if (e instanceof Protozoa)
 			protozoa(g, (Protozoa) e);
-		else if (e instanceof Pellet)
-			pellet(g, (Pellet) e);
+		else if (e instanceof EdibleCell)
+			pellet(g, (EdibleCell) e);
 	}
 
 	public boolean pointOnScreen(int x, int y) {
@@ -308,15 +308,15 @@ public class Renderer extends Canvas
 		if (chunkInView(chunk)) {
 			if (simulation.inDebugMode())
 				stats.put("Chunks Rendered", stats.get("Chunks Rendered") + 1);
-			for (Entity e : chunk.getEntities())
+			for (Cell e : chunk.getEntities())
 				renderEntity(g, e);
 		}
 	}
 
-	public void renderEntityAttachments(Graphics2D g, Entity e) {
+	public void renderEntityAttachments(Graphics2D g, Cell e) {
 		float r1 = toRenderSpace(e.getRadius());
 		Vector2 ePos = toRenderSpace(e.getPos());
-		if (circleNotVisible(ePos, r1) || e.getAttachedEntities().isEmpty())
+		if (circleNotVisible(ePos, r1) || e.getCellBindings().isEmpty())
 			return;
 
 		Color eColor = e.getColor();
@@ -324,7 +324,8 @@ public class Renderer extends Canvas
 		int green = eColor.getGreen();
 		int blue = eColor.getBlue();
 
-		for (Entity attached : e.getAttachedEntities()) {
+		for (CellAdhesion.CellBinding binding : e.getCellBindings()) {
+			Cell attached = binding.getDestinationEntity();
 			float r2 = toRenderSpace(attached.getRadius());
 			float r = Math.min(r1, r2);
 			Stroke s = g.getStroke();
@@ -345,7 +346,7 @@ public class Renderer extends Canvas
 	public void entities(Graphics2D g, Tank tank)
 	{
 		for (Chunk chunk : tank.getChunkManager().getChunks())
-			for (Entity e : chunk.getEntities())
+			for (Cell e : chunk.getEntities())
 				renderEntityAttachments(g, e);
 		for (Chunk chunk : tank.getChunkManager().getChunks())
 			renderChunk(g, chunk);
@@ -365,7 +366,7 @@ public class Renderer extends Canvas
 
 			if (track instanceof Protozoa) {
 				drawCollisionBounds(g, track, Settings.protozoaInteractRange, Color.WHITE.darker());
-				Iterator<Entity> interactEntities = chunkManager.broadEntityDetection(
+				Iterator<Cell> interactEntities = chunkManager.broadEntityDetection(
 						track.getPos(), Settings.protozoaInteractRange);
 				interactEntities.forEachRemaining(
 						e -> {
@@ -457,8 +458,8 @@ public class Renderer extends Canvas
 	}
 
 	public void drawCollisionBounds(Graphics2D g, Collidable collidable, Color color) {
-		if (collidable instanceof Entity) {
-			Entity e = (Entity) collidable;
+		if (collidable instanceof Cell) {
+			Cell e = (Cell) collidable;
 			drawCollisionBounds(g, e, e.getRadius(), color);
 		} else if (collidable instanceof Rock) {
 			drawCollisionBounds(g, (Rock) collidable, color);
@@ -497,7 +498,7 @@ public class Renderer extends Canvas
 		g.setStroke(s);
 	}
 
-	public void drawCollisionBounds(Graphics2D g, Entity e, float r, Color color) {
+	public void drawCollisionBounds(Graphics2D g, Cell e, float r, Color color) {
 		Vector2 pos = toRenderSpace(e.getPos());
 		r = toRenderSpace(r);
 		if (!circleNotVisible(pos, r))
@@ -691,7 +692,7 @@ public class Renderer extends Canvas
 		panPosTemp = pan;
 	}
 	
-	public void track(Entity e) {
+	public void track(Cell e) {
 		if (e != null)
 			pan = new Vector2(0, 0);
 		else if (track != null)
@@ -707,7 +708,7 @@ public class Renderer extends Canvas
 		return zoom;
 	}
 	
-	public Entity getTracked() {
+	public Cell getTracked() {
 		return track;
 	}
 

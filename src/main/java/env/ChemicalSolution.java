@@ -1,7 +1,8 @@
-package core;
+package env;
 
-import biology.Entity;
-import biology.PlantPellet;
+import biology.Cell;
+import biology.PlantCell;
+import core.Settings;
 import utils.Vector2;
 
 import java.io.Serializable;
@@ -65,8 +66,8 @@ public class ChemicalSolution implements Serializable {
         return j;
     }
 
-    public void depositChemicals(float delta, Entity e) {
-        if (e instanceof PlantPellet) {
+    public void depositChemicals(float delta, Cell e) {
+        if (e instanceof PlantCell) {
             int i = toChemicalGridX(e.getPos().getX());
             int j = toChemicalGridY(e.getPos().getY());
             float k = Settings.plantPheromoneDeposit;
@@ -74,7 +75,7 @@ public class ChemicalSolution implements Serializable {
         }
     }
 
-    public void update(float delta, Collection<Entity> entities) {
+    public void update(float delta, Collection<Cell> entities) {
         entities.forEach(e -> depositChemicals(delta, e));
 
         for (int i = 1; i < nXChunks - 1; i++)

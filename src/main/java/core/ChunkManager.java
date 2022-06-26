@@ -1,7 +1,8 @@
 package core;
 
-import biology.Entity;
+import biology.Cell;
 import com.google.common.collect.Iterators;
+import env.Rock;
 import utils.Vector2;
 
 import java.io.Serializable;
@@ -22,7 +23,7 @@ public class ChunkManager implements Serializable {
     private final int nXChunks;
 
     private final Chunk[] chunks;
-    private final List<Entity> entities = new ArrayList<>();
+    private final List<Cell> entities = new ArrayList<>();
 
     public ChunkManager(float xMin, float xMax,
                         float yMin, float yMax,
@@ -70,7 +71,7 @@ public class ChunkManager implements Serializable {
         return broadScan(pos, range, Chunk::getCollidables);
     }
 
-    public Iterator<Entity> broadEntityDetection(Vector2 pos, float range) {
+    public Iterator<Cell> broadEntityDetection(Vector2 pos, float range) {
         return broadScan(pos, range, chunk -> chunk.getEntities().iterator());
     }
 
@@ -115,7 +116,7 @@ public class ChunkManager implements Serializable {
         return new Vector2(x, y);
     }
 
-    public Chunk getChunk(Entity e) {
+    public Chunk getChunk(Cell e) {
         return getChunk(e.getPos());
     }
 
@@ -128,12 +129,12 @@ public class ChunkManager implements Serializable {
         return this.chunks[chunkID];
     }
 
-    public void allocateToChunk(Entity e) {
+    public void allocateToChunk(Cell e) {
         Chunk chunk = getChunk(e);
         chunk.addEntity(e);
     }
 
-    public void add(Entity e) {
+    public void add(Cell e) {
         if (e != null)
             entities.add(e);
     }
@@ -142,7 +143,7 @@ public class ChunkManager implements Serializable {
         return chunks;
     }
 
-    public Collection<Entity> getAllEntities() {
+    public Collection<Cell> getAllCells() {
         return entities;
     }
 
@@ -150,7 +151,7 @@ public class ChunkManager implements Serializable {
         for (Chunk chunk : chunks)
             chunk.clear();
 
-        entities.removeIf(Entity::isDead);
+        entities.removeIf(Cell::isDead);
         entities.forEach(this::allocateToChunk);
     }
 

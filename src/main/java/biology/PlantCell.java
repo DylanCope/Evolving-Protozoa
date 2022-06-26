@@ -1,24 +1,25 @@
 package biology;
 
 import core.ChunkManager;
+import core.Particle;
 import core.Settings;
 import core.Simulation;
-import core.Tank;
+import env.Tank;
 import utils.Vector2;
 
 import java.awt.*;
 import java.util.Iterator;
 import java.util.Map;
 
-public class PlantPellet extends Pellet {
+public class PlantCell extends EdibleCell {
     public static final long serialVersionUID = -3975433688803760076L;
 
     private final float maxRadius;
     private float crowdingFactor;
     private final float plantAttractionFactor;
 
-    public PlantPellet(float radius, Tank tank) {
-        super(radius, tank);
+    public PlantCell(float radius, Tank tank) {
+        super(radius, Food.Type.Plant, tank);
         setGrowthRate((float) (Settings.minPlantGrowth + Settings.plantGrowthRange * Simulation.RANDOM.nextDouble()));
 
         float range = Settings.maxPlantBirthRadius - radius;
@@ -29,22 +30,20 @@ public class PlantPellet extends Pellet {
                 150  + Simulation.RANDOM.nextInt(100),
                 10  + Simulation.RANDOM.nextInt(100))
         );
-
-//        float range = Settings.maxPlantBirthRadius - Settings.minMaxPlantRadius;
-//        maxRadius = (float) (1e-3 + range * Simulation.RANDOM.nextDouble());
-        plantAttractionFactor = 1e-7f;
-//        plantAttractionFactor = 0f;
-//        plantAttractionFactor = 5e-6f;
+        plantAttractionFactor = 5e-8f;
     }
 
     @Override
-    public boolean handlePotentialCollision(Entity e, float delta) {
-        boolean collision = super.handlePotentialCollision(e, delta);
-        float sqDist = e.getPos().sub(getPos()).len2();
-        float r = getRadius() + e.getRadius();
-        if (e != this && e instanceof PlantPellet && sqDist > 1.01f*r*r && !isAttached(e)) {
-            Vector2 f = e.getPos().sub(getPos()).setLength(plantAttractionFactor / sqDist);
-            accelerate(f.mul(1 / getMass()));
+    public boolean handlePotentialCollision(Particle p, float delta) {
+        boolean collision = super.handlePotentialCollision(p, delta);
+        if (p != this && p instanceof PlantCell) {
+            PlantCell otherPlant = (PlantCell) p;
+            float sqDist = otherPlant.getPos().sub(getPos()).len2();
+            float r = getRadius() + otherPlant.getRadius();
+            if (sqDist > 1.01f*r*r && !isAttached(otherPlant)) {
+                Vector2 f = p.getPos().sub(getPos()).setLength(plantAttractionFactor / sqDist);
+                accelerate(f.mul(1 / getMass()));
+            }
         }
         return collision;
     }
@@ -54,7 +53,7 @@ public class PlantPellet extends Pellet {
         return Settings.minPlantBirthRadius + range * Simulation.RANDOM.nextFloat();
     }
 
-    public PlantPellet(Tank tank) {
+    public PlantCell(Tank tank) {
         this(randomPlantRadius(), tank);
     }
 
@@ -63,17 +62,11 @@ public class PlantPellet extends Pellet {
                 getHealth() > Settings.minHealthToSplit;
     }
 
-    @Override
-    public float getRadius() {
-        float r = (0.3f + 0.7f * getHealth()) * super.getRadius();
-        return Math.max(r, Settings.minEntityRadius);
-    }
-
     public float getCrowdingFactor() {
         return crowdingFactor;
     }
 
-    private void updateCrowding(Entity e) {
+    private void updateCrowding(Cell e) {
         float sqDist = e.getPos().squareDistanceTo(getPos());
         if (sqDist < Math.pow(3 * getRadius(), 2)) {
             crowdingFactor += e.getRadius() / (getRadius() + sqDist);
@@ -84,15 +77,22 @@ public class PlantPellet extends Pellet {
     public void update(float delta) {
         super.update(delta);
 
+        if (isDead())
+            return;
+
         crowdingFactor = 0;
-        ChunkManager chunkManager = tank.getChunkManager();
-        Iterator<Entity> entities = chunkManager.broadEntityDetection(getPos(), getRadius());
+        ChunkManager chunkManager = getTank().getChunkManager();
+        Iterator<Cell> entities = chunkManager.broadEntityDetection(getPos(), getRadius());
         entities.forEachRemaining(this::updateCrowding);
 
-        setHealth(getHealth() + Settings.plantRegen * delta * getGrowthRate());
+        if (getGrowthRate() < 0f)
+            setHealth(getHealth() + Settings.plantRegen * delta * getGrowthRate());
+
+        addConstructionMass(delta);
+        addAvailableEnergy(delta / 3f);
 
         if (shouldSplit())
-            burst(PlantPellet.class, r -> new PlantPellet(r, tank));
+            burst(PlantCell.class, r -> new PlantCell(r, getTank()));
     }
 
     /**
@@ -113,7 +113,6 @@ public class PlantPellet extends Pellet {
 
     public Map<String, Float> getStats() {
         Map<String, Float> stats = super.getStats();
-        stats.put("Growth Rate", Settings.statsDistanceScalar * getGrowthRate());
         stats.put("Crowding Factor", crowdingFactor);
         stats.put("Split Radius", Settings.statsDistanceScalar * maxRadius);
         return stats;

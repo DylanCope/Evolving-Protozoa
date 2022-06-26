@@ -3,14 +3,13 @@ package biology.genes;
 import biology.*;
 import core.Settings;
 import core.Simulation;
-import core.Tank;
+import env.Tank;
 import neat.NetworkGenome;
 import neat.NeuralNetwork;
 
 import java.awt.*;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Set;
 
 /**
  * Created by dylan on 28/05/2017.

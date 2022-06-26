@@ -1,20 +1,18 @@
 package core;
 
-import biology.Entity;
+import biology.Cell;
 import com.google.common.collect.Iterators;
+import env.Rock;
 import utils.Vector2;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Chunk implements Serializable {
 
     public static final long serialVersionUID = 4697424153087580763L;
 
-    private final List<Entity> entities;
+    private final List<Cell> entities;
     private final List<Rock> rocks;
     private final int x;
     private final int y;
@@ -37,11 +35,11 @@ public class Chunk implements Serializable {
         return this.chunkManager.toTankCoords(getChunkCoords());
     }
 
-    public Collection<Entity> getEntities() {
+    public Collection<Cell> getEntities() {
         return entities;
     }
 
-    public void addEntity(Entity e) {
+    public void addEntity(Cell e) {
         entities.add(e);
     }
 

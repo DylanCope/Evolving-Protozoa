@@ -17,7 +17,7 @@ public class Application
 	{
 //		simulation = new Simulation(Settings.simulationSeed, "hypnos-seaking-quam");
 //		simulation = new Simulation(Settings.simulationSeed, "chaos-arbok-eius");
-		simulation = new Simulation(Settings.simulationSeed, "aion-machoke-numquam");
+		simulation = new Simulation(Settings.simulationSeed);
 		try {
 			if (!(args.length > 0 && args[0].equals("noui"))) {
 				TextStyle.loadFonts();

@@ -1,6 +1,6 @@
 package biology;
 
-import core.ChemicalSolution;
+import env.ChemicalSolution;
 import core.Settings;
 import neat.NeuralNetwork;
 

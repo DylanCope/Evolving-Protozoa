@@ -4,7 +4,7 @@ import java.awt.event.KeyEvent;
 
 import utils.Input;
 import utils.Vector2;
-import biology.Entity;
+import biology.Cell;
 
 public class Controller
 {
@@ -50,7 +50,7 @@ public class Controller
 			synchronized (simulation.getTank()) {
 				for (Chunk chunk : simulation.getTank().getChunkManager().getChunks()) {
 					if (isPosInChunk(pos, chunk)) {
-						for (Entity e : chunk.getEntities())
+						for (Cell e : chunk.getEntities())
 						{
 							Vector2 s = renderer.toRenderSpace(e.getPos());
 							double r = renderer.toRenderSpace(e.getRadius());

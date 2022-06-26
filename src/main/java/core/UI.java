@@ -13,7 +13,7 @@ import utils.TextObject;
 import utils.Vector2;
 import utils.Window;
 import utils.TextStyle;
-import biology.Entity;
+import biology.Cell;
 import biology.Protozoa;
 
 public class UI 
@@ -103,7 +103,7 @@ public class UI
 			return;
 		}
 
-		Entity tracked = renderer.getTracked();
+		Cell tracked = renderer.getTracked();
 		if (tracked == null) {
 			Map<String, Float> tankStats = simulation.getTank().getStats();
 			lineNumber = renderStats(g, lineNumber, tankStats);

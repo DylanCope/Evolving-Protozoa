@@ -34,4 +34,8 @@ public class Geometry {
     public static boolean isPointInsideCircle(Vector2 circlePos, float radius, Vector2 p) {
         return circlePos.sub(p).len2() <= radius * radius;
     }
+
+    public static float getSphereVolume(float r) {
+        return  (float) ((4 / 3) * Math.PI * r * r * r);
+    }
 }

@@ -1,6 +1,7 @@
 package neat;
 
 import org.junit.Test;
+import protoevo.neat.Neuron;
 
 import java.util.ArrayList;
 import java.util.Arrays;

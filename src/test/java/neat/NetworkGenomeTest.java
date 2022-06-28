@@ -1,12 +1,8 @@
 package neat;
 
-import com.google.common.collect.Streams;
 import org.junit.Test;
-
-import java.sql.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import protoevo.neat.NetworkGenome;
+import protoevo.neat.NeuralNetwork;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

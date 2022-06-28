@@ -5,10 +5,12 @@
 The aim of this project was to create an environment where protozoa-like entities can evolve their behaviours
 and morphologies in order to survive and reproduce, with a particle interest in the evolution of multi-cellularity. 
 The process of evolution takes place in a 2D environment with simulated physics. 
-The followiung screenshot shows a zoomed out view of the entire environment. 
+The following screenshot shows a zoomed-out view of the entire environment. 
 We can see procedurally generated rocks shown as brown-grey triangles that form rigid boundaries for cells moving
 around the tank fluids. The bright green cells are plants that serve as a sources of energy and mass for protozoa. 
-These plants emit chemical pheromones into the environment, gradients of which can be detected by the protozoa.
+These plants emit chemical pheromones that spread environment, gradients of which can be detected by the protozoa. 
+These pheromones are visualised on a chemical grid and can be seen as the glowing green effect and trails left 
+behind and around plant cells.
 
 ![png](/screenshots/tank_full_view.png)
 
@@ -32,4 +34,4 @@ This final screenshot shots an example of the kinds of multi-cell structures tha
 This is facilitated as the cells have the ability to evolve _Cell-adhesion molecules (CAMs)_ 
 that allow them to bind to other cells and transmit mass, energy, signals, and complex molecules.
 
-![png](/screenshots/evolved_multicells.png)
+![png](/screenshots/evolved_multicells2.png)

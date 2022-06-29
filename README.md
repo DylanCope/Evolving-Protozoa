@@ -2,15 +2,17 @@
 
 ## Overview
 
-The aim of this project was to create an environment where protozoa-like entities can evolve their behaviours
-and morphologies in order to survive and reproduce, with a particle interest in the evolution of multi-cellularity. 
-The process of evolution takes place in a 2D environment with simulated physics. 
+The aim of this project is to create an environment where protozoa-like entities can evolve their behaviours
+and morphologies in order to survive and reproduce, with a particular interest in the evolution of multi-cellularity. 
+The simulation takes place in a 2D environment with Newtonian physics implemented with Verlet integration. 
 The following screenshot shows a zoomed-out view of the entire environment. 
-We can see procedurally generated rocks shown as brown-grey triangles that form rigid boundaries for cells moving
-around the tank fluids. The bright green cells are plants that serve as a sources of energy and mass for protozoa. 
-These plants emit chemical pheromones that spread environment, gradients of which can be detected by the protozoa. 
-These pheromones are visualised on a chemical grid and can be seen as the glowing green effect and trails left 
-behind and around plant cells.
+In the screenshot below, can see procedurally generated rocks shown as brown-grey triangles that form rigid 
+boundaries for cells moving around the tank fluids. The bright green cells are plants that serve as a sources 
+of energy and mass for protozoa. 
+These plants emit chemical pheromones that spread through the environment, 
+and gradients of which can be detected by the protozoa. 
+These pheromones are visualised in the screenshot and can be seen as the glowing green trails dispersed 
+around and behind plant cells.
 
 ![png](/screenshots/tank_full_view.png)
 

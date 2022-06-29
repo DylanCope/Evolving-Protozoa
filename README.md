@@ -20,6 +20,8 @@ In the next screenshot we see a close-up of tracking a protozoa in the environme
 The tracked cell is fixed at the centre of the screen as it moves around, and the neural network that controls 
 its actions is illustrated on the right-hand side of the screen. 
 This network evolved using a variation of the NEAT algorithm.
+The protozoa have a variety of other evolvable traits, including (but not limited to) their size, growth rate, colour,
+speed, herbivore factor, and the growth of offensive spikes for harming and killing other protozoa.  
 
 ![png](/screenshots/tank.png)
 

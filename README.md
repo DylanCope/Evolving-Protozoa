@@ -23,7 +23,7 @@ This network evolved using a variation of the NEAT algorithm.
 
 ![png](/screenshots/tank.png)
 
-Zooming in more on a protozoa, we can see one of their key evolvable traits: vision by light-sensitive "retinas". 
+Zooming in more on a protozoan, we can see one of their key evolvable traits: vision by light-sensitive "retinas". 
 These retinas can have variable fields-of-view and acuity, mediated by a ray-casting procedure that feeds into their 
 control circuits. However, developing such capabilities' comes with a cost. Retinas require a complex molecule call 
 _retinal_ that is sensitive to light, which itself requires mass and energy to produce from raw material extracted

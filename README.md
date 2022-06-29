@@ -3,7 +3,7 @@
 ## Overview
 
 The aim of this project is to create an environment where protozoa-like entities can evolve their behaviours
-and morphologies in order to survive and reproduce, with a particular interest in the evolution of multi-cellularity. 
+and morphologies in order to survive and reproduce. 
 The simulation takes place in a 2D environment with Newtonian physics implemented with Verlet integration. 
 The following screenshot shows a zoomed-out view of the entire environment. 
 In the screenshot below, can see procedurally generated rocks shown as brown-grey triangles that form rigid 
@@ -13,6 +13,12 @@ These plants emit chemical pheromones that spread through the environment,
 and gradients of which can be detected by the protozoa. 
 These pheromones are visualised in the screenshot and can be seen as the glowing green trails dispersed 
 around and behind plant cells.
+
+The primary research objective of this project is to investigate the emergence of "multi-cellularity", 
+i.e. the development of coordinated groups of attached cells that incur a survival benefit by being attached. 
+So far, by implementing cell-adhesion and allowing protozoa to share resources I have seen the 
+emergence of some quite cool multi-cell behaviour. However, the next step is to achieve cell differentiation 
+via the evolution of gene-regulatory networks.
 
 ![png](/screenshots/tank_full_view.png)
 

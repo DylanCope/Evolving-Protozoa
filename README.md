@@ -14,7 +14,7 @@ and gradients of which can be detected by the protozoa.
 These pheromones are visualised in the screenshot and can be seen as the glowing green trails dispersed 
 around and behind plant cells.
 
-The primary research objective of this project is to investigate the emergence of "multi-cellularity", 
+The primary research objective of this project is to investigate the emergence of multicellular structures, 
 i.e. the development of coordinated groups of attached cells that incur a survival benefit by being attached. 
 So far, by implementing cell-adhesion and allowing protozoa to share resources I have seen the 
 emergence of some quite cool multi-cell behaviour. However, the next step is to achieve cell differentiation 
@@ -45,3 +45,11 @@ This is facilitated as the cells have the ability to evolve _Cell-adhesion molec
 that allow them to bind to other cells and transmit mass, energy, signals, and complex molecules.
 
 ![png](/screenshots/evolved_multicells2.png)
+
+## Next Steps
+
+* Evolvable gene regulation to promote cell differentiation.
+* Environmental and internal temperature to add ecological variety and new cell interaction dynamics.
+* Signal relaying channels for cells bound together.
+* Improved visualisations of protozoa genes.
+* Lineage tracking UI tools.

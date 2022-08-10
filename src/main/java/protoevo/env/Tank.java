@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import protoevo.biology.*;
+import protoevo.core.Application;
 import protoevo.core.ChunkManager;
 import protoevo.core.Settings;
 import protoevo.core.Simulation;

@@ -59,7 +59,7 @@ public class NeuralNetwork implements Serializable
         return depth;
     }
 
-    private int calculateDepth() {
+    public int calculateDepth() {
         boolean[] visited = new boolean[neurons.length];
         Arrays.fill(visited, false);
         int depth = calculateDepth(outputNeurons, visited);
@@ -149,5 +149,33 @@ public class NeuralNetwork implements Serializable
 
     public int getGraphicsNodeSpacing() {
         return nodeSpacing;
+    }
+
+    public void disableInputsFrom(int i) {
+        for (int idx = i; idx < inputNeurons.length; idx++)
+            inputNeurons[idx].setConnectedToOutput(false);
+//        disableOnlyConnectedToDisabled();
+    }
+
+    private void disableOnlyConnectedToDisabled() {
+        boolean check = true;
+        while (check) {
+            check = false;
+            for (Neuron neuron : neurons) {
+                if (!neuron.isConnectedToOutput())
+                    continue;
+
+                boolean allInputsDisabled = true;
+                for (Neuron input : neuron.getInputs())
+                    if (!input.isConnectedToOutput()) {
+                        allInputsDisabled = false;
+                        break;
+                    }
+                if (allInputsDisabled) {
+                    neuron.setConnectedToOutput(false);
+                    check = true;
+                }
+            }
+        }
     }
 }

@@ -105,8 +105,12 @@ public class ProtozoaGenome implements Serializable
 
         try {
             NeuralNetwork nn = networkGenome.phenotype();
-            if (nn.getInputSize() < expectedNetworkInputSize(retina().numberOfCells()))
+            int expInpSize = expectedNetworkInputSize(retina().numberOfCells());
+            if (nn.getInputSize() < expInpSize)
                 throw new MiscarriageException();
+            else if (nn.getInputSize() > expInpSize) {
+                nn.disableInputsFrom(expInpSize);
+            }
             return new NNBrain(nn, maxTurn);
         } catch (IllegalArgumentException e) {
             throw new MiscarriageException();

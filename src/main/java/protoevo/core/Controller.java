@@ -19,13 +19,22 @@ public class Controller
 		this.simulation = simulation;
 		this.renderer = renderer;
 
-		input.registerOnPressHandler(KeyEvent.VK_F1, renderer.getUI()::toggleShowFPS);
+		input.registerOnPressHandler(KeyEvent.VK_F1, simulation::togglePause);
+		input.registerOnPressHandler(KeyEvent.VK_F2, renderer.getUI()::toggleShowFPS);
 		input.registerOnPressHandler(KeyEvent.VK_F3, simulation::toggleDebug);
-		input.registerOnPressHandler(KeyEvent.VK_F4, renderer::toggleChemicalGrid);
-		input.registerOnPressHandler(KeyEvent.VK_R, renderer::resetCamera);
-		input.registerOnPressHandler(KeyEvent.VK_F8, renderer::toggleAA);
+		input.registerOnPressHandler(KeyEvent.VK_F4, renderer::toggleAdvancedDebugInfo);
+
+		input.registerOnPressHandler(KeyEvent.VK_F9, this::resetCamera);
+		input.registerOnPressHandler(KeyEvent.VK_F10, renderer::toggleChemicalGrid);
+		input.registerOnPressHandler(KeyEvent.VK_F11, renderer::toggleAA);
+		input.registerOnPressHandler(KeyEvent.VK_F12, renderer::toggleUI);
 	}
 
+	public void resetCamera() {
+		renderer.resetCamera();
+		input.reset();
+	}
+	
 	private boolean isPosInChunk(Vector2 pos, Chunk chunk) {
 		Vector2 chunkCoords = renderer.toRenderSpace(chunk.getTankCoords());
 		int originX = (int) chunkCoords.getX();

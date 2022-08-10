@@ -27,6 +27,13 @@ public class Input implements KeyListener, FocusListener,
 	}
 	
 	private int mouseWheelRotation = 0;
+
+	public void reset() {
+		mouseWheelRotation = 0;
+		mousePosition = new Vector2(0, 0);
+		mouseLeftClickDelta = new Vector2(0, 0);
+		positionOnLeftClickDown = new Vector2(0, 0);
+	}
 	
 	public boolean getKey(int key) {
 		return keys[key];

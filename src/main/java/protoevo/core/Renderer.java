@@ -24,12 +24,14 @@ public class Renderer extends Canvas
 	private float targetZoom;
 	private final float initialZoom = 1;
 	private double zoomRange = 5, zoomSlowness = 8;
-	private boolean superSimpleRender = false, renderChemicals = false;
+	private boolean superSimpleRender = false, renderChemicals = true;
+	private boolean advancedDebugInfo = false;
 	private final float rotate = 0;
 	private double lastFPSTime = 0;
 	private int framesRendered = 0;
 	private Cell track;
 	private final UI ui;
+	private boolean showUI = true;
 	public boolean antiAliasing = Settings.antiAliasing;
 
 	private final HashMap<String, Integer> stats = new HashMap<>(5, 1);
@@ -594,7 +596,7 @@ public class Renderer extends Canvas
 					int nextY = (int) nextCellCoords.getY();
 
 					graphics.fillRect(x, y, nextX - x, nextY - y);
-					if (simulation.inDebugMode()) {
+					if (simulation.inDebugMode() && advancedDebugInfo) {
 						graphics.setColor(Color.ORANGE.darker());
 						graphics.drawRect(x, y, chemicalCellSize, chemicalCellSize);
 					}
@@ -602,7 +604,7 @@ public class Renderer extends Canvas
 			}
 		}
 
-		if (simulation.inDebugMode()) {
+		if (simulation.inDebugMode() && advancedDebugInfo) {
 			graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 			graphics.setColor(Color.YELLOW.darker());
 			ChunkManager chunkManager = simulation.getTank().getChunkManager();
@@ -667,7 +669,8 @@ public class Renderer extends Canvas
 						tankRenderRadius * zoom,
 						simulation.inDebugMode() ? 100 : 255);
 
-				ui.render(graphics);
+				if (showUI)
+					ui.render(graphics);
 
 				graphics.dispose();
 				bs.show();
@@ -754,6 +757,7 @@ public class Renderer extends Canvas
 	public void resetCamera() {
 		track = null;
 		pan = new Vector2(0, 0);
+		panPosTemp = new Vector2(0, 0);
 		targetZoom = 1;
 		zoom = 1;
 	}
@@ -764,6 +768,18 @@ public class Renderer extends Canvas
 
 	public void toggleAA() {
 		antiAliasing = !antiAliasing;
+	}
+
+	public void toggleUI() {
+		showUI = !showUI;
+	}
+
+	public void toggleAdvancedDebugInfo() {
+		advancedDebugInfo = !advancedDebugInfo;
+	}
+
+	public boolean isAdvancedDebugInfo() {
+		return advancedDebugInfo;
 	}
 
 	public UI getUI() {

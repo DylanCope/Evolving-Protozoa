@@ -10,11 +10,9 @@ import java.util.function.Function;
 public class Neuron implements Comparable<Neuron>, Serializable {
 
     public interface Activation extends Function<Float, Float>, Serializable {
-
         Activation SIGMOID = z -> 1 / (1 + (float) Math.exp(-z));
         Activation LINEAR = z -> z;
         Activation TANH = x -> (float) Math.tanh(x);
-
     }
 
     public enum Type implements Serializable {
@@ -42,6 +40,7 @@ public class Neuron implements Comparable<Neuron>, Serializable {
     private Activation activation;
     private int depth = -1;
     private int graphicsX = -1, graphicsY = -1;
+    private boolean connectedToOutput = true;
 
     public Neuron(int id, Neuron[] inputs, float[] weights, Type type, Activation activation)
     {
@@ -50,6 +49,9 @@ public class Neuron implements Comparable<Neuron>, Serializable {
         this.weights = weights;
         this.type = type;
         this.activation = activation;
+
+        if (type.equals(Type.OUTPUT))
+            connectedToOutput = true;
     }
 
     void tick()
@@ -142,6 +144,14 @@ public class Neuron implements Comparable<Neuron>, Serializable {
 
     public int getDepth() {
         return depth;
+    }
+
+    public boolean isConnectedToOutput() {
+        return connectedToOutput;
+    }
+
+    public void setConnectedToOutput(boolean connectedToOutput) {
+        this.connectedToOutput = connectedToOutput;
     }
 
     public void setGraphicsPosition(int x, int y) {

@@ -61,6 +61,6 @@ public class RetinaSizeGene extends Gene<Integer> implements Serializable {
 
     @Override
     public Integer getNewValue() {
-        return 0;
+        return Settings.defaultRetinaSize;
     }
 }

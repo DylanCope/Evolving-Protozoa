@@ -15,8 +15,9 @@ public class Application
 	
 	public static void main(String[] args)
 	{
-//		simulation = new Simulation(Settings.simulationSeed, "pontus-seel-officiis");
-		simulation = new Simulation(Settings.simulationSeed, "pontus-parasect-ipsam");
+//		simulation = new Simulation(Settings.simulationSeed, "aion-exeggutor-dicta");
+//		simulation = new Simulation(Settings.simulationSeed, "pontus-parasect-ipsam");
+		simulation = new Simulation(Settings.simulationSeed, "gaia-shellder-nesciunt");
 
 		try {
 			if (!(args.length > 0 && args[0].equals("noui"))) {

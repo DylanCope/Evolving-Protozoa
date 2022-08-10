@@ -222,11 +222,12 @@ public class UI implements ChangeListener {
 
 		int r = nn.getGraphicsNodeSpacing() / 8;
 		for (Neuron neuron : nn.getNeurons()) {
-			if (!neuron.getType().equals(Neuron.Type.SENSOR)) {
+			if (!neuron.getType().equals(Neuron.Type.SENSOR) && neuron.isConnectedToOutput()) {
 				Stroke s = g.getStroke();
 
 				for (int i = 0; i < neuron.getInputs().length; i++) {
 					Neuron inputNeuron = neuron.getInputs()[i];
+
 					float weight = inputNeuron.getLastState() * neuron.getWeights()[i];
 					if (Math.abs(weight) <= 1e-4)
 						continue;
@@ -268,6 +269,9 @@ public class UI implements ChangeListener {
 		}
 
 		for (Neuron neuron : nn.getNeurons()) {
+			if (!neuron.isConnectedToOutput())
+				continue;
+
 			Color colour;
 			double state = neuron.getLastState();
 			if (state > 0) {
@@ -322,14 +326,14 @@ public class UI implements ChangeListener {
 											 int boxYStart,
 											 int boxWidth,
 											 int boxHeight) {
-
 		Neuron[] neurons = nn.getNeurons();
-		int networkDepth = nn.getDepth();
+		int networkDepth = nn.calculateDepth();
 
 		int[] depthWidthValues = new int[networkDepth + 1];
 		Arrays.fill(depthWidthValues, 0);
 		for (Neuron n : neurons)
-			depthWidthValues[n.getDepth()]++;
+			if (n.isConnectedToOutput())
+				depthWidthValues[n.getDepth()]++;
 
 		int maxWidth = 0;
 		for (int width : depthWidthValues)
@@ -344,7 +348,7 @@ public class UI implements ChangeListener {
 
 			int i = 0;
 			for (Neuron n : neurons) {
-				if (n.getDepth() == depth) {
+				if (n.getDepth() == depth && n.isConnectedToOutput()) {
 					int y = (int) (boxYStart + nodeSpacing / 2f + boxHeight / 2f - (nNodes / 2f - i) * nodeSpacing);
 					n.setGraphicsPosition(x, y);
 					i++;

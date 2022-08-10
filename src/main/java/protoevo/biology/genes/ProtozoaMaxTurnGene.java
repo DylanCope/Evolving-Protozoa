@@ -16,5 +16,10 @@ public class ProtozoaMaxTurnGene extends BoundedFloatGene implements Serializabl
     public <G extends Gene<Float>> G createNew(Float value) {
         return (G) new ProtozoaMaxTurnGene(value);
     }
+
+    @Override
+    public String getTraitName() {
+        return "Max Turn";
+    }
 }
 

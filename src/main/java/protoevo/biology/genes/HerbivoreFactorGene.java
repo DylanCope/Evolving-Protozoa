@@ -17,5 +17,10 @@ public class HerbivoreFactorGene extends BoundedFloatGene implements Serializabl
     public <G extends Gene<Float>> G createNew(Float value) {
         return (G) new HerbivoreFactorGene(value);
     }
+
+    @Override
+    public String getTraitName() {
+        return "Herbivore Factor";
+    }
 }
 

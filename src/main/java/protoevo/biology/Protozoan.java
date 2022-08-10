@@ -1,7 +1,6 @@
 package protoevo.biology;
 
 import protoevo.biology.genes.CAMProductionGene;
-import protoevo.biology.genes.GeneticFloatTrait;
 import protoevo.biology.genes.ProtozoaGenome;
 import protoevo.biology.genes.RetinalProductionGene;
 import protoevo.core.*;
@@ -13,7 +12,7 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 
-public class Protozoa extends Cell
+public class Protozoan extends Cell
 {
 
 	private static final long serialVersionUID = 2314292760446370751L;
@@ -22,7 +21,7 @@ public class Protozoa extends Cell
 	private final ProtozoaGenome genome;
 
 	private ProtozoaGenome crossOverGenome;
-	private Protozoa mate;
+	private Protozoan mate;
 	private float timeMating = 0;
 
 	private Retina retina;
@@ -32,9 +31,6 @@ public class Protozoa extends Cell
 	private final float attackFactor = 10f;
 	private float deathRate = 0;
 	private final float herbivoreFactor;
-	@GeneticFloatTrait(
-			min = Settings.minProtozoanSplitRadius,
-			max = Settings.maxProtozoanSplitRadius)
 	private final float splitRadius;
 
 	private final Vector2 dir = new Vector2(0, 0);
@@ -71,7 +67,7 @@ public class Protozoa extends Cell
 	private final Spike[] spikes;
 	public boolean wasJustDamaged = false;
 
-	public Protozoa(ProtozoaGenome genome, Tank tank) throws MiscarriageException
+	public Protozoan(ProtozoaGenome genome, Tank tank) throws MiscarriageException
 	{
 		super(tank);
 
@@ -116,7 +112,7 @@ public class Protozoa extends Cell
 
 	}
 
-	public Protozoa(Tank tank) throws MiscarriageException {
+	public Protozoan(Tank tank) throws MiscarriageException {
 		this(new ProtozoaGenome(), tank);
 	}
 
@@ -188,7 +184,7 @@ public class Protozoa extends Cell
 		setHealth(getHealth() - damage);
 	}
 	
-	public void attack(Protozoa p, Spike spike, float delta)
+	public void attack(Protozoan p, Spike spike, float delta)
 	{
 		float myAttack = (float) (
 				2*getHealth() +
@@ -225,9 +221,9 @@ public class Protozoa extends Cell
 		return getRadius() > splitRadius && getHealth() > Settings.minHealthToSplit;
 	}
 
-	private Protozoa createSplitChild(float r) throws MiscarriageException {
+	private Protozoan createSplitChild(float r) throws MiscarriageException {
 		float stuntingFactor = r / getRadius();
-		Protozoa child = genome.createChild(getTank(), crossOverGenome);
+		Protozoan child = genome.createChild(getTank(), crossOverGenome);
 		child.setRadius(stuntingFactor * child.getRadius());
 		return child;
 	}
@@ -256,14 +252,14 @@ public class Protozoa extends Cell
 			return;
 
 		if (shouldSplit()) {
-			super.burst(Protozoa.class, this::createSplitChild);
+			super.burst(Protozoan.class, this::createSplitChild);
 			return;
 		}
 
 		float r = getRadius() + other.getRadius();
 
-		if (other instanceof Protozoa) {
-			Protozoa p = (Protozoa) other;
+		if (other instanceof Protozoan) {
+			Protozoan p = (Protozoan) other;
 			for (Spike spike : spikes) {
 				float spikeLen = getSpikeLength(spike);
 				if (d < r + spikeLen && spikeInContact(spike, spikeLen, p))
@@ -273,9 +269,9 @@ public class Protozoa extends Cell
 
 		if (0.95 * d < r) {
 
-			if (other instanceof Protozoa)
+			if (other instanceof Protozoan)
 			{
-				Protozoa p = (Protozoa) other;
+				Protozoan p = (Protozoan) other;
 
 				if (brain.wantToMateWith(p) && p.brain.wantToMateWith(this)) {
 					if (p != mate) {
@@ -450,7 +446,8 @@ public class Protozoa extends Cell
 		return crossOverGenome != null;
 	}
 
-	public Protozoa getMate() {
+	public Protozoan getMate() {
 		return mate;
 	}
+
 }

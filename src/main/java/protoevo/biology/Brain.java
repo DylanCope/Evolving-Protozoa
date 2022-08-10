@@ -7,10 +7,10 @@ import protoevo.core.Simulation;
 
 public interface Brain extends Serializable
 {
-	void tick(Protozoa p);
-	float turn(Protozoa p);
-	float speed(Protozoa p);
-	boolean wantToMateWith(Protozoa p);
+	void tick(Protozoan p);
+	float turn(Protozoan p);
+	float speed(Protozoan p);
+	boolean wantToMateWith(Protozoan p);
 	float energyConsumption();
 	
 	Brain RANDOM = new Brain()
@@ -18,10 +18,10 @@ public interface Brain extends Serializable
 		private static final long serialVersionUID = 1648484737904226314L;
 
 		@Override
-		public void tick(Protozoa p) {}
+		public void tick(Protozoan p) {}
 
 		@Override
-		public float turn(Protozoa p)
+		public float turn(Protozoan p)
 		{
 			float x = (float) (2* Simulation.RANDOM.nextDouble() - 1);
 			float t = (float) Math.toRadians(35);
@@ -29,12 +29,12 @@ public interface Brain extends Serializable
 		}
 
 		@Override
-		public float speed(Protozoa p) {
+		public float speed(Protozoan p) {
 			return (float) (Simulation.RANDOM.nextDouble() * Settings.maxProtozoaSpeed);
 		}
 
 		@Override
-		public boolean wantToMateWith(Protozoa p) {
+		public boolean wantToMateWith(Protozoan p) {
 			return false;
 		}
 
@@ -47,20 +47,20 @@ public interface Brain extends Serializable
 
 	Brain EMPTY = new Brain() {
 		@Override
-		public void tick(Protozoa p) {}
+		public void tick(Protozoan p) {}
 
 		@Override
-		public float turn(Protozoa p) {
+		public float turn(Protozoan p) {
 			return 0;
 		}
 
 		@Override
-		public float speed(Protozoa p) {
+		public float speed(Protozoan p) {
 			return 0;
 		}
 
 		@Override
-		public boolean wantToMateWith(Protozoa p) {
+		public boolean wantToMateWith(Protozoan p) {
 			return false;
 		}
 

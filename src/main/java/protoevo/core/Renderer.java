@@ -69,7 +69,7 @@ public class Renderer extends Canvas
 		lastFPSTime = Utils.getTimeSeconds();
 	}
 	
-	public void retina(Graphics2D g, Protozoa p)
+	public void retina(Graphics2D g, Protozoan p)
 	{
 		Vector2 pos = toRenderSpace(p.getPos());
 		float r = toRenderSpace(p.getRadius());
@@ -146,7 +146,7 @@ public class Renderer extends Canvas
 		}
 	}
 	
-	public void protozoa(Graphics2D g, Protozoa p)
+	public void protozoa(Graphics2D g, Protozoan p)
 	{
 		Vector2 pos = toRenderSpace(p.getPos());
 		float r = toRenderSpace(p.getRadius());
@@ -159,7 +159,7 @@ public class Renderer extends Canvas
 			drawOutlinedCircle(g, pos, r, p.getColor(), Color.RED);
 		}
 
-		for (Protozoa.Spike spike : p.getSpikes()) {
+		for (Protozoan.Spike spike : p.getSpikes()) {
 			if (r > 0.001 * window.getHeight()) {
 				Stroke s = g.getStroke();
 				g.setColor(p.getColor().darker().darker());
@@ -288,8 +288,8 @@ public class Renderer extends Canvas
 	}
 
 	public void renderEntity(Graphics2D g, Cell e) {
-		if (e instanceof Protozoa)
-			protozoa(g, (Protozoa) e);
+		if (e instanceof Protozoan)
+			protozoa(g, (Protozoan) e);
 		else if (e instanceof EdibleCell)
 			pellet(g, (EdibleCell) e);
 	}
@@ -374,8 +374,8 @@ public class Renderer extends Canvas
 					}
 			);
 
-			if (track instanceof Protozoa) {
-				Protozoa p = (Protozoa) track;
+			if (track instanceof Protozoan) {
+				Protozoan p = (Protozoan) track;
 				drawCollisionBounds(g, track, p.getInteractRange(), Color.WHITE.darker());
 
 				Iterator<Cell> interactCells = chunkManager.broadEntityDetection(
@@ -390,7 +390,7 @@ public class Renderer extends Canvas
 					drawCollisionBounds(g, cell, 1.1f * cell.getRadius(), Color.WHITE.darker());
 				}
 
-				for (Protozoa.ContactSensor sensor : p.getContactSensors()) {
+				for (Protozoan.ContactSensor sensor : p.getContactSensors()) {
 					Vector2 sensorPos = p.getSensorPosition(sensor);
 					fillCircle(g, toRenderSpace(sensorPos), 2, Color.WHITE.darker());
 				}

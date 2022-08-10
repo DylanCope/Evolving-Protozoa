@@ -15,6 +15,11 @@ public class ProtozoaSplitRadiusGene extends BoundedFloatGene implements Seriali
     }
 
     @Override
+    public String getTraitName() {
+        return "Split Radius";
+    }
+
+    @Override
     public BoundedFloatGene createNew(Float value) {
         return new ProtozoaSplitRadiusGene(value);
     }

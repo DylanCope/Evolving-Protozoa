@@ -52,4 +52,20 @@ public class CAMProductionGene extends Gene<Map<CellAdhesion.CellAdhesionMolecul
     public Map<CellAdhesion.CellAdhesionMolecule, Float> getNewValue() {
         return new HashMap<>();
     }
+
+    @Override
+    public String getTraitName() {
+        return "CAM Production";
+    }
+
+    @Override
+    public String valueString() {
+        Map<CellAdhesion.CellAdhesionMolecule, Float> map = getValue();
+        StringBuilder str = new StringBuilder();
+        for (CellAdhesion.CellAdhesionMolecule cam : map.keySet())
+            str.append(cam.toString()).append(";")
+                    .append(map.get(cam).toString()).append(";")
+                    .append(cam.getJunctionType().toString().charAt(0));
+        return str.toString();
+    }
 }

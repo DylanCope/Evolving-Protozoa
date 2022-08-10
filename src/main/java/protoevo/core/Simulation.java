@@ -2,7 +2,7 @@ package protoevo.core;
 
 import protoevo.biology.MeatCell;
 import protoevo.biology.PlantCell;
-import protoevo.biology.Protozoa;
+import protoevo.biology.Protozoan;
 import com.github.javafaker.Faker;
 import protoevo.env.Tank;
 import protoevo.utils.FileIO;
@@ -71,7 +71,7 @@ public class Simulation
 	}
 
 	private void loadSettings() {
-		tank.cellCapacities.put(Protozoa.class, Settings.maxProtozoa);
+		tank.cellCapacities.put(Protozoan.class, Settings.maxProtozoa);
 		tank.cellCapacities.put(PlantCell.class, Settings.maxPlants);
 		tank.cellCapacities.put(MeatCell.class, Settings.maxMeat);
 	}
@@ -111,7 +111,6 @@ public class Simulation
 		tank = new Tank();
 		loadSettings();
 		tank.setGenomeFile(genomeFile);
-		makeHistorySnapshot();
 	}
 
 	public void setupTank() {
@@ -149,6 +148,7 @@ public class Simulation
 
 	public void simulate() {
 		setupTank();
+		makeHistorySnapshot();
 		while (simulate) {
 			if (pause)
 				continue;
@@ -173,7 +173,7 @@ public class Simulation
 	}
 
 	public void printStats() {
-		tank.getStats().forEach(
+		tank.getStats(true).forEach(
 			(k, v) -> System.out.printf("%s: %.5f\n", k, v)
 		);
 	}
@@ -212,10 +212,10 @@ public class Simulation
 	}
 
 	public void makeHistorySnapshot() {
-		Map<String, Float> stats = tank.getStats();
+		Map<String, Float> stats = tank.getStats(true);
 
 		if (statsNames == null) {
-			statsNames = new ArrayList<>(tank.getStats().keySet());
+			statsNames = new ArrayList<>(tank.getStats(true).keySet());
 			String statsCsvHeader = String.join(",", statsNames);
 			FileIO.appendLine(historyFile, statsCsvHeader);
 		}

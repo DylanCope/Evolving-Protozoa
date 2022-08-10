@@ -58,6 +58,8 @@ public abstract class Gene<T> implements Serializable {
 
     public abstract T getNewValue();
 
+    public abstract String getTraitName();
+
     public T getValue() {
         return value;
     }
@@ -74,5 +76,14 @@ public abstract class Gene<T> implements Serializable {
         Gene<T> newGene = this.createNew(getValue(), numMutations + 1);
         newGene.disabled = !disabled;
         return newGene;
+    }
+
+    public String valueString() {
+        return value.toString();
+    }
+
+    @Override
+    public String toString() {
+        return valueString() + ":" + numMutations + ":" + (disabled ? "0" : "1");
     }
 }

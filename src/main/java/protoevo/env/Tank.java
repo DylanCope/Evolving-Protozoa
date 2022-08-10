@@ -4,9 +4,10 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import protoevo.biology.*;
-import protoevo.core.Application;
+import protoevo.biology.genes.Gene;
 import protoevo.core.ChunkManager;
 import protoevo.core.Settings;
 import protoevo.core.Simulation;
@@ -71,8 +72,29 @@ public class Tank implements Iterable<Cell>, Serializable
 				initialisePopulation(Arrays.copyOfRange(clusterCentres, 0, Settings.numPopulationClusters));
 			else
 				initialisePopulation();
+			flushEntitiesToAdd();
+
+			if (Settings.writeGenomes && genomeFile != null)
+				writeGenomeHeaders();
+
 			hasInitialised = true;
 		}
+	}
+
+	public void writeGenomeHeaders() {
+		Protozoan protozoan = chunkManager.getAllCells()
+				.stream()
+				.filter(cell -> cell instanceof Protozoan)
+				.map(cell -> (Protozoan) cell)
+				.findAny()
+				.orElseThrow(() -> new RuntimeException("No initial population present"));
+
+		StringBuilder headerStr = new StringBuilder();
+		headerStr.append("Generation,Time Elapsed,Parent 1 ID, Parent 2 ID, ID,");
+		for (Gene<?> gene : protozoan.getGenome().getGenes())
+			headerStr.append(gene.getTraitName()).append(",");
+
+		FileIO.appendLine(genomeFile, headerStr.toString());
 	}
 
 	public boolean hasBeenInitialised() {
@@ -92,7 +114,7 @@ public class Tank implements Iterable<Cell>, Serializable
 
 		for (int i = 0; i < Settings.numInitialProtozoa; i++) {
 			try {
-				addRandom(new Protozoa(this), findProtozoaPosition);
+				addRandom(new Protozoan(this), findProtozoaPosition);
 			} catch (MiscarriageException ignored) {}
 		}
 	}
@@ -142,13 +164,26 @@ public class Tank implements Iterable<Cell>, Serializable
 		handleTankEdge(e);
 	}
 
-	public void update(float delta) 
-	{
-		elapsedTime += delta;
-
+	private void flushEntitiesToAdd() {
 		entitiesToAdd.forEach(chunkManager::add);
 		entitiesToAdd.clear();
 		chunkManager.update();
+	}
+
+	private void flushWrites() {
+		List<String> genomeWritesHandled = new ArrayList<>();
+		for (String line : genomesToWrite) {
+			FileIO.appendLine(genomeFile, line);
+			genomeWritesHandled.add(line);
+		}
+		genomesToWrite.removeAll(genomeWritesHandled);
+	}
+
+	public void update(float delta) 
+	{
+		elapsedTime += delta;
+		flushEntitiesToAdd();
+		flushWrites();
 
 		Collection<Cell> cells = chunkManager.getAllCells();
 
@@ -175,21 +210,13 @@ public class Tank implements Iterable<Cell>, Serializable
 		e.handleDeath();
 	}
 
-	private void handleNewProtozoa(Protozoa p) {
+	private void handleNewProtozoa(Protozoan p) {
 		protozoaBorn++;
 		generation = Math.max(generation, p.getGeneration());
 
 		if (genomeFile != null && Settings.writeGenomes) {
-			String genomeStr = p.getGenome().toString();
-			String genomeLine = "generation=" + p.getGeneration() + "," + genomeStr;
+			String genomeLine = p.getGeneration() + "," + elapsedTime + "," + p.getGenome().toString();
 			genomesToWrite.add(genomeLine);
-			List<String> genomeWritesHandled = new ArrayList<>();
-			for (String line : genomesToWrite) {
-				FileIO.appendLine(genomeFile, line);
-				genomeWritesHandled.add(line);
-			}
-
-			genomesToWrite.removeAll(genomeWritesHandled);
 		}
 	}
 
@@ -201,15 +228,15 @@ public class Tank implements Iterable<Cell>, Serializable
 		totalCellsAdded++;
 		entitiesToAdd.add(e);
 
-		if (e instanceof Protozoa)
-			handleNewProtozoa((Protozoa) e);
+		if (e instanceof Protozoan)
+			handleNewProtozoa((Protozoan) e);
 	}
 
 	public Collection<Cell> getEntities() {
 		return chunkManager.getAllCells();
 	}
 
-	public Map<String, Float> getStats() {
+	public Map<String, Float> getStats(boolean includeProtozoaStats) {
 		Map<String, Float> stats = new TreeMap<>();
 		stats.put("Protozoa", (float) numberOfProtozoa());
 		stats.put("Plants", (float) cellCounts.getOrDefault(PlantCell.class, 0));
@@ -219,24 +246,47 @@ public class Tank implements Iterable<Cell>, Serializable
 		stats.put("Protozoa Born", (float) protozoaBorn);
 		stats.put("Total Entities Born", (float) totalCellsAdded);
 		stats.put("Crossover Events", (float) crossoverEvents);
+		if (includeProtozoaStats)
+			stats.putAll(getProtozoaStats());
+		return stats;
+	}
 
-//		Collection<Cell> entities = chunkManager.getAllCells();
-//		float n = (float) numberOfProtozoa();
-//		for (Cell e : entities) {
-//			if (e instanceof Protozoa) {
-//				for (Map.Entry<String, Float> stat : e.getStats().entrySet()) {
-//					String key = "Mean " + stat.getKey();
-//					float currentValue = stats.getOrDefault(key, 0.0f);
-//					stats.put(key, stat.getValue() / n + currentValue);
-//				}
-//			}
-//		}
+	public Map<String, Float> getStats() {
+		return getStats(false);
+	}
 
+	public Map<String, Float> getProtozoaStats() {
+		Map<String, Float> stats = new TreeMap<>();
+		Collection<Protozoan> protozoa = chunkManager.getAllCells()
+				.stream()
+				.filter(cell -> cell instanceof Protozoan)
+				.map(cell -> (Protozoan) cell)
+				.collect(Collectors.toSet());
+
+		for (Cell e : protozoa) {
+			for (Map.Entry<String, Float> stat : e.getStats().entrySet()) {
+				String key = "Sum " + stat.getKey();
+				float currentValue = stats.getOrDefault(key, 0f);
+				stats.put(key, stat.getValue() + currentValue);
+			}
+		}
+
+		int numProtozoa = protozoa.size();
+		for (Cell e : protozoa) {
+			for (Map.Entry<String, Float> stat : e.getStats().entrySet()) {
+				float sumValue = stats.getOrDefault("Sum " + stat.getKey(), 0f);
+				float mean = sumValue / numProtozoa;
+				stats.put("Mean " + stat.getKey(), mean);
+				float currVar = stats.getOrDefault("Var " + stat.getKey(), 0f);
+				float deltaVar = (float) Math.pow(stat.getValue() - mean, 2) / numProtozoa;
+				stats.put("Var " + stat.getKey(), currVar + deltaVar);
+			}
+		}
 		return stats;
 	}
 	
 	public int numberOfProtozoa() {
-		return cellCounts.getOrDefault(Protozoa.class, 0);
+		return cellCounts.getOrDefault(Protozoan.class, 0);
 	}
 	
 	public int numberOfPellets() {

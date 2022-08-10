@@ -18,4 +18,9 @@ public class ProtozoaGrowthRateGene extends BoundedFloatGene implements Serializ
     public <G extends Gene<Float>> G createNew(Float value) {
         return (G) new ProtozoaGrowthRateGene(value);
     }
+
+    @Override
+    public String getTraitName() {
+        return "Growth Rate";
+    }
 }

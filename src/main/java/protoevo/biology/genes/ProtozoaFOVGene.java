@@ -13,6 +13,11 @@ public class ProtozoaFOVGene extends BoundedFloatGene implements Serializable {
     }
 
     @Override
+    public String getTraitName() {
+        return "Retina FoV";
+    }
+
+    @Override
     public BoundedFloatGene createNew(Float value) {
         return new ProtozoaFOVGene(value);
     }

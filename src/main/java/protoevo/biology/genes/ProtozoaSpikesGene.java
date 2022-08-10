@@ -1,29 +1,43 @@
 package protoevo.biology.genes;
 
-import protoevo.biology.Protozoa;
+import protoevo.biology.Protozoan;
 import protoevo.core.Settings;
 import protoevo.core.Simulation;
 
 import java.io.Serializable;
 import java.util.Arrays;
 
-public class ProtozoaSpikesGene extends Gene<Protozoa.Spike[]> implements Serializable {
+public class ProtozoaSpikesGene extends Gene<Protozoan.Spike[]> implements Serializable {
 
     public ProtozoaSpikesGene() {
         super();
     }
 
-    public ProtozoaSpikesGene(Protozoa.Spike[] value) {
+    public ProtozoaSpikesGene(Protozoan.Spike[] value) {
         super(value);
     }
 
     @Override
-    public <G extends Gene<Protozoa.Spike[]>> G createNew(Protozoa.Spike[] value) {
+    public <G extends Gene<Protozoan.Spike[]>> G createNew(Protozoan.Spike[] value) {
         return (G) new ProtozoaSpikesGene(value);
     }
 
-    public Protozoa.Spike[] getNewValue() {
-        return new Protozoa.Spike[0];
+    public Protozoan.Spike[] getNewValue() {
+        return new Protozoan.Spike[0];
+    }
+
+    @Override
+    public String getTraitName() {
+        return "Spikes";
+    }
+
+    @Override
+    public String valueString() {
+        Protozoan.Spike[] spikes = getValue();
+        StringBuilder str = new StringBuilder(spikes.length + ";");
+        for (Protozoan.Spike spike : spikes)
+            str.append(spike.currentLength).append(";").append(spike.angle).append(";").append(spike.growthRate);
+        return str.toString();
     }
 
     private float getProtozoaMaxRadius(Gene<?>[] genome) {
@@ -46,11 +60,11 @@ public class ProtozoaSpikesGene extends Gene<Protozoa.Spike[]> implements Serial
         return Settings.maxSpikeGrowth * Simulation.RANDOM.nextFloat();
     }
 
-    private <G extends Gene<Protozoa.Spike[]>> G addSpike(Gene<?>[] genome) {
-        Protozoa.Spike[] spikes = getValue();
-        Protozoa.Spike[] newSpikes = Arrays.copyOf(spikes, spikes.length+1);
+    private <G extends Gene<Protozoan.Spike[]>> G addSpike(Gene<?>[] genome) {
+        Protozoan.Spike[] spikes = getValue();
+        Protozoan.Spike[] newSpikes = Arrays.copyOf(spikes, spikes.length+1);
 
-        Protozoa.Spike spike = new Protozoa.Spike();
+        Protozoan.Spike spike = new Protozoan.Spike();
         float radius = getProtozoaMaxRadius(genome);
         spike.length = randomSpikeLength(radius);
         spike.angle = randomAngle();
@@ -60,10 +74,10 @@ public class ProtozoaSpikesGene extends Gene<Protozoa.Spike[]> implements Serial
         return createNew(newSpikes, getNumMutations() + 1);
     }
 
-    private <G extends Gene<Protozoa.Spike[]>> G removeSpike() {
-        Protozoa.Spike[] spikes = getValue();
+    private <G extends Gene<Protozoan.Spike[]>> G removeSpike() {
+        Protozoan.Spike[] spikes = getValue();
         int idxRemove = Simulation.RANDOM.nextInt(spikes.length);
-        Protozoa.Spike[] newSpikes = new Protozoa.Spike[spikes.length - 1];
+        Protozoan.Spike[] newSpikes = new Protozoan.Spike[spikes.length - 1];
         int j = 0;
         for (int i = 0; i < spikes.length; i++) {
             if (i == idxRemove)
@@ -75,14 +89,14 @@ public class ProtozoaSpikesGene extends Gene<Protozoa.Spike[]> implements Serial
         return createNew(newSpikes, getNumMutations() + 1);
     }
 
-    private <G extends Gene<Protozoa.Spike[]>> G mutateRandomSpike(Gene<?>[] genome) {
-        Protozoa.Spike[] spikes = getValue();
-        Protozoa.Spike[] newSpikes = Arrays.copyOf(spikes, spikes.length);
+    private <G extends Gene<Protozoan.Spike[]>> G mutateRandomSpike(Gene<?>[] genome) {
+        Protozoan.Spike[] spikes = getValue();
+        Protozoan.Spike[] newSpikes = Arrays.copyOf(spikes, spikes.length);
         int idx = Simulation.RANDOM.nextInt(spikes.length);
         int nSpikeProperties = 3;
         float p = Simulation.RANDOM.nextFloat();
 
-        Protozoa.Spike newSpike = new Protozoa.Spike();
+        Protozoan.Spike newSpike = new Protozoan.Spike();
         if (p < 1f / nSpikeProperties) {
             newSpike.angle = randomAngle();
         } else if (p < 2f / nSpikeProperties) {
@@ -97,10 +111,10 @@ public class ProtozoaSpikesGene extends Gene<Protozoa.Spike[]> implements Serial
     }
 
     @Override
-    public <G extends Gene<Protozoa.Spike[]>> G mutate(Gene<?>[] genome) {
+    public <G extends Gene<Protozoan.Spike[]>> G mutate(Gene<?>[] genome) {
         float p = Simulation.RANDOM.nextFloat();
 
-        Protozoa.Spike[] spikes = getValue();
+        Protozoan.Spike[] spikes = getValue();
         if (p > 3f / 4f || spikes.length == 0)
             return addSpike(genome);
         else if (p > 2f / 4f)
@@ -111,12 +125,12 @@ public class ProtozoaSpikesGene extends Gene<Protozoa.Spike[]> implements Serial
             return mutateRandomSpike(genome);
     }
 
-    private <G extends Gene<Protozoa.Spike[]>> G rotateSpikes() {
-        Protozoa.Spike[] spikes = getValue();
-        Protozoa.Spike[] newSpikes = Arrays.copyOf(spikes, spikes.length);
+    private <G extends Gene<Protozoan.Spike[]>> G rotateSpikes() {
+        Protozoan.Spike[] spikes = getValue();
+        Protozoan.Spike[] newSpikes = Arrays.copyOf(spikes, spikes.length);
         float theta = randomAngle();
         for (int i = 0; i < spikes.length; i++) {
-            Protozoa.Spike newSpike = new Protozoa.Spike();
+            Protozoan.Spike newSpike = new Protozoan.Spike();
             newSpike.angle = spikes[i].angle + theta;
             newSpike.length = spikes[i].length;
             newSpike.growthRate = spikes[i].growthRate;
@@ -132,7 +146,7 @@ public class ProtozoaSpikesGene extends Gene<Protozoa.Spike[]> implements Serial
     }
 
     @Override
-    public Protozoa.Spike[] disabledValue() {
-        return new Protozoa.Spike[0];
+    public Protozoan.Spike[] disabledValue() {
+        return new Protozoan.Spike[0];
     }
 }

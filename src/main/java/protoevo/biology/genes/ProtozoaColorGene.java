@@ -58,4 +58,15 @@ public class ProtozoaColorGene extends Gene<Color> implements Serializable {
             return new Color(color.getRed(), color.getGreen(), v);
         }
     }
+
+    @Override
+    public String valueString() {
+        Color value = getValue();
+        return value.getRed() + ";" + value.getGreen() + ";" + value.getBlue();
+    }
+
+    @Override
+    public String getTraitName() {
+        return "Colour";
+    }
 }

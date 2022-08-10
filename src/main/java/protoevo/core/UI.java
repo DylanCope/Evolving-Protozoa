@@ -11,7 +11,7 @@ import protoevo.utils.TextObject;
 import protoevo.utils.Vector2;
 import protoevo.utils.Window;
 import protoevo.utils.TextStyle;
-import protoevo.biology.Protozoa;
+import protoevo.biology.Protozoan;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -20,7 +20,7 @@ import javax.swing.event.ChangeListener;
 public class UI implements ChangeListener {
 	private final Window window;
 	private final Simulation simulation;
-	private final Renderer renderer;
+	private final protoevo.core.Renderer renderer;
 	private final TextObject title, creatingTank;
 	private final ArrayList<TextObject> info;
 	private final ArrayList<TextObject> debugInfo;
@@ -152,8 +152,8 @@ public class UI implements ChangeListener {
 
 			renderStats(g, lineNumber++, tracked.getStats());
 
-			if (tracked instanceof Protozoa && ((Protozoa) tracked).getBrain() instanceof NNBrain) {
-				NNBrain brain = (NNBrain) ((Protozoa) tracked).getBrain();
+			if (tracked instanceof Protozoan && ((Protozoan) tracked).getBrain() instanceof NNBrain) {
+				NNBrain brain = (NNBrain) ((Protozoan) tracked).getBrain();
 				renderBrainNetwork(brain.network, g);
 			}
 		}

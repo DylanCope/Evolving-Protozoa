@@ -20,6 +20,11 @@ public class RetinalProductionGene extends BoundedFloatGene {
     }
 
     @Override
+    public String getTraitName() {
+        return "Retinal Production";
+    }
+
+    @Override
     public <G extends Gene<Float>> G createNew(Float value) {
         return (G) new RetinalProductionGene(value);
     }

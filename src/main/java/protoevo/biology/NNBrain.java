@@ -25,7 +25,7 @@ public class NNBrain implements Brain {
     }
 
     @Override
-    public void tick(Protozoa p)
+    public void tick(Protozoan p)
     {
         int i = 0;
         // ProtozoaGenome.nonVisualSensorSize
@@ -34,7 +34,7 @@ public class NNBrain implements Brain {
         inputs[i++] = 2 * p.getRadius() / p.getGenome().getSplitRadius() - 1;
         inputs[i++] = 2 * p.getConstructionMassAvailable() / p.getConstructionMassCap() - 1;
 
-        for (Protozoa.ContactSensor sensor : p.getContactSensors())
+        for (Protozoan.ContactSensor sensor : p.getContactSensors())
             inputs[i++] = sensor.inContact() ? 1f : 0f;
 
         if (Settings.enableChemicalField) {
@@ -72,14 +72,14 @@ public class NNBrain implements Brain {
     }
 
     @Override
-    public float turn(Protozoa p)
+    public float turn(Protozoan p)
     {
         float turn = outputs[0];
         return turn * maxTurn;
     }
 
     @Override
-    public float speed(Protozoa p)
+    public float speed(Protozoan p)
     {
         return Math.min(
                 Settings.maxProtozoaSpeed * outputs[1],
@@ -88,7 +88,7 @@ public class NNBrain implements Brain {
     }
 
     @Override
-    public boolean wantToMateWith(Protozoa p) {
+    public boolean wantToMateWith(Protozoan p) {
         return outputs[2] > 0;
     }
 

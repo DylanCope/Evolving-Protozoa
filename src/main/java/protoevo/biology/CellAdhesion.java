@@ -1,6 +1,5 @@
 package protoevo.biology;
 
-import org.checkerframework.checker.units.qual.A;
 import protoevo.core.Settings;
 import protoevo.core.Simulation;
 
@@ -147,6 +146,11 @@ public class CellAdhesion implements Serializable  {
             public int getChemicalBindingSignature() {
                 return signature;
             }
+
+            @Override
+            public String toString() {
+                return signature + "";
+            }
         };
     }
 
@@ -169,6 +173,11 @@ public class CellAdhesion implements Serializable  {
             @Override
             public int getChemicalBindingSignature() {
                 return signature;
+            }
+
+            @Override
+            public String toString() {
+                return signature + "";
             }
         };
     }

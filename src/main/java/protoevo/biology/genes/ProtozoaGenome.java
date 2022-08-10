@@ -22,9 +22,13 @@ public class ProtozoaGenome implements Serializable
     public static final int actionSpaceSize = 3;
     public static final int nonVisualSensorSize = 3;
 
+    private int parent1Hash = 0;
+    private int parent2Hash = 0;
+
     public ProtozoaGenome(ProtozoaGenome parentGenome) {
         mutationChance = parentGenome.mutationChance;
         genes = Arrays.copyOf(parentGenome.genes, parentGenome.genes.length);
+        parent1Hash = parentGenome.hashCode();
     }
 
     public ProtozoaGenome()
@@ -48,6 +52,10 @@ public class ProtozoaGenome implements Serializable
         };
     }
 
+    public Gene<?>[] getGenes() {
+        return genes;
+    }
+
     public static int expectedNetworkInputSize(int retinaSize) {
         int chemicalGradientInputs = Settings.enableChemicalField ? 3 : 0;
         return 3 * retinaSize
@@ -68,16 +76,23 @@ public class ProtozoaGenome implements Serializable
 
     public ProtozoaGenome mutate() {
         Gene<?>[] newGenes = Arrays.copyOf(genes, genes.length);
+        int numMutations = 0;
         for (int i = 0; i < genes.length; i++) {
             if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
                 newGenes[i] = genes[i].mutate(newGenes);
 //            } if (genes[i].canDisable() && Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
 //                newGenes[i] = genes[i].toggle();
+                numMutations += 1;
             } else {
                 newGenes[i] = genes[i];
             }
         }
-        return new ProtozoaGenome(newGenes);
+        if (numMutations > 0) {
+            ProtozoaGenome mutatedGenome = new ProtozoaGenome(newGenes);
+            mutatedGenome.parent1Hash = parent1Hash;
+            mutatedGenome.parent2Hash = parent2Hash;
+        }
+        return this;
     }
 
     public ProtozoaGenome crossover(ProtozoaGenome other) {
@@ -142,21 +157,23 @@ public class ProtozoaGenome implements Serializable
     }
 
 
-    public Protozoa phenotype(Tank tank) throws MiscarriageException
+    public Protozoan phenotype(Tank tank) throws MiscarriageException
     {
-        return new Protozoa(this, tank);
+        return new Protozoan(this, tank);
     }
 
-    public Protozoa createChild(Tank tank) throws MiscarriageException {
+    public Protozoan createChild(Tank tank) throws MiscarriageException {
         ProtozoaGenome childGenome = new ProtozoaGenome(this);
         return childGenome.mutate().phenotype(tank);
     }
 
-    public Protozoa createChild(Tank tank, ProtozoaGenome otherGenome) throws MiscarriageException {
+    public Protozoan createChild(Tank tank, ProtozoaGenome otherGenome) throws MiscarriageException {
         if (otherGenome == null)
             return createChild(tank);
         tank.registerCrossoverEvent();
         ProtozoaGenome childGenome = crossover(otherGenome);
+        childGenome.parent1Hash = hashCode();
+        childGenome.parent2Hash = otherGenome.hashCode();
         return childGenome.mutate().phenotype(tank);
     }
 
@@ -171,7 +188,7 @@ public class ProtozoaGenome implements Serializable
         return numMutations;
     }
 
-    public Protozoa.Spike[] getSpikes() {
+    public Protozoan.Spike[] getSpikes() {
         return getGeneValue(ProtozoaSpikesGene.class);
     }
 
@@ -181,5 +198,16 @@ public class ProtozoaGenome implements Serializable
 
     public float getHerbivoreFactor() {
         return getGeneValue(HerbivoreFactorGene.class);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder genomeStr = new StringBuilder();
+        genomeStr.append(parent1Hash).append(",");
+        genomeStr.append(parent2Hash).append(",");
+        genomeStr.append(hashCode()).append(",");
+        for (Gene<?> gene : genes)
+            genomeStr.append(gene.toString()).append(",");
+        return genomeStr.toString();
     }
 }

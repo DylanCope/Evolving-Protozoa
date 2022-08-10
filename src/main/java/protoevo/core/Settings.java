@@ -8,7 +8,7 @@ public final class Settings {
     public static final float maxParticleSpeed = 1e-4f;
     public static final float timeBetweenSaves = 500.0f;
     public static final float historySnapshotTime = 2.0f;
-    public static final boolean writeGenomes = false;
+    public static final boolean writeGenomes = true;
     public static final boolean finishOnProtozoaExtinction = true;
     public static final int physicsSubSteps = 3;
     public static final int numPossibleCAMs = 64;

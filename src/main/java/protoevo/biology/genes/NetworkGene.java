@@ -1,6 +1,7 @@
 package protoevo.biology.genes;
 
 import protoevo.neat.NetworkGenome;
+import protoevo.neat.NeuralNetwork;
 
 import java.io.Serializable;
 
@@ -33,6 +34,11 @@ public class NetworkGene extends Gene<NetworkGenome> implements Serializable {
         return networkGenome;
     }
 
+    @Override
+    public String getTraitName() {
+        return "Control Network";
+    }
+
 //    @Override
 //    public Gene<?> crossover(Gene<?> other) {
 //        if (other instanceof  NetworkGene) {
@@ -46,4 +52,10 @@ public class NetworkGene extends Gene<NetworkGenome> implements Serializable {
     public int getNumMutations() {
         return getValue().getNumMutations();
     }
+
+    @Override
+    public String valueString() {
+        return getValue().hashCode() + "";
+    }
+
 }

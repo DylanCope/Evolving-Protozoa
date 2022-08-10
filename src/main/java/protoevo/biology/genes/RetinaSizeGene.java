@@ -63,4 +63,9 @@ public class RetinaSizeGene extends Gene<Integer> implements Serializable {
     public Integer getNewValue() {
         return Settings.defaultRetinaSize;
     }
+
+    @Override
+    public String getTraitName() {
+        return "Num Retina Cells";
+    }
 }

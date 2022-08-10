@@ -18,4 +18,9 @@ public class ProtozoaRadiusGene extends BoundedFloatGene implements Serializable
     public <G extends Gene<Float>> G createNew(Float value) {
         return (G) new ProtozoaRadiusGene(value);
     }
+
+    @Override
+    public String getTraitName() {
+        return "Radius";
+    }
 }

@@ -90,7 +90,7 @@ public class Tank implements Iterable<Cell>, Serializable
 				.orElseThrow(() -> new RuntimeException("No initial population present"));
 
 		StringBuilder headerStr = new StringBuilder();
-		headerStr.append("Generation,Time Elapsed,Parent 1 ID, Parent 2 ID, ID,");
+		headerStr.append("Generation,Time Elapsed,Parent 1 ID,Parent 2 ID,ID,");
 		for (Gene<?> gene : protozoan.getGenome().getGenes())
 			headerStr.append(gene.getTraitName()).append(",");
 

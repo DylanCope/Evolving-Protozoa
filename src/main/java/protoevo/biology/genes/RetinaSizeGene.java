@@ -1,10 +1,13 @@
 package protoevo.biology.genes;
 
 
+import protoevo.biology.Retina;
 import protoevo.core.Settings;
 import protoevo.neat.NetworkGenome;
 
+import javax.swing.text.html.Option;
 import java.io.Serializable;
+import java.util.Optional;
 
 public class RetinaSizeGene extends Gene<Integer> implements Serializable {
     public static final long serialVersionUID = -4191267363677698742L;
@@ -43,20 +46,24 @@ public class RetinaSizeGene extends Gene<Integer> implements Serializable {
         return 0;
     }
 
-    private void addNetworkSensors(Gene<?>[] genes, int retinaSize) {
+    private Optional<Integer> findNetworkGene(Gene<?>[] genes) {
         for (int i = 0; i < genes.length; i++) {
             Gene<?> gene = genes[i];
-            if (gene instanceof NetworkGene) {
-                NetworkGene networkGene = (NetworkGene) gene;
-                NetworkGenome currentNetworkGenome = ((NetworkGene) gene).getValue();
-                NetworkGenome newNetworkGenome = new NetworkGenome(currentNetworkGenome);
-                while (newNetworkGenome.numberOfSensors() < ProtozoaGenome.expectedNetworkInputSize(retinaSize))
-                    newNetworkGenome.addSensor();
-
-                genes[i] = networkGene.createNew(newNetworkGenome);
-                return;
-            }
+            if (gene instanceof NetworkGene)
+                return Optional.of(i);
         }
+        return Optional.empty();
+    }
+
+    private void addNetworkSensors(Gene<?>[] genes, int newRetinaSize) {
+
+        int i = findNetworkGene(genes).orElseThrow(() -> new RuntimeException("No Network Gene found"));
+        NetworkGene networkGene = (NetworkGene) genes[i];
+        NetworkGenome currentNetworkGenome = networkGene.getValue();
+        NetworkGenome newNetworkGenome = new NetworkGenome(currentNetworkGenome);
+        newNetworkGenome.ensureRetinaSensorsExist(newRetinaSize);
+        genes[i] = networkGene.createNew(newNetworkGenome);
+
     }
 
     @Override

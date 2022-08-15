@@ -333,9 +333,9 @@ public class Protozoan extends Cell
 		Map<String, Float> stats = super.getStats();
 		stats.put("Death Rate", 100 * deathRate);
 		stats.put("Split Radius", Settings.statsDistanceScalar * splitRadius);
-//		stats.put("Max Turning", genome.getMaxTurn());
+		stats.put("Max Turning", genome.getMaxTurn());
 		stats.put("Mutations", (float) genome.getNumMutations());
-//		stats.put("Genetic Size", Settings.statsDistanceScalar * genome.getRadius());
+		stats.put("Genetic Size", Settings.statsDistanceScalar * genome.getRadius());
 		stats.put("Has Mated", crossOverGenome == null ? 0f : 1f);
 		if (spikes.length > 0)
 			stats.put("Num Spikes", (float) spikes.length);

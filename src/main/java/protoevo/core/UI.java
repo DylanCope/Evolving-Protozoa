@@ -319,6 +319,34 @@ public class UI implements ChangeListener {
 					2*r);
 			g.setStroke(s);
 		}
+
+
+		Vector2 mousePos = window.getCurrentMousePosition();
+		int mouseX = (int) mousePos.getX();
+		int mouseY = (int) mousePos.getY();
+		if (boxXStart < mouseX && mouseX < boxXStart + boxWidth &&
+				boxYStart < mouseY && mouseY < boxYStart + boxHeight) {
+			for (Neuron neuron : nn.getNeurons()) {
+				int x = neuron.getGraphicsX();
+				int y = neuron.getGraphicsY();
+				if (neuron.getLabel() != null &&
+						x - 2*r <= mouseX && mouseX <= x + 2*r &&
+						y - 2*r <= mouseY && mouseY <= y + 2*r) {
+					TextObject label = new TextObject(neuron.getLabel(), infoTextSize);
+					int labelX = x - label.getWidth() / 2;
+					int labelY = (int) (y - 1.1 * r - label.getHeight() / 2);
+					label.setPosition(new Vector2(labelX, labelY));
+
+					int pad = (int) (infoTextSize * 0.3);
+					g.setColor(new Color(240, 240, 240, 100));
+					g.fillRoundRect(labelX - pad, labelY - 2*pad - label.getHeight() / 2,
+							label.getWidth() + 2*pad, label.getHeight() + pad,
+							pad, pad);
+					g.setColor(Color.WHITE.darker());
+					label.render(g);
+				}
+			}
+		}
 	}
 
 	private void precomputeGraphicsPositions(NeuralNetwork nn,

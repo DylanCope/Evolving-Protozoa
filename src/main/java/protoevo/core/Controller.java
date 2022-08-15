@@ -117,4 +117,8 @@ public class Controller
 				isPosInChunk(new Vector2(pos.getX() + r, pos.getY() - r), chunk) ||
 				isPosInChunk(new Vector2(pos.getX() + r, pos.getY() + r), chunk);
 	}
+
+    public Vector2 getCurrentMousePosition() {
+		return input.getMousePosition();
+    }
 }

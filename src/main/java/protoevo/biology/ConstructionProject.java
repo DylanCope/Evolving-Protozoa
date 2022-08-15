@@ -8,7 +8,9 @@ public abstract class ConstructionProject implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private float requiredMass, requiredEnergy, timeSpent;
+    private final float requiredMass;
+    private final float requiredEnergy;
+    private float timeSpent;
     private final float timeToComplete;
     private final Map<Food.ComplexMolecule, Float> requiredComplexMolecules;
 
@@ -63,8 +65,8 @@ public abstract class ConstructionProject implements Serializable {
         return Math.max(Math.min(timeSpent / timeToComplete, 1f), 0f);
     }
 
-    public boolean isFinished() {
-        return timeSpent >= timeToComplete;
+    public boolean notFinished() {
+        return timeSpent < timeToComplete;
     }
 
     /**

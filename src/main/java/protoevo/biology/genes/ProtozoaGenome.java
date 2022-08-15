@@ -33,9 +33,23 @@ public class ProtozoaGenome implements Serializable
 
     public ProtozoaGenome()
     {
-        int numInputs = expectedNetworkInputSize(Settings.defaultRetinaSize);
+        NetworkGenome networkGenome = new NetworkGenome();
+        networkGenome.addOutput("Turn Amount");
+        networkGenome.addOutput("Speed");
+        networkGenome.addOutput("Mate Desire");
 
-        NetworkGenome networkGenome = new NetworkGenome(numInputs, actionSpaceSize);
+        networkGenome.addSensor("Bias");
+        networkGenome.addSensor("Health");
+        networkGenome.addSensor("Size");
+        networkGenome.addSensor("Mass Available");
+        for (int i = 0; i < Settings.numContactSensors; i++)
+            networkGenome.addSensor("Contact Sensor " + i);
+        if (Settings.enableChemicalField) {
+            networkGenome.addSensor("Pheromone Gradient X");
+            networkGenome.addSensor("Pheromone Gradient Y");
+            networkGenome.addSensor("Pheromone Amount");
+        }
+
         genes = new Gene<?>[]{
                 new NetworkGene(networkGenome),
                 new ProtozoaColorGene(),
@@ -69,8 +83,7 @@ public class ProtozoaGenome implements Serializable
         NetworkGenome networkGenome = getGeneValue(NetworkGene.class);
         if (networkGenome != null) {
             int retinaSize = getGeneValue(RetinaSizeGene.class);
-            while (networkGenome.numberOfSensors() < expectedNetworkInputSize(retinaSize))
-                networkGenome.addSensor();
+            networkGenome.ensureRetinaSensorsExist(retinaSize);
         }
     }
 
@@ -78,7 +91,7 @@ public class ProtozoaGenome implements Serializable
         Gene<?>[] newGenes = Arrays.copyOf(genes, genes.length);
         int numMutations = 0;
         for (int i = 0; i < genes.length; i++) {
-            if (Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
+            if (Simulation.RANDOM.nextDouble() < mutationChance) {
                 newGenes[i] = genes[i].mutate(newGenes);
 //            } if (genes[i].canDisable() && Simulation.RANDOM.nextDouble() < Settings.globalMutationChance) {
 //                newGenes[i] = genes[i].toggle();
@@ -87,12 +100,10 @@ public class ProtozoaGenome implements Serializable
                 newGenes[i] = genes[i];
             }
         }
-        if (numMutations > 0) {
-            ProtozoaGenome mutatedGenome = new ProtozoaGenome(newGenes);
-            mutatedGenome.parent1Hash = parent1Hash;
-            mutatedGenome.parent2Hash = parent2Hash;
-        }
-        return this;
+        ProtozoaGenome mutatedGenome = new ProtozoaGenome(newGenes);
+        mutatedGenome.parent1Hash = parent1Hash;
+        mutatedGenome.parent2Hash = parent2Hash;
+        return mutatedGenome;
     }
 
     public ProtozoaGenome crossover(ProtozoaGenome other) {

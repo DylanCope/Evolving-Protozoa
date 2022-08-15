@@ -10,17 +10,19 @@ public class NeuronGene implements Comparable<NeuronGene>, Serializable
     private final Neuron.Type type;
     private final Neuron.Activation activation;
 
+    private final String label;
+
     public NeuronGene(int id, Neuron.Type type, Neuron.Activation activation)
+    {
+        this(id, type, activation, null);
+    }
+
+    public NeuronGene(int id, Neuron.Type type, Neuron.Activation activation, String label)
     {
         this.id = id;
         this.type = type;
         this.activation = activation;
-    }
-
-    public NeuronGene(NeuronGene g) {
-        id = g.id;
-        type = g.type;
-        activation = g.activation;
+        this.label = label;
     }
 
     @Override
@@ -42,10 +44,17 @@ public class NeuronGene implements Comparable<NeuronGene>, Serializable
 
     @Override
     public String toString() {
-        return String.format("Neuron: id=%d; type=%s", id, type);
+        String str = String.format("Neuron: id=%d; type=%s", id, type);
+        if (label != null)
+            str += ", label=" + label;
+        return str;
     }
 
     public int getId() { return id; }
     public Neuron.Type getType() { return type; }
     public Neuron.Activation getActivation() { return activation; }
+
+    public String getLabel() {
+        return label;
+    }
 }

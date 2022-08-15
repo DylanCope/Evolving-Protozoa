@@ -41,14 +41,16 @@ public class Neuron implements Comparable<Neuron>, Serializable {
     private int depth = -1;
     private int graphicsX = -1, graphicsY = -1;
     private boolean connectedToOutput = true;
+    private final String label;
 
-    public Neuron(int id, Neuron[] inputs, float[] weights, Type type, Activation activation)
+    public Neuron(int id, Neuron[] inputs, float[] weights, Type type, Activation activation, String label)
     {
         this.id = id;
         this.inputs = inputs;
         this.weights = weights;
         this.type = type;
         this.activation = activation;
+        this.label = label;
 
         if (type.equals(Type.OUTPUT))
             connectedToOutput = true;
@@ -167,4 +169,7 @@ public class Neuron implements Comparable<Neuron>, Serializable {
         return graphicsY;
     }
 
+    public String getLabel() {
+        return label;
+    }
 }

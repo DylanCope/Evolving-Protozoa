@@ -93,4 +93,12 @@ public class Window extends Canvas implements Runnable, ActionListener
 	public JFrame getFrame() {
 		return frame;
 	}
+
+	public Controller getController() {
+		return controller;
+	}
+
+	public Vector2 getCurrentMousePosition() {
+		return controller.getCurrentMousePosition();
+	}
 }

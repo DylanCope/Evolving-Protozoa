@@ -189,13 +189,13 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 	}
 
 	public float getHealth() {
-		if (!constructionProject.isFinished())
+		if (constructionProject.notFinished())
 			return constructionProject.getProgress();
 		return health;
 	}
 
 	public float updateHealth(float delta, float availableRetinal) {
-		if (!constructionProject.isFinished())
+		if (constructionProject.notFinished())
 			return 0;
 
 		float requiredRetinal =
@@ -216,6 +216,10 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 		float x = 1 - wD;
 		float k = (float) (0.5 * Math.log((1 + x) / (1 - x))) / (dMin - Settings.protozoaInteractRange);
 		return (float) (1 + Math.tanh(-k*(Math.sqrt(sqLen) - dMin))) / 2f;
+	}
+
+	public static String retinaCellLabel(int idx) {
+		return "Retina Sensor " + idx;
 	}
 
 	public ConstructionProject getConstructionProject() {

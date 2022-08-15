@@ -73,7 +73,7 @@ public abstract class Cell extends Particle implements Serializable
 
 	public void progressConstructionProjects(float delta) {
 		for (ConstructionProject project : constructionProjects) {
-			if (!project.isFinished() && project.canMakeProgress(
+			if (project.notFinished() && project.canMakeProgress(
 					energyAvailable,
 					constructionMassAvailable,
 					availableComplexMolecules,

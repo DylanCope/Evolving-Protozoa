@@ -1,5 +1,6 @@
 package protoevo.neat;
 
+import protoevo.biology.Retina;
 import protoevo.core.Settings;
 import protoevo.core.Simulation;
 
@@ -21,8 +22,6 @@ public class NetworkGenome implements Serializable
 	private float fitness = 0.0f;
 	private int numMutations = 0, nSensors, nOutputs;
 
-	public NetworkGenome() {}
-
 	public NetworkGenome(NetworkGenome other) {
 		setProperties(other);
 	}
@@ -41,6 +40,10 @@ public class NetworkGenome implements Serializable
 		numMutations = other.numMutations;
 		nSensors = other.nSensors;
 		nOutputs = other.nOutputs;
+	}
+
+	public NetworkGenome() {
+		this(0, 0);
 	}
 
 	public NetworkGenome(int numInputs, int numOutputs)
@@ -91,9 +94,9 @@ public class NetworkGenome implements Serializable
 		nNeuronGenes = nSensors + nOutputs + hiddenGenes.length;
 	}
 
-	public void addSensor() {
+	public void addSensor(String label) {
 		NeuronGene n = new NeuronGene(
-				nNeuronGenes++, Neuron.Type.SENSOR, Neuron.Activation.LINEAR
+				nNeuronGenes++, Neuron.Type.SENSOR, Neuron.Activation.LINEAR, label
 		);
 
 		sensorNeuronGenes = Arrays.copyOf(sensorNeuronGenes, sensorNeuronGenes.length + 1);
@@ -104,6 +107,21 @@ public class NetworkGenome implements Serializable
 		synapseGenes = Arrays.copyOf(synapseGenes, originalLen + outputNeuronGenes.length);
 		for (int i = 0; i < outputNeuronGenes.length; i++)
 			synapseGenes[originalLen + i] = new SynapseGene(n, outputNeuronGenes[i]);
+	}
+
+	public void addOutput(String label) {
+		NeuronGene n = new NeuronGene(
+				nNeuronGenes++, Neuron.Type.OUTPUT, defaultActivation, label
+		);
+
+		outputNeuronGenes = Arrays.copyOf(outputNeuronGenes, outputNeuronGenes.length + 1);
+		outputNeuronGenes[outputNeuronGenes.length - 1] = n;
+		nOutputs++;
+
+		int originalLen = synapseGenes.length;
+		synapseGenes = Arrays.copyOf(synapseGenes, originalLen + sensorNeuronGenes.length);
+		for (int i = 0; i < sensorNeuronGenes.length; i++)
+			synapseGenes[originalLen + i] = new SynapseGene(sensorNeuronGenes[i], n);
 	}
 
 	private void createHiddenBetween(SynapseGene g) {
@@ -257,7 +275,9 @@ public class NetworkGenome implements Serializable
 			Neuron[] inputs = new Neuron[0];
 			float[] weights = new float[0];
 
-			neurons[g.getId()] = new Neuron(g.getId(), inputs, weights, g.getType(), g.getActivation());
+			neurons[g.getId()] = new Neuron(
+					g.getId(), inputs, weights, g.getType(), g.getActivation(), g.getLabel()
+			);
 		}
 
 		int[] inputCounts = new int[neurons.length];
@@ -275,7 +295,9 @@ public class NetworkGenome implements Serializable
 			Neuron[] inputs = new Neuron[inputCounts[g.getId()]];
 			float[] weights = new float[inputCounts[g.getId()]];
 
-			neurons[g.getId()] = new Neuron(g.getId(), inputs, weights, g.getType(), g.getActivation());
+			neurons[g.getId()] = new Neuron(
+					g.getId(), inputs, weights, g.getType(), g.getActivation(), g.getLabel()
+			);
 		}
 
 		Arrays.fill(inputCounts, 0);
@@ -319,5 +341,20 @@ public class NetworkGenome implements Serializable
 
 	public int numberOfSensors() {
 		return nSensors;
+	}
+
+	public boolean hasSensor(String label) {
+		for (NeuronGene gene : sensorNeuronGenes)
+			if (gene.getLabel().equals(label))
+				return true;
+		return false;
+	}
+
+	public void ensureRetinaSensorsExist(int retinaSize) {
+		for (int i = 0; i < retinaSize; i++) {
+			String label = Retina.retinaCellLabel(i);
+			if (!hasSensor(label))
+				addSensor(label);
+		}
 	}
 }

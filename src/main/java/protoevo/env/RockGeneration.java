@@ -11,9 +11,17 @@ import java.util.List;
 public class RockGeneration {
 
     public static void generateRingOfRocks(Tank tank, Vector2 ringCentre, float ringRadius) {
+        generateRingOfRocks(tank, ringCentre, ringRadius, 0f);
+    }
+
+    public static void generateRingOfRocks(Tank tank, Vector2 ringCentre, float ringRadius, float breakProb) {
         float angleDelta = (float) (2 * Math.asin(Settings.minRockSize / (2 * ringRadius)));
         Rock currentRock = null;
         for (float angle = 0; angle < 2*Math.PI; angle += angleDelta) {
+            if (breakProb > 0 && Simulation.RANDOM.nextFloat() < breakProb) {
+                currentRock = null;
+                angle += angleDelta * 10;
+            }
             if (currentRock == null || currentRock.allEdgesAttached()) {
                 currentRock = newCircumferenceRockAtAngle(ringCentre, ringRadius, angle);
                 if (isRockObstructed(currentRock, tank.getRocks(), Settings.minRockOpeningSize)) {

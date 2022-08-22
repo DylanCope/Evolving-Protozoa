@@ -6,7 +6,7 @@ public final class Settings {
     public static final float simulationUpdateDelta = 5f / 1000f;
     public static final float maxProtozoaSpeed = .01f;
     public static final float maxParticleSpeed = 1e-4f;
-    public static final float timeBetweenSaves = 500.0f;
+    public static final float timeBetweenSaves = 2000.0f;
     public static final float historySnapshotTime = 2.0f;
     public static final boolean writeGenomes = true;
     public static final boolean finishOnProtozoaExtinction = true;
@@ -37,6 +37,7 @@ public final class Settings {
     public static final int numRingClusters = 4;
     public static final int numPopulationClusters = 4;
     public static final float populationClusterRadius = 0.3f;
+    public static final float populationClusterRadiusRange = 0.f;
     public static final float tankRadius = 3.0f;
     public static final boolean sphericalTank = false;
     public static final int numChunkBreaks = 100;

@@ -37,6 +37,7 @@ public class ProtozoaGenome implements Serializable
         networkGenome.addOutput("Turn Amount");
         networkGenome.addOutput("Speed");
         networkGenome.addOutput("Mate Desire");
+        networkGenome.addOutput("Attack");
 
         networkGenome.addSensor("Bias");
         networkGenome.addSensor("Health");

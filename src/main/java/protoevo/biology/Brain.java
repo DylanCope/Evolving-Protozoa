@@ -1,10 +1,9 @@
 package protoevo.biology;
 
-import java.io.Serializable;
-
-import protoevo.biology.genes.ProtozoaGenome;
 import protoevo.core.Settings;
 import protoevo.core.Simulation;
+
+import java.io.Serializable;
 
 public interface Brain extends Serializable
 {
@@ -23,8 +22,7 @@ public interface Brain extends Serializable
 		public void tick(Protozoan p) {}
 
 		@Override
-		public float turn(Protozoan p)
-		{
+		public float turn(Protozoan p) {
 			float x = (float) (2* Simulation.RANDOM.nextDouble() - 1);
 			float t = (float) Math.toRadians(35);
 			return t * x;

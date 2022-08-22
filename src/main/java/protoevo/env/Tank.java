@@ -60,9 +60,17 @@ public class Tank implements Iterable<Cell>, Serializable
 			Vector2[] clusterCentres = null;
 			if (Settings.initialPopulationClustering) {
 				clusterCentres = new Vector2[Settings.numRingClusters];
-				for (int i = 0; i < clusterCentres.length; i++) {
+				for (int i = 0; i < Settings.numPopulationClusters; i++) {
 					clusterCentres[i] = randomPosition(Settings.populationClusterRadius);
-					RockGeneration.generateRingOfRocks(this, clusterCentres[i], Settings.populationClusterRadius*5);
+					RockGeneration.generateRingOfRocks(this, clusterCentres[i],
+							5 * Settings.populationClusterRadius);
+				}
+				for (int j = Settings.numPopulationClusters; j < clusterCentres.length; j++) {
+					clusterCentres[j] = randomPosition(Settings.populationClusterRadius);
+					float maxR = 5 * (Settings.populationClusterRadius + Settings.populationClusterRadiusRange);
+					float minR = Math.max(0.1f, 5 * (Settings.populationClusterRadius - Settings.populationClusterRadiusRange));
+					float radius = Simulation.RANDOM.nextFloat() * (maxR - minR) + minR;
+					RockGeneration.generateRingOfRocks(this, clusterCentres[j], radius, 0.05f);
 				}
 			}
 			RockGeneration.generateRocks(this);

@@ -7,11 +7,9 @@ import protoevo.biology.NNBrain;
 import protoevo.neat.NeuralNetwork;
 import protoevo.neat.Neuron;
 import protoevo.biology.Cell;
-import protoevo.utils.TextObject;
-import protoevo.utils.Vector2;
-import protoevo.utils.Window;
-import protoevo.utils.TextStyle;
+import protoevo.utils.*;
 import protoevo.biology.Protozoan;
+import protoevo.utils.Window;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -96,7 +94,7 @@ public class UI implements ChangeListener {
 	private int renderStats(Graphics2D g, int lineNumber, Map<String, Float> stats) {
 
 		for (Map.Entry<String, Float> entityStat : stats.entrySet()) {
-			String text = entityStat.getKey() + ": " + TextStyle.toString(entityStat.getValue(), 2);
+			String text = entityStat.getKey() + ": " + TextStyle.numberToString(entityStat.getValue(), 2);
 			TextObject statText = new TextObject(
 					text, infoTextSize,
 					new Vector2(textAwayFromEdge, getYPosLHS(lineNumber))
@@ -176,7 +174,7 @@ public class UI implements ChangeListener {
 		TextObject[] statTexts = new TextObject[stats.keySet().size()];
 		int maxWidth = 0;
 		for (Map.Entry<String, Integer> entityStat : stats.entrySet()) {
-			String text = entityStat.getKey() + ": " + TextStyle.toString(entityStat.getValue(), 2);
+			String text = entityStat.getKey() + ": " + TextStyle.numberToString(entityStat.getValue(), 2);
 			TextObject statText = new TextObject(
 					text, infoTextSize,
 					new Vector2(0, getYPosRHS(lineNumber))
@@ -324,15 +322,24 @@ public class UI implements ChangeListener {
 		Vector2 mousePos = window.getCurrentMousePosition();
 		int mouseX = (int) mousePos.getX();
 		int mouseY = (int) mousePos.getY();
-		if (boxXStart < mouseX && mouseX < boxXStart + boxWidth &&
-				boxYStart < mouseY && mouseY < boxYStart + boxHeight) {
+		if (boxXStart - 2*r < mouseX && mouseX < boxXStart + boxWidth + 2*r &&
+				boxYStart - 2*r < mouseY && mouseY < boxYStart + boxHeight + 2*r) {
 			for (Neuron neuron : nn.getNeurons()) {
 				int x = neuron.getGraphicsX();
 				int y = neuron.getGraphicsY();
+				if (simulation.inDebugMode()) {
+					g.setColor(Color.YELLOW.darker());
+					g.drawRect(x - 2*r, y - 2*r, 4*r, 4*r);
+					g.setColor(Color.RED);
+					int r2 = r / 5;
+					g.drawOval(mouseX - r2, mouseY - r2, 2*r2, 2*r2);
+				}
 				if (neuron.getLabel() != null &&
 						x - 2*r <= mouseX && mouseX <= x + 2*r &&
 						y - 2*r <= mouseY && mouseY <= y + 2*r) {
-					TextObject label = new TextObject(neuron.getLabel(), infoTextSize);
+					String labelStr = neuron.getLabel() + " = " + TextStyle.numberToString(neuron.getLastState(), 2);
+					TextObject label = new TextObject(labelStr, infoTextSize);
+					label.setColor(Color.WHITE.darker());
 					int labelX = x - label.getWidth() / 2;
 					int pad = (int) (infoTextSize * 0.3);
 					int infoWidth = label.getWidth() + 2*pad;
@@ -342,7 +349,7 @@ public class UI implements ChangeListener {
 					int labelY = (int) (y - 1.1 * r - label.getHeight() / 2);
 					label.setPosition(new Vector2(labelX, labelY));
 
-					g.setColor(new Color(240, 240, 240, 100));
+					g.setColor(Color.BLACK);
 					g.fillRoundRect(labelX - pad, labelY - 2*pad - label.getHeight() / 2,
 							infoWidth, label.getHeight() + pad,
 							pad, pad);

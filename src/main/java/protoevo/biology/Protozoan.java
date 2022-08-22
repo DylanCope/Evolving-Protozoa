@@ -431,7 +431,7 @@ public class Protozoan extends Cell
 	}
 
 	public float getSpikeLength(Spike spike) {
-		return spike.currentLength * getRadius() / splitRadius;
+		return brain.attack(this) * spike.currentLength * getRadius() / splitRadius;
 	}
 
 	public Vector2 getDir() {

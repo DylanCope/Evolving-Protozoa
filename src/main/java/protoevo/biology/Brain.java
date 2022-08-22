@@ -2,6 +2,7 @@ package protoevo.biology;
 
 import java.io.Serializable;
 
+import protoevo.biology.genes.ProtozoaGenome;
 import protoevo.core.Settings;
 import protoevo.core.Simulation;
 
@@ -10,6 +11,7 @@ public interface Brain extends Serializable
 	void tick(Protozoan p);
 	float turn(Protozoan p);
 	float speed(Protozoan p);
+	float attack(Protozoan p);
 	boolean wantToMateWith(Protozoan p);
 	float energyConsumption();
 	
@@ -31,6 +33,11 @@ public interface Brain extends Serializable
 		@Override
 		public float speed(Protozoan p) {
 			return (float) (Simulation.RANDOM.nextDouble() * Settings.maxProtozoaSpeed);
+		}
+
+		@Override
+		public float attack(Protozoan p) {
+			return Simulation.RANDOM.nextFloat();
 		}
 
 		@Override
@@ -56,6 +63,11 @@ public interface Brain extends Serializable
 
 		@Override
 		public float speed(Protozoan p) {
+			return 0;
+		}
+
+		@Override
+		public float attack(Protozoan p) {
 			return 0;
 		}
 

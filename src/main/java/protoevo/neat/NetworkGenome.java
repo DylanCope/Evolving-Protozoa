@@ -353,8 +353,12 @@ public class NetworkGenome implements Serializable
 	public void ensureRetinaSensorsExist(int retinaSize) {
 		for (int i = 0; i < retinaSize; i++) {
 			String label = Retina.retinaCellLabel(i);
-			if (!hasSensor(label))
-				addSensor(label);
+			if (!hasSensor(label + " R"))
+				addSensor(label + " R");
+			if (!hasSensor(label + " G"))
+				addSensor(label + " G");
+			if (!hasSensor(label + " B"))
+				addSensor(label + " B");
 		}
 	}
 }

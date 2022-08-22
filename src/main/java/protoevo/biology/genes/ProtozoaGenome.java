@@ -64,6 +64,8 @@ public class ProtozoaGenome implements Serializable
                 new RetinalProductionGene(),
                 new CAMProductionGene()
         };
+
+        ensureCorrectness();
     }
 
     public Gene<?>[] getGenes() {
@@ -81,10 +83,8 @@ public class ProtozoaGenome implements Serializable
     public ProtozoaGenome(Gene<?>[] genes) {
         this.genes = genes;
         NetworkGenome networkGenome = getGeneValue(NetworkGene.class);
-        if (networkGenome != null) {
-            int retinaSize = getGeneValue(RetinaSizeGene.class);
-            networkGenome.ensureRetinaSensorsExist(retinaSize);
-        }
+        if (networkGenome != null)
+            ensureCorrectness();
     }
 
     public ProtozoaGenome mutate() {
@@ -103,14 +103,20 @@ public class ProtozoaGenome implements Serializable
         ProtozoaGenome mutatedGenome = new ProtozoaGenome(newGenes);
         mutatedGenome.parent1Hash = parent1Hash;
         mutatedGenome.parent2Hash = parent2Hash;
-        return mutatedGenome;
+        return mutatedGenome.ensureCorrectness();
+    }
+
+    public ProtozoaGenome ensureCorrectness() {
+        int retinaSize = getGeneValue(RetinaSizeGene.class);
+        getGeneValue(NetworkGene.class).ensureRetinaSensorsExist(retinaSize);
+        return this;
     }
 
     public ProtozoaGenome crossover(ProtozoaGenome other) {
         Gene<?>[] newGenes = Arrays.copyOf(genes, genes.length);
         for (int i = 0; i < genes.length; i++)
             newGenes[i] = genes[i].crossover(other.genes[i]);
-        return new ProtozoaGenome(newGenes);
+        return new ProtozoaGenome(newGenes).ensureCorrectness();
     }
 
     public <T> T getGeneValue(Class<? extends Gene<T>> clazz) {

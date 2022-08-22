@@ -93,6 +93,11 @@ public class NNBrain implements Brain {
     }
 
     @Override
+    public float attack(Protozoan p) {
+        return outputs[3] > 0 ? 1 : 0;
+    }
+
+    @Override
     public float energyConsumption() {
         return 0;
     }

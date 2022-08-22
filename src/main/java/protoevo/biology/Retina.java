@@ -118,21 +118,24 @@ public class Retina implements Iterable<Retina.Cell>, Serializable
 
 		public static float getRequiredMass(float retinaFoV, int nCells) {
 			float r = Settings.minParticleRadius;
-			return nCells * retinaFoV * r * r * r / 10f;
+			return (float) (Math.log(nCells + 1) * Math.log(retinaFoV + 1) * r * r * r / 20f);
 		}
 
 		public static float getRequiredEnergy(float retinaFoV, int nCells) {
-			return nCells * retinaFoV / 20f;
+			return (float) (Math.log(nCells + 1) * Math.log(retinaFoV + 1) / 20f);
 		}
 
 		public static float getRequiredTime(float retinaFoV, int nCells) {
-			return retinaFoV * nCells / 2f;
+			return (float) (Math.log(retinaFoV + 1) * Math.log(nCells + 1) / 2f);
 		}
 
 		public static Map<Food.ComplexMolecule, Float> getRequiredComplexMolecules(float retinaFoV, int nCells) {
 			Map<Food.ComplexMolecule, Float> requiredMolecules = new HashMap<>();
 			float r = Settings.minParticleRadius;
-			requiredMolecules.put(Food.ComplexMolecule.Retinal, (float) (nCells * retinaFoV * r * r * r / (20 * Math.PI)));
+			requiredMolecules.put(
+					Food.ComplexMolecule.Retinal,
+					(float) (nCells * retinaFoV * r * r * r / (20 * Math.PI))
+			);
 			return requiredMolecules;
 		}
 

@@ -334,13 +334,17 @@ public class UI implements ChangeListener {
 						y - 2*r <= mouseY && mouseY <= y + 2*r) {
 					TextObject label = new TextObject(neuron.getLabel(), infoTextSize);
 					int labelX = x - label.getWidth() / 2;
+					int pad = (int) (infoTextSize * 0.3);
+					int infoWidth = label.getWidth() + 2*pad;
+					if (labelX + infoWidth >= window.getWidth())
+						labelX = (int) (window.getWidth() - 1.1 * infoWidth);
+
 					int labelY = (int) (y - 1.1 * r - label.getHeight() / 2);
 					label.setPosition(new Vector2(labelX, labelY));
 
-					int pad = (int) (infoTextSize * 0.3);
 					g.setColor(new Color(240, 240, 240, 100));
 					g.fillRoundRect(labelX - pad, labelY - 2*pad - label.getHeight() / 2,
-							label.getWidth() + 2*pad, label.getHeight() + pad,
+							infoWidth, label.getHeight() + pad,
 							pad, pad);
 					g.setColor(Color.WHITE.darker());
 					label.render(g);

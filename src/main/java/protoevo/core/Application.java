@@ -15,6 +15,7 @@ public class Application
 	
 	public static void main(String[] args)
 	{
+		// to load a saved simulation, pass the path to the save file as the first argument
 //		simulation = new Simulation(Settings.simulationSeed, "pontus-parasect-ipsam");
 		simulation = new Simulation(Settings.simulationSeed);
 

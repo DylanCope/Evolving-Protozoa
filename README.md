@@ -94,4 +94,11 @@ window and runs the simulation headless at maximum speed. The settime and gettim
 will allow you to control the simulation time, i.e. the amount of time that the simulation is
 stepped with each update. However, this can change the behaviour of the simulation, so be careful.
 
+**Saving a Loading Simulations.**
 
+The simulation will automatically save the current state of the simulation to a folder
+in the `saves` directory. The name of the folder is randomly generated, and the folder
+contains backups of the simulation at various points, a history of genomes, and a history
+of statistics. To reload a simulation, you will need to edit the code in the `Application`
+class. Simply add an argument to the construction of the `Simulation` object with the name
+of the directory in the saves folder that you want to load.

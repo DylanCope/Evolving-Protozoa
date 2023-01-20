@@ -1,0 +1,37 @@
+# Random seed for simulation
+simulation_seed: 42
+
+# World parameters
+tank_radius: 3.0
+num_rock_ring_clusters: 4
+max_rock_size: 0.15
+min_rock_size: 0.05
+rock_clustering: 0.99
+min_rock_opening_size: 0.08
+
+# Initial conditions
+num_initial_protozoa: 100
+num_initial_plants: 1000
+num_initial_pop_centres: 4
+pop_cluster_radius: 0.3
+
+# Simulation parameters
+global_mutation_chance: 0.05
+plant_energy_density: 1.0
+meat_energy_density: 10.0
+enable_chemical_field: true
+plant_regen: 2.0
+spike_damage: 3.0
+spike_plant_consumption_penalty: 0.8
+
+# Performance parameters
+physics_substeps: 1
+spatial_hash_resolution: 100
+chemical_field_resolution: 400
+chemical_update_interval: 10
+max_interact_range: 0.15
+max_protozoa: 1500
+max_plants: 7000
+max_meat: 1000
+
+

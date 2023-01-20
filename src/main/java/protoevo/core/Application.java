@@ -2,9 +2,13 @@ package protoevo.core;
 
 import javax.swing.SwingUtilities;
 
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 import protoevo.utils.REPL;
 import protoevo.utils.TextStyle;
 import protoevo.utils.Window;
+
+import java.io.InputStream;
 
 public class Application 
 {
@@ -15,9 +19,10 @@ public class Application
 	
 	public static void main(String[] args)
 	{
-		// to load a saved simulation, pass the path to the save file as the first argument
-//		simulation = new Simulation(Settings.simulationSeed, "pontus-parasect-ipsam");
-		simulation = new Simulation(Settings.simulationSeed);
+		if (args.length > 2)
+			simulation = new Simulation(Settings.simulationSeed, args[2]);
+		else
+			simulation = new Simulation(Settings.simulationSeed);
 
 		try {
 			if (!(args.length > 0 && args[0].equals("noui"))) {

@@ -18,7 +18,7 @@ public class Chemical implements Serializable {
             incoming /= neighbours.length;
             nextPlantPheromoneDensity += delta * incoming;
         }
-        nextPlantPheromoneDensity *= 1 - delta * Settings.pheromoneDecay;
+        nextPlantPheromoneDensity *= 1 - delta * Settings.chemicalsDecay;
     }
 
     public void update() {
@@ -33,7 +33,7 @@ public class Chemical implements Serializable {
 
     public float pheromoneFlow(Chemical other) {
         float densityDiff = other.currentPlantPheromoneDensity - currentPlantPheromoneDensity;
-        float p = Settings.pheromoneFlow * (float) Math.tanh(densityDiff);
+        float p = Settings.chemicalsFlow * (float) Math.tanh(densityDiff);
         return p * densityDiff;
     }
 

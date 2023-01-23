@@ -40,7 +40,11 @@ public class Particle extends Collidable implements Serializable {
         if (prevPos == null)
             prevPos = pos.copy();
 
-        vel = pos.sub(prevPos).scale(1 / delta);
+        if (delta != 0)
+            vel = pos.sub(prevPos).scale(1 / delta);
+        else
+            return;
+
         move(delta);
     }
 

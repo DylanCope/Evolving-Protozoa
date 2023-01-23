@@ -20,9 +20,9 @@ public class Application
 	public static void main(String[] args)
 	{
 		if (args.length > 2)
-			simulation = new Simulation(Settings.simulationSeed, args[2]);
+			simulation = new Simulation(args[2]);
 		else
-			simulation = new Simulation(Settings.simulationSeed);
+			simulation = new Simulation();
 
 		try {
 			if (!(args.length > 0 && args[0].equals("noui"))) {

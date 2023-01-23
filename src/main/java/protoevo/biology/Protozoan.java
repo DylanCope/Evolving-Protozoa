@@ -206,7 +206,7 @@ public class Protozoan extends Cell
 	{
 		brain.tick(this);
 		dir.turn(delta * 80 * brain.turn(this));
-		float spikeDecay = (float) Math.pow(Settings.spikeMovementPenalty, spikes.length);
+		float spikeDecay = (float) Math.pow(Settings.spikeMovementPenaltyFactor, spikes.length);
 		float sizePenalty = getRadius() / splitRadius; // smaller flagella generate less impulse
 		float speed = Math.abs(brain.speed(this));
 		Vector2 vel = dir.mul(sizePenalty * spikeDecay * speed);
@@ -366,9 +366,9 @@ public class Protozoan extends Cell
 
 	public void age(float delta) {
 		deathRate = getRadius() * delta * Settings.protozoaStarvationFactor;
-		deathRate *= 0.75f + 0.25f * getSpeed();
+//		deathRate *= 0.75f + 0.25f * getSpeed();
 		deathRate *= (float) Math.pow(Settings.spikeDeathRatePenalty, spikes.length);
-		setHealth(getHealth() * (1 - deathRate));
+		setHealth(getHealth() - deathRate);
 	}
 
 	@Override

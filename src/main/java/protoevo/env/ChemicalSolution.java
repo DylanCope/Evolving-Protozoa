@@ -90,7 +90,7 @@ public class ChemicalSolution implements Serializable {
 
     public void update(float delta, Collection<Cell> entities) {
         timeSinceUpdate += delta;
-        if (timeSinceUpdate >= Settings.pheromoneUpdateTime) {
+        if (timeSinceUpdate >= Settings.chemicalsUpdateTime) {
             entities.parallelStream().forEach(e -> depositChemicals(timeSinceUpdate, e));
             Arrays.stream(chemicalGrid).parallel().forEach(
                     row -> Arrays.stream(row).forEach(chemical -> chemical.propagate(timeSinceUpdate))

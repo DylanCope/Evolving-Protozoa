@@ -21,6 +21,10 @@ import java.util.stream.Stream;
 
 public class Simulation
 {
+
+	public static String defaultSettingsPath = "config/default_settings.yaml";
+	public static String settingsPath = defaultSettingsPath;
+
 	private Tank tank;
 	private boolean simulate, pause = false;
 	private float timeDilation = 1, timeSinceSave = 0, timeSinceSnapshot = 0;
@@ -33,35 +37,36 @@ public class Simulation
 	private final String genomeFile, historyFile;
 	private List<String> statsNames;
 
-	public Simulation(long seed)
+	public Simulation()
 	{
-		RANDOM = new Random(seed);
 		simulate = true;
 		name = generateSimName();
 		System.out.println("Created new simulation named: " + name);
 		genomeFile = "saves/" + name + "/genomes.csv";
 		historyFile = "saves/" + name + "/history.csv";
+		settingsPath = "saves/" + name + "/settings.yaml";
 		newSaveDir();
 		newDefaultTank();
 		loadSettings();
+		RANDOM = new Random(Settings.simulationSeed);
 	}
 
-	public Simulation(long seed, String name)
+	public Simulation(String name)
 	{
-		RANDOM = new Random(seed);
 		simulate = true;
 		this.name = name;
 		genomeFile = "saves/" + name + "/genomes.csv";
 		historyFile = "saves/" + name + "/history.csv";
+		settingsPath = "saves/" + name + "/settings.yaml";
 
 		newSaveDir();
 		loadMostRecentTank();
 		loadSettings();
+		RANDOM = new Random(Settings.simulationSeed);
 	}
 
-	public Simulation(long seed, String name, String save)
+	public Simulation(String name, String save)
 	{
-		RANDOM = new Random(seed);
 		simulate = true;
 		this.name = name;
 		genomeFile = "saves/" + name + "/genomes.csv";
@@ -70,6 +75,7 @@ public class Simulation
 		newSaveDir();
 		loadTank("saves/" + name + "/tank/" + save);
 		loadSettings();
+		RANDOM = new Random(Settings.simulationSeed);
 	}
 
 	private void loadSettings() {
@@ -80,8 +86,15 @@ public class Simulation
 
 	private void newSaveDir() {
 		try {
-			Files.createDirectories(Paths.get("saves/" + name));
-			Files.createDirectories(Paths.get("saves/" + name + "/tank"));
+			Path saveDir = Paths.get("saves/" + name);
+			if (!Files.exists(saveDir)) {
+				Files.createDirectories(saveDir);
+				Files.createDirectories(Paths.get("saves/" + name + "/tank"));
+
+				File original = new File(defaultSettingsPath);
+				File copied = new File(settingsPath);
+				com.google.common.io.Files.copy(original, copied);
+			}
 
 			Path genomePath = Paths.get(genomeFile);
 			if (!Files.exists(genomePath))
@@ -102,10 +115,6 @@ public class Simulation
 				faker.ancient().primordial().toLowerCase().replaceAll(" ", "-"),
 				faker.pokemon().name().toLowerCase().replaceAll(" ", "-"),
 				faker.lorem().word().toLowerCase().replaceAll(" ", "-"));
-	}
-	
-	public Simulation() {
-		this(new Random().nextLong());
 	}
 	
 	public void newDefaultTank()

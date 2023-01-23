@@ -3,6 +3,7 @@ simulation_seed: 42
 
 # World parameters
 tank_radius: 3.0
+fluid_resistance_multiplier: 1.0
 num_rock_ring_clusters: 4
 max_rock_size: 0.15
 min_rock_size: 0.05
@@ -23,9 +24,23 @@ enable_chemical_field: true
 plant_regen: 2.0
 spike_damage: 3.0
 spike_plant_consumption_penalty: 0.8
+max_particle_radius: 0.15
+chemicals_decay: 1.0
+chemicals_flow: 0.05
+pheromones_deposit: 50.0
+protozoa_starvation_rate: 1.0
+starting_retina_size: 0
+max_retina_size: 16
+retina_grow_cost: 0.03
+min_health_to_split: 0.5
+max_protozoa_growth_rate: 0.1
+max_plant_growth: 0.03
+cell_repair_rate: 5.0
+food_waste_multiplier: 1.5
+cam_energy_cost: 0.05
 
 # Performance parameters
-physics_substeps: 1
+physics_substeps: 3
 spatial_hash_resolution: 100
 chemical_field_resolution: 400
 chemical_update_interval: 10

@@ -148,7 +148,7 @@ public final class Settings {
     public static final float minProtozoanBirthRadius = 0.01f;
     public static final float maxProtozoanBirthRadius = 0.015f;
     public static final float protozoaStarvationFactor = getInstance().protozoa_starvation_rate;
-    public static final int defaultRetinaSize = getInstance().starting_retina_size;
+    public static final int defaultRetinaSize = 10; //getInstance().starting_retina_size;
     public static final int maxRetinaSize = getInstance().max_retina_size;
     public static final float retinaCellGrowthCost = getInstance().retina_growth_cost;
     public static final int numContactSensors = 0;

@@ -38,6 +38,12 @@ public class Vector2 implements Serializable
 		return this;
 	}
 
+	public Vector2 translate(float dx, float dy) {
+		x += dx;
+		y += dy;
+		return this;
+	}
+
 	public Vector2 scale(float s) {
 		x *= s;
 		y *= s;
@@ -71,13 +77,14 @@ public class Vector2 implements Serializable
 		return new Vector2(x*c - y*s, x*s + y*c);
 	}
 
-	public void turn(float angle) {
+	public Vector2 turn(float angle) {
 		float c = (float) Math.cos(angle);
 		float s = (float) Math.sin(angle);
 		float xNew = x*c - y*s;
 		float yNew = x*s + y*c;
 		x = xNew;
 		y = yNew;
+		return this;
 	}
 	
 	public Vector2 unit()
@@ -86,6 +93,15 @@ public class Vector2 implements Serializable
 		if (len == 0)
 			return new Vector2(0, 0);
 		return new Vector2(x / len, y / len);
+	}
+
+	public Vector2 nor() {
+		float len = len();
+		if (len == 0)
+			return this;
+		x /= len;
+		y /= len;
+		return this;
 	}
 	
 	public float angle() {
@@ -160,13 +176,21 @@ public class Vector2 implements Serializable
 		y = other.getY() + dy * amount / l;
 	}
 
-	public void set(float x, float y) {
+	public Vector2 set(float x, float y) {
 		this.x = x;
 		this.y = y;
+		return this;
 	}
 
-	public void set(Vector2 v) {
+	public Vector2 set(Vector2 v) {
 		this.x = v.getX();
 		this.y = v.getY();
+		return this;
+	}
+
+	public Vector2 take(Vector2 pos) {
+		x -= pos.getX();
+		y -= pos.getY();
+		return this;
 	}
 }

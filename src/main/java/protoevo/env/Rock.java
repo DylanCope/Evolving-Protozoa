@@ -122,22 +122,30 @@ public class Rock extends Collidable implements Serializable {
     }
 
     @Override
-    public Vector2[] rayCollisions(Vector2 start, Vector2 end) {
-        Vector2[] ray = new Vector2[]{start, end};
-        Vector2 dirRay = ray[1].sub(ray[0]);
-        ArrayList<Vector2> collisions = new ArrayList<>(edges.length * 2);
+    public void rayCollisions(Vector2 start, Vector2 end, Collision[] collisions) {
+        for (Collision collision : collisions)
+            collision.collided = false;
+
+        Vector2 dirRay = end.take(start);
+        float bestT = Float.MAX_VALUE;
         for (int i = 0; i < edges.length; i++) {
             if (isEdgeAttached(i))
                 continue;
 
             Vector2[] edge = edges[i];
             Vector2 dirEdge = edge[1].sub(edge[0]);
-            float[] coefs = edgesIntersectCoef(ray[0], dirRay, edge[0], dirEdge);
-            if ((coefs != null) && edgeIntersectCondition(coefs))
-                collisions.add(ray[0].add(dirRay.mul(coefs[0])));
+            float[] coefs = edgesIntersectCoef(start, dirRay, edge[0], dirEdge);
+            if ((coefs != null) && edgeIntersectCondition(coefs)) {
+                float t = coefs[0];
+                if (t > bestT)
+                    continue;
+                bestT = t;
+                collisions[0].point.set(start)
+                        .translate(dirRay.getX() * t, dirRay.getY() * t);
+                collisions[0].collided = true;
+            }
 
         }
-        return collisions.toArray(new Vector2[0]);
     }
 
     public boolean intersectsWith(Rock otherRock) {

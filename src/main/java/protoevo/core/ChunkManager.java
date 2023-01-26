@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class ChunkManager implements Serializable {
+    public static final long serialVersionUID = 1L;
 
     private final float chunkSize;
     private final float xMin;

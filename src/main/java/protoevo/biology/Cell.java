@@ -311,7 +311,10 @@ public abstract class Cell extends Particle implements Serializable
 	public void handleSignallingBindingInteraction(CellAdhesion.CellBinding binding, float delta) {}
 
 	public boolean isAttached(Cell e) {
-		return cellBindings.stream().anyMatch(binding -> binding.getDestinationEntity().equals(e));
+		for (CellAdhesion.CellBinding binding : cellBindings)
+			if (binding.getDestinationEntity().equals(e))
+				return true;
+		return false;
 	}
 	
 	public abstract boolean isEdible();

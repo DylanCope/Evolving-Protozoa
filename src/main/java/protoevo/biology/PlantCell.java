@@ -17,6 +17,7 @@ public class PlantCell extends EdibleCell {
     private final float maxRadius;
     private float crowdingFactor;
     private final float plantAttractionFactor;
+    private final Vector2 force = new Vector2(0, 0);
 
     public PlantCell(float radius, Tank tank) {
         super(radius, Food.Type.Plant, tank);
@@ -38,11 +39,12 @@ public class PlantCell extends EdibleCell {
         boolean collision = super.handlePotentialCollision(p, delta);
         if (p != this && p instanceof PlantCell) {
             PlantCell otherPlant = (PlantCell) p;
-            float sqDist = otherPlant.getPos().sub(getPos()).len2();
+            force.set(p.getPos()).take(getPos());
+            float sqDist = force.len2();
             float r = getRadius() + otherPlant.getRadius();
             if (sqDist > 1.01f*r*r && !isAttached(otherPlant)) {
-                Vector2 f = p.getPos().sub(getPos()).setLength(plantAttractionFactor / sqDist);
-                accelerate(f.mul(1 / getMass()));
+                force.setLength(plantAttractionFactor / sqDist);
+                accelerate(force.scale(1 / getMass()));
             }
         }
         return collision;

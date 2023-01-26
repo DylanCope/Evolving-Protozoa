@@ -85,10 +85,17 @@ public class Particle extends Collidable implements Serializable {
         return false;
     }
 
-    @Override
-    public Vector2[] rayCollisions(Vector2 start, Vector2 end) {
-        Vector2 ray = end.sub(start).unit();
-        Vector2 p = getPos().sub(start);
+    private final Vector2 tmp = new Vector2(0, 0);
+    private final Vector2[] collision = new Vector2[]{
+            new Vector2(0, 0), new Vector2(0, 0)
+    };
+
+    public void rayCollisions(Vector2 start, Vector2 end, Collision[] collisions) {
+        for (Collision collision : collisions)
+            collision.collided = false;
+
+        Vector2 ray = end.take(start).nor();
+        Vector2 p = collisions[0].point.set(getPos()).take(start);
 
         float a = ray.len2();
         float b = -2 * ray.dot(p);
@@ -97,18 +104,18 @@ public class Particle extends Collidable implements Serializable {
         float d = b*b - 4*a*c;
         boolean doesIntersect = d != 0;
         if (!doesIntersect)
-            return null;
+            return;
 
         float l1 = (float) ((-b + Math.sqrt(d)) / (2*a));
         float l2 = (float) ((-b - Math.sqrt(d)) / (2*a));
 
-        if (l1 > 0 || l2 > 0) {
-            return new Vector2[]{
-                    start.add(ray.mul(l1)),
-                    start.add(ray.mul(l2))
-            };
+        if (l1 > 0) {
+            collisions[0].collided = true;
+            collisions[0].point.set(start).translate(ray.getX() * l1, ray.getY() * l1);
+        } else if (l2 > 0) {
+            collisions[1].collided = true;
+            collisions[1].point.set(start).translate(ray.getX() * l2, ray.getY() * l2);
         }
-        return null;
     }
 
     @Override

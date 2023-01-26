@@ -66,6 +66,7 @@ public class Protozoan extends Cell
 	private final ContactSensor[] contactSensors;
 	private final Spike[] spikes;
 	public boolean wasJustDamaged = false;
+	private float cosHalfFov;
 
 	public Protozoan(ProtozoaGenome genome, Tank tank) throws MiscarriageException
 	{
@@ -135,30 +136,42 @@ public class Protozoan extends Cell
 	public boolean cullFromRayCasting(Collidable o) {
 		if (o instanceof Particle) {
 			Particle p = (Particle) o;
-			Vector2 dx = p.getPos().sub(getPos()).unit();
-			return dx.dot(getDir().unit()) < Math.cos(retina.getFov() / 2f);
+			float dx = p.getPos().getX() - getPos().getX();
+			float dy = p.getPos().getY() - getPos().getY();
+			float d2 = dx * dx + dy * dy;
+			float dirX = getDir().getX();
+			float dirY = getDir().getY();
+			float dirLength2 = getDir().len2();
+			return (dx * dirX + dy * dirY) / Math.sqrt(d2 * dirLength2) < cosHalfFov;
 		}
 		return false;
 	}
 
+	private final Vector2 rayEndTmp = new Vector2(0, 0), rayStartTmp = new Vector2(0, 0);
+	private final Collidable.Collision[] collisions = new Collidable.Collision[]{
+			new Collidable.Collision(), new Collidable.Collision()
+	};
 	public void see(Collidable o)
 	{
 		if (cullFromRayCasting(o))
 			return;
 
+		rayStartTmp.set(getPos());
 		float interactRange = getInteractRange();
 		float dirAngle = getDir().angle();
 		for (Retina.Cell cell : retina.getCells()) {
 			Vector2[] rays = cell.getRays();
 			for (int i = 0; i < rays.length; i++) {
-				Vector2 ray = rays[i].rotate(dirAngle).setLength(interactRange);
-				Vector2[] collisions = o.rayCollisions(getPos(), getPos().add(ray));
-				if (collisions == null || collisions.length == 0)
-					continue;
+				rayEndTmp.set(rays[i])
+						.turn(dirAngle)
+						.setLength(interactRange)
+						.translate(rayStartTmp);
+				o.rayCollisions(rayStartTmp, rayEndTmp, collisions);
 
 				float sqLen = Float.MAX_VALUE;
-				for (Vector2 collisionPoint : collisions)
-					sqLen = Math.min(sqLen, collisionPoint.sub(getPos()).len2());
+				for (Collidable.Collision collision : collisions)
+					if (collision.collided)
+						sqLen = Math.min(sqLen, collision.point.squareDistanceTo(rayStartTmp));
 
 				if (sqLen < cell.collisionSqLen(i))
 					cell.set(i, o.getColor(), sqLen);
@@ -408,6 +421,7 @@ public class Protozoan extends Cell
 
 	public void setRetina(Retina retina) {
 		this.retina = retina;
+		this.cosHalfFov = (float) Math.cos(retina.getFov() / 2f);
 	}
 
 	public ProtozoaGenome getGenome() {

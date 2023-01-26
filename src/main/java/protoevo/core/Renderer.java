@@ -37,6 +37,9 @@ public class Renderer extends Canvas
 	private final HashMap<String, Integer> stats = new HashMap<>(5, 1);
 	private final Simulation simulation;
 	private final Window window;
+	private final int microscopePolygonNPoints = 500;
+	private int microscopePolygonXPoints[] = new int[microscopePolygonNPoints];
+	private int microscopePolygonYPoints[] = new int[microscopePolygonNPoints];
 
 	public Renderer(Simulation simulation, Window window)
 	{
@@ -404,18 +407,18 @@ public class Renderer extends Canvas
 	}
 
 	public void rocks(Graphics2D g, Tank tank) {
-		for (Rock rock : tank.getRocks()) {
-			Vector2[] screenPoints = new Vector2[]{
-					toRenderSpace(rock.getPoints()[0]),
-					toRenderSpace(rock.getPoints()[1]),
-					toRenderSpace(rock.getPoints()[2])
-			};
 
-			int[] xPoints = new int[screenPoints.length];
+		Vector2[] screenPoints = new Vector2[3];
+		int[] xPoints = new int[screenPoints.length];
+		int[] yPoints = new int[screenPoints.length];
+		for (Rock rock : tank.getRocks()) {
+			screenPoints[0] = toRenderSpace(rock.getPoints()[0]);
+			screenPoints[1] = toRenderSpace(rock.getPoints()[1]);
+			screenPoints[2] = toRenderSpace(rock.getPoints()[2]);
+
 			for (int i = 0; i < screenPoints.length; i++)
 				xPoints[i] = (int) screenPoints[i].getX();
 
-			int[] yPoints = new int[screenPoints.length];
 			for (int i = 0; i < screenPoints.length; i++)
 				yPoints[i] = (int) screenPoints[i].getY();
 
@@ -521,41 +524,38 @@ public class Renderer extends Canvas
 	
 	public void maskTank(Graphics g, Vector2 coords, float r, int alpha)
 	{
-		int nPoints = 500;
-		int xPoints[] = new int[nPoints];
-		int yPoints[] = new int[nPoints];
 		
-		int n = nPoints - 7;
+		int n = microscopePolygonNPoints - 7;
 		for (int i = 0; i < n; i++) 
 		{
 			float t = (float) (2*Math.PI * i / (float) n);
-			xPoints[i] = (int) (coords.getX() + r * Math.cos(t));
-			yPoints[i] = (int) (coords.getY() + r * Math.sin(t));
+			microscopePolygonXPoints[i] = (int) (coords.getX() + r * Math.cos(t));
+			microscopePolygonYPoints[i] = (int) (coords.getY() + r * Math.sin(t));
 		}
 		
-		xPoints[n] 	 = (int) (coords.getX()) + (int) r;
-		yPoints[n]	 = (int) (coords.getY());
+		microscopePolygonXPoints[n] 	 = (int) (coords.getX()) + (int) r;
+		microscopePolygonYPoints[n]	 = (int) (coords.getY());
 		
-		xPoints[n+1] = window.getWidth();
-		yPoints[n+1] = (int) (coords.getY());
+		microscopePolygonXPoints[n+1] = window.getWidth();
+		microscopePolygonYPoints[n+1] = (int) (coords.getY());
 		
-		xPoints[n+2] = window.getWidth();
-		yPoints[n+2] = 0;
+		microscopePolygonXPoints[n+2] = window.getWidth();
+		microscopePolygonYPoints[n+2] = 0;
 		
-		xPoints[n+3] = 0;
-		yPoints[n+3] = 0;
+		microscopePolygonXPoints[n+3] = 0;
+		microscopePolygonYPoints[n+3] = 0;
 		
-		xPoints[n+4] = 0;
-		yPoints[n+4] = window.getHeight();
+		microscopePolygonXPoints[n+4] = 0;
+		microscopePolygonYPoints[n+4] = window.getHeight();
 		
-		xPoints[n+5] = window.getWidth();
-		yPoints[n+5] = window.getHeight();
+		microscopePolygonXPoints[n+5] = window.getWidth();
+		microscopePolygonYPoints[n+5] = window.getHeight();
 		
-		xPoints[n+6] = window.getWidth();
-		yPoints[n+6] = (int) (coords.getY());
+		microscopePolygonXPoints[n+6] = window.getWidth();
+		microscopePolygonYPoints[n+6] = (int) (coords.getY());
 		
 		g.setColor(new Color(0, 0, 0, alpha));
-		g.fillPolygon(xPoints, yPoints, nPoints);
+		g.fillPolygon(microscopePolygonXPoints, microscopePolygonYPoints, microscopePolygonNPoints);
 	}
 	
 	public void background(Graphics2D graphics)
@@ -706,17 +706,17 @@ public class Renderer extends Canvas
 	public Vector2 toRenderSpace(Vector2 v)
 	{
 		if (track == null)
-			return v
-//					.rotate(rotate)
-					.mul(1 / simulation.getTank().getRadius())
-					.add(pan.mul(1 / tankRenderRadius))
-					.mul(tankRenderRadius * zoom)
-					.add(tankRenderCoords);
+			return v.copy()
+					.scale(1 / simulation.getTank().getRadius())
+					.translate(pan.mul(1 / tankRenderRadius))
+					.scale(tankRenderRadius * zoom)
+					.translate(tankRenderCoords);
 		else {
-			return v.sub(track.getPos())
+			return v.copy()
+					.take(track.getPos())
 //					.rotate(rotate)
-					.mul(tankRenderRadius * zoom / simulation.getTank().getRadius())
-					.add(tankRenderCoords);
+					.scale(tankRenderRadius * zoom / simulation.getTank().getRadius())
+					.translate(tankRenderCoords);
 		}
 	}
 	

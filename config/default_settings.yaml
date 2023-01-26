@@ -1,5 +1,5 @@
 # Random seed for simulation
-simulation_seed: 42
+simulation_seed: 0
 
 # World parameters
 tank_radius: 3.0

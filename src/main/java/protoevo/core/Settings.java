@@ -84,7 +84,7 @@ public final class Settings {
     private int max_meat;
 
     // Simulation settings
-    public static final long simulationSeed = getInstance().simulation_seed;
+    public static final long simulationSeed = getInstance().simulation_seed == 0 ? System.currentTimeMillis() : getInstance().simulation_seed;
     public static final float simulationUpdateDelta = 5f / 1000f;
     public static final float maxProtozoaSpeed = .01f;
     public static final float maxParticleSpeed = 1e-4f;

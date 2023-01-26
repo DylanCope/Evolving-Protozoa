@@ -24,7 +24,8 @@ public class Application
 		for (String arg: args) {
 			String[] split = arg.split("=");
 			if (split.length == 2) {
-				argsMap.put(split[0], split[1]);
+				if (!split[1].equals(""))
+					argsMap.put(split[0], split[1]);
 			}
 		}
 		return argsMap;

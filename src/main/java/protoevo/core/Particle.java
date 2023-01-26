@@ -129,15 +129,16 @@ public class Particle extends Collidable implements Serializable {
 
     public void onParticleCollisionCallback(Particle p, float delta) {}
 
+    private final Vector2 tmp1 = new Vector2(0, 0);
     public void handleParticleCollision(Particle p, float delta) {
         float mr = p.getMass() / (p.getMass() + getMass());
-        Vector2 axis = getPos().sub(p.getPos());
+        Vector2 axis = tmp1.set(getPos()).take(p.getPos());
         float dist = axis.len();
         float targetDist = (getRadius() + p.getRadius());
         float offset = targetDist - dist;
-        Vector2 axisNorm = axis.unit();
-        getPos().translate(axisNorm.mul(mr * offset));
-        p.getPos().translate(axisNorm.mul(-(1 - mr) * offset));
+        Vector2 axisNorm = axis.nor();
+        getPos().translate(axisNorm.scale(mr * offset));
+        p.getPos().translate(axisNorm.scale(-(1 - mr) / mr));
         onParticleCollisionCallback(p, delta);
     }
 

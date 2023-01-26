@@ -9,7 +9,7 @@ import java.io.InputStream;
 
 public final class Settings {
 
-    private static Settings loadSettingsYAML() {
+    public static Settings loadSettingsYAML() {
         InputStream inputStream;
         try {
             System.out.println("Loading settings from " + Simulation.settingsPath);
@@ -21,7 +21,7 @@ public final class Settings {
         return yaml.load(inputStream);
     }
 
-    private static Settings instance = null;
+    public static Settings instance = null;
 
     public static Settings getInstance() {
         if (instance == null) {
@@ -30,58 +30,58 @@ public final class Settings {
         return instance;
     }
 
-    private long simulation_seed;
+    public long simulation_seed;
 
     // World parameters
-    private float tank_radius;
-    private float fluid_resistance_multiplier;
-    private int num_rock_ring_clusters;
-    private float max_rock_size;
-    private float min_rock_size;
-    private float rock_clustering;
-    private float min_rock_opening_size;
+    public float tank_radius;
+    public float fluid_resistance_multiplier;
+    public int num_rock_ring_clusters;
+    public float max_rock_size;
+    public float min_rock_size;
+    public float rock_clustering;
+    public float min_rock_opening_size;
 
     // Initial Conditions
-    private int num_initial_protozoa;
-    private int num_initial_plants;
-    private int num_initial_pop_centres;
-    private float pop_cluster_radius;
+    public int num_initial_protozoa;
+    public int num_initial_plants;
+    public int num_initial_pop_centres;
+    public float pop_cluster_radius;
 
     // Simulation parameters
-    private float global_mutation_chance;
-    private float plant_energy_density;
-    private float meat_energy_density;
-    private boolean enable_chemical_field;
-    private float plant_regen;
-    private float spike_damage;
-    private float spike_plant_consumption_penalty;
-    private float max_particle_radius;
-    private float chemicals_decay;
+    public float global_mutation_chance;
+    public float plant_energy_density;
+    public float meat_energy_density;
+    public boolean enable_chemical_field;
+    public float plant_regen;
+    public float spike_damage;
+    public float spike_plant_consumption_penalty;
+    public float max_particle_radius;
+    public float chemicals_decay;
 
-    private float chemicals_flow;
-    private float pheromones_deposit;
-    private float protozoa_starvation_rate;
-    private int starting_retina_size;
-    private int max_retina_size;
-    private float retina_grow_cost;
-    private float min_health_to_split;
-    private float max_protozoa_growth_rate;
-    private float max_plant_growth;
-    private float retina_growth_cost;
-    private float cell_repair_rate;
-    private float food_waste_multiplier;
-    private float cam_energy_cost;
+    public float chemicals_flow;
+    public float pheromones_deposit;
+    public float protozoa_starvation_rate;
+    public int starting_retina_size;
+    public int max_retina_size;
+    public float retina_grow_cost;
+    public float min_health_to_split;
+    public float max_protozoa_growth_rate;
+    public float max_plant_growth;
+    public float retina_growth_cost;
+    public float cell_repair_rate;
+    public float food_waste_multiplier;
+    public float cam_energy_cost;
 
 
     // Performance parameters
-    private int physics_substeps;
-    private int spatial_hash_resolution;
-    private int chemical_field_resolution;
-    private int chemical_update_interval;
-    private float max_interact_range;
-    private int max_protozoa;
-    private int max_plants;
-    private int max_meat;
+    public int physics_substeps;
+    public int spatial_hash_resolution;
+    public int chemical_field_resolution;
+    public int chemical_update_interval;
+    public float max_interact_range;
+    public int max_protozoa;
+    public int max_plants;
+    public int max_meat;
 
     // Simulation settings
     public static final long simulationSeed = getInstance().simulation_seed == 0 ? System.currentTimeMillis() : getInstance().simulation_seed;
@@ -148,7 +148,7 @@ public final class Settings {
     public static final float minProtozoanBirthRadius = 0.01f;
     public static final float maxProtozoanBirthRadius = 0.015f;
     public static final float protozoaStarvationFactor = getInstance().protozoa_starvation_rate;
-    public static final int defaultRetinaSize = 10; //getInstance().starting_retina_size;
+    public static final int defaultRetinaSize = getInstance().starting_retina_size;
     public static final int maxRetinaSize = getInstance().max_retina_size;
     public static final float retinaCellGrowthCost = getInstance().retina_growth_cost;
     public static final int numContactSensors = 0;

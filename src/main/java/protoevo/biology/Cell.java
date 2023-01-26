@@ -31,11 +31,11 @@ public abstract class Cell extends Particle implements Serializable
 	private float energyAvailable = Settings.startingAvailableCellEnergy;
 	private float constructionMassAvailable, wasteMass;
 	private final Map<Food.ComplexMolecule, Float> availableComplexMolecules;
-	private final Set<CellAdhesion.CellBinding> cellBindings, toAttach;
+	private final Collection<CellAdhesion.CellBinding> cellBindings, toAttach;
 	private final Map<CellAdhesion.CellAdhesionMolecule, Float> surfaceCAMs;
 	private final Map<Food.Type, Float> foodDigestionRates;
 	private final Map<Food.Type, Food> foodToDigest;
-	private final Set<ConstructionProject> constructionProjects;
+	private final Collection<ConstructionProject> constructionProjects;
 	private final Map<Food.ComplexMolecule, Float> complexMoleculeProductionRates;
 	private final Map<CellAdhesion.CellAdhesionMolecule, Float> camProductionRates;
 	private final ArrayList<Cell> children = new ArrayList<>();
@@ -44,15 +44,15 @@ public abstract class Cell extends Particle implements Serializable
 	{
 		super(tank);
 		healthyColour = new Color(255, 255, 255);
-		foodDigestionRates = new HashMap<>(0);
-		foodToDigest = new HashMap<>(0);
-		cellBindings = new HashSet<>(0);
-		toAttach = new HashSet<>(0);
-		surfaceCAMs = new HashMap<>(0);
-		constructionProjects = new HashSet<>(0);
-		complexMoleculeProductionRates = new HashMap<>(0);
-		camProductionRates = new HashMap<>(0);
-		availableComplexMolecules = new HashMap<>(0);
+		foodDigestionRates = new TreeMap<>();
+		foodToDigest = new TreeMap<>();
+		cellBindings = new ArrayList<>(10);
+		toAttach = new ArrayList<>(5);
+		surfaceCAMs = new HashMap<>(10);
+		constructionProjects = new ArrayList<>(10);
+		complexMoleculeProductionRates = new TreeMap<>();
+		camProductionRates = new HashMap<>(10);
+		availableComplexMolecules = new TreeMap<>();
 	}
 	
 	public void update(float delta) {
@@ -226,7 +226,7 @@ public abstract class Cell extends Particle implements Serializable
 			toAttach.add(binding);
 	}
 
-	public Set<CellAdhesion.CellBinding> getCellBindings() {
+	public Collection<CellAdhesion.CellBinding> getCellBindings() {
 		return cellBindings;
 	}
 

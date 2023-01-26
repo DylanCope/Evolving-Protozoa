@@ -58,13 +58,13 @@ public class ChunkManager implements Serializable {
         int jMin = this.toChunkY(y - range);
         int jMax = this.toChunkY(y + range);
 
-        List<Iterator<T>> iterators = new ArrayList<>();
-        for (int i = iMin; i <= iMax; i++)
+        List<Iterator<T>> iterators = new ArrayList<>((iMax - iMin + 1) * (jMax - jMin + 1));
+        for (int i = iMin; i <= iMax; i++) {
             for (int j = jMin; j <= jMax; j++) {
                 Chunk chunk = getChunk(toChunkID(i, j));
                 iterators.add(scanner.apply(chunk));
             }
-
+        }
         return Iterators.concat(iterators.iterator());
     }
 

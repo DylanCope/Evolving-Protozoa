@@ -72,14 +72,14 @@ public class Vector2 implements Serializable
 	
 	public Vector2 rotate(float angle)
 	{
-		float c = (float) Math.cos(angle);
-		float s = (float) Math.sin(angle);
+		float c = (float) CachedMath.cos(angle);
+		float s = (float) CachedMath.sin(angle);
 		return new Vector2(x*c - y*s, x*s + y*c);
 	}
 
 	public Vector2 turn(float angle) {
-		float c = (float) Math.cos(angle);
-		float s = (float) Math.sin(angle);
+		float c = (float) CachedMath.cos(angle);
+		float s = (float) CachedMath.sin(angle);
 		float xNew = x*c - y*s;
 		float yNew = x*s + y*c;
 		x = xNew;

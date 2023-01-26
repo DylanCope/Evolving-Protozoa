@@ -22,6 +22,7 @@ public abstract class Cell extends Particle implements Serializable
 	}
 	private Color healthyColour, fullyDegradedColour;
 	private int generation = 1;
+	private float mass = -1;
 	private boolean dead = false;
 	protected boolean hasHandledDeath = false;
 	private float timeAlive = 0f;
@@ -55,7 +56,7 @@ public abstract class Cell extends Particle implements Serializable
 	}
 	
 	public void update(float delta) {
-
+		mass = computeMass();
 		timeAlive += delta;
 		digest(delta);
 		repair(delta);
@@ -588,6 +589,7 @@ public abstract class Cell extends Particle implements Serializable
 		float currentAmount = availableComplexMolecules.getOrDefault(molecule, 0f);
 		float newAmount = Math.min(getComplexMoleculeMassCap(), currentAmount + amount);
 		availableComplexMolecules.put(molecule, newAmount);
+		mass = computeMass();
 	}
 
 	private float getComplexMoleculeMassCap() {
@@ -596,6 +598,7 @@ public abstract class Cell extends Particle implements Serializable
 
 	public void setComplexMoleculeAvailable(Food.ComplexMolecule molecule, float amount) {
 		availableComplexMolecules.put(molecule, Math.max(0, amount));
+		mass = computeMass();
 	}
 
 	public float getConstructionMassCap() {
@@ -604,6 +607,7 @@ public abstract class Cell extends Particle implements Serializable
 
 	public void setAvailableConstructionMass(float mass) {
 		constructionMassAvailable = Math.min(mass, getConstructionMassCap());
+		this.mass = computeMass();
 	}
 
 	public float getConstructionMassAvailable() {
@@ -626,12 +630,17 @@ public abstract class Cell extends Particle implements Serializable
 		camProductionRates.put(cam, rate);
 	}
 
-
 	@Override
 	public float getMass() {
+		if (mass < 0)
+			mass = computeMass();
+		return mass;
+	}
+
+	public float computeMass() {
 		float extraMass = constructionMassAvailable + wasteMass;
-		for (float mass : complexMoleculeProductionRates.values())
-			extraMass += mass;
+		for (float m : availableComplexMolecules.values())
+			extraMass += m;
 		return getMass(getRadius(), extraMass);
 	}
 

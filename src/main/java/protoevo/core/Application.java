@@ -9,6 +9,8 @@ import protoevo.utils.TextStyle;
 import protoevo.utils.Window;
 
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Application 
 {
@@ -16,11 +18,23 @@ public class Application
 	public static Window window;
 	
 	public static final float refreshDelay = 1000 / 120f;
+
+	public static Map<String, String> parseArgs(String[] args) {
+		Map<String, String> argsMap = new HashMap<>();
+		for (String arg: args) {
+			String[] split = arg.split("=");
+			if (split.length == 2) {
+				argsMap.put(split[0], split[1]);
+			}
+		}
+		return argsMap;
+	}
 	
 	public static void main(String[] args)
 	{
-		if (args.length > 2)
-			simulation = new Simulation(args[2]);
+		Map<String, String> argsMap = parseArgs(args);
+		if (argsMap.containsKey("-save"))
+			simulation = new Simulation(argsMap.get("-save"));
 		else
 			simulation = new Simulation();
 

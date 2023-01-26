@@ -28,7 +28,7 @@ max_particle_radius: 0.15
 chemicals_decay: 1.0
 chemicals_flow: 0.05
 pheromones_deposit: 50.0
-protozoa_starvation_rate: 1.0
+protozoa_starvation_rate: 5.0
 starting_retina_size: 0
 max_retina_size: 16
 retina_grow_cost: 0.03

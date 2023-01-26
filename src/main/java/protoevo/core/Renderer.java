@@ -570,6 +570,11 @@ public class Renderer extends Canvas
 		graphics.fillRect(0, 0, window.getWidth(), window.getHeight());
 
 		if (Settings.enableChemicalField && renderChemicals) {
+			if (antiAliasing)
+				graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+			else
+				graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
 			ChemicalSolution chemicalSolution = simulation.getTank().getChemicalSolution();
 
 			int chemicalCellSize = toRenderSpace(chemicalSolution.getGridSize());
@@ -602,6 +607,10 @@ public class Renderer extends Canvas
 					}
 				}
 			}
+			if (antiAliasing)
+				graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			else
+				graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 		}
 
 		if (simulation.inDebugMode() && advancedDebugInfo) {
@@ -632,7 +641,7 @@ public class Renderer extends Canvas
 			framesRendered = 0;
 			lastFPSTime = Utils.getTimeSeconds();
 		}
-		superSimpleRender = stats.get("FPS") <= 5;
+		superSimpleRender = stats.get("FPS") <= 10;
 
 		BufferStrategy bs = this.getBufferStrategy();
 		

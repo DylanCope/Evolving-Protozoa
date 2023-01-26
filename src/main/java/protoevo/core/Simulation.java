@@ -104,6 +104,17 @@ public class Simulation
 			if (!Files.exists(historyPath))
 				Files.createFile(historyPath);
 
+			String seedFile = "saves/" + name + "/seed.txt";
+			Path seedPath = Paths.get(seedFile);
+			if (!Files.exists(seedPath)) {
+				try {
+					Files.createFile(seedPath);
+					FileIO.appendLine(seedFile, Settings.simulationSeed + "");
+				} catch (IOException e) {
+					System.out.println("Failed to create seed file.");
+				}
+			}
+
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

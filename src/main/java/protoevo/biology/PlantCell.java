@@ -18,6 +18,9 @@ public class PlantCell extends EdibleCell {
     private float crowdingFactor;
     private final float plantAttractionFactor;
     private final Vector2 force = new Vector2(0, 0);
+    private float crowdingFactorTime = 0;
+    private float crowdingFactorFreq = 30f;
+    private float plantGrowth = 0;
 
     public PlantCell(float radius, Tank tank) {
         super(radius, Food.Type.Plant, tank);
@@ -82,10 +85,22 @@ public class PlantCell extends EdibleCell {
         if (isDead())
             return;
 
-        crowdingFactor = 0;
-        ChunkManager chunkManager = getTank().getChunkManager();
-        Iterator<Cell> entities = chunkManager.broadEntityDetection(getPos(), getRadius());
-        entities.forEachRemaining(this::updateCrowding);
+        crowdingFactorTime += delta;
+        if (crowdingFactorTime > crowdingFactorFreq * delta) {
+            crowdingFactor = 0;
+            ChunkManager chunkManager = getTank().getChunkManager();
+            Iterator<Cell> entities = chunkManager.broadEntityDetection(getPos(), getRadius());
+            entities.forEachRemaining(this::updateCrowding);
+            crowdingFactorTime = 0;
+
+            float x = (-getCrowdingFactor() + Settings.plantCriticalCrowding) / Settings.plantCrowdingGrowthDecay;
+            x = (float) (Math.tanh(x));// * Math.tanh(-0.01 + 50 * getCrowdingFactor() / Settings.plantCriticalCrowding));
+            x = x < 0 ? (float) (1 - Math.exp(-Settings.plantCrowdingGrowthDecay * x)) : x;
+            plantGrowth = super.getGrowthRate() * x;
+            if (getRadius() > maxRadius)
+                plantGrowth *= Math.exp(maxRadius - getRadius());
+            plantGrowth = plantGrowth > 0 ? plantGrowth * getHealth() : plantGrowth;
+        }
 
         if (getGrowthRate() < 0f)
             setHealth(getHealth() + Settings.plantRegen * delta * getGrowthRate());
@@ -103,14 +118,7 @@ public class PlantCell extends EdibleCell {
      */
     @Override
     public float getGrowthRate() {
-        float x = (-getCrowdingFactor() + Settings.plantCriticalCrowding) / Settings.plantCrowdingGrowthDecay;
-        x = (float) (Math.tanh(x));// * Math.tanh(-0.01 + 50 * getCrowdingFactor() / Settings.plantCriticalCrowding));
-        x = x < 0 ? (float) (1 - Math.exp(-Settings.plantCrowdingGrowthDecay * x)) : x;
-        float growthRate = super.getGrowthRate() * x;
-        if (getRadius() > maxRadius)
-            growthRate *= Math.exp(maxRadius - getRadius());
-        growthRate = growthRate > 0 ? growthRate * getHealth() : growthRate;
-        return growthRate;
+        return plantGrowth;
     }
 
     public Map<String, Float> getStats() {

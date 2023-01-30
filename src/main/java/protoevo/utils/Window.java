@@ -1,9 +1,7 @@
 package protoevo.utils;
 
-import protoevo.core.Application;
-import protoevo.core.Controller;
+import protoevo.core.*;
 import protoevo.core.Renderer;
-import protoevo.core.Simulation;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,7 +20,7 @@ public class Window extends Canvas implements Runnable, ActionListener
 	private Controller controller;
 	private int width, height;
 
-	private final Timer timer = new Timer((int) Application.refreshDelay, this);
+	private final Timer timer = new Timer(1000 / Settings.targetFPS, this);
 	
 	public Window(String title, Simulation simulation)
 	{

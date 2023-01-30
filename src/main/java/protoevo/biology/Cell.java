@@ -489,8 +489,8 @@ public abstract class Cell extends Particle implements Serializable
 			Vector2 dir = new Vector2((float) Math.cos(angle), (float) Math.sin(angle));
 			float p = (float) (0.3 + 0.7 * Simulation.RANDOM.nextDouble() / nChildren);
 
-			int nEntities = tank.cellCounts.getOrDefault(type, 0);
-			int maxEntities = tank.cellCapacities.getOrDefault(type, 0);
+			int nEntities = tank.getCount(type);
+			int maxEntities = tank.getCapacity(type);
 			if (nEntities > maxEntities)
 				return;
 			try {

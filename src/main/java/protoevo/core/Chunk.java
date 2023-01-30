@@ -23,7 +23,7 @@ public class Chunk implements Serializable {
         this.y = y;
         this.chunkManager = chunkManager;
 
-        entities = new ArrayList<>();
+        entities = new LinkedList<>();
         rocks = new ArrayList<>();
     }
 

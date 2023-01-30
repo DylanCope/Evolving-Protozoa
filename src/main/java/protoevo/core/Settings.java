@@ -74,6 +74,7 @@ public final class Settings {
 
 
     // Performance parameters
+    public int target_fps;
     public int physics_substeps;
     public int spatial_hash_resolution;
     public int chemical_field_resolution;
@@ -86,6 +87,7 @@ public final class Settings {
     // Simulation settings
     public static final long simulationSeed = getInstance().simulation_seed == 0 ? System.currentTimeMillis() : getInstance().simulation_seed;
     public static final float simulationUpdateDelta = 5f / 1000f;
+    public static final int targetFPS = getInstance().target_fps;
     public static final float maxProtozoaSpeed = .01f;
     public static final float maxParticleSpeed = 1e-4f;
     public static final float timeBetweenSaves = 2000.0f;

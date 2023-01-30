@@ -6,10 +6,7 @@ import protoevo.env.Rock;
 import protoevo.utils.Vector2;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 public class ChunkManager implements Serializable {
@@ -149,8 +146,9 @@ public class ChunkManager implements Serializable {
     }
 
     public void update() {
-        for (Chunk chunk : chunks)
-            chunk.clear();
+        Arrays.stream(chunks).parallel().forEach(Chunk::clear);
+//        for (Chunk chunk : chunks)
+//            chunk.clear();
 
         entities.removeIf(Cell::isDead);
         entities.forEach(this::allocateToChunk);

@@ -40,7 +40,8 @@ food_waste_multiplier: 1.5
 cam_energy_cost: 0.05
 
 # Performance parameters
-physics_substeps: 3
+target_fps: 60
+physics_substeps: 1
 spatial_hash_resolution: 100
 chemical_field_resolution: 400
 chemical_update_interval: 10
@@ -48,5 +49,3 @@ max_interact_range: 0.15
 max_protozoa: 1500
 max_plants: 7000
 max_meat: 1000
-
-

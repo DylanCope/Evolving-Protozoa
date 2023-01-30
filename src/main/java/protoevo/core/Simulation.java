@@ -28,7 +28,7 @@ public class Simulation
 	private Tank tank;
 	private boolean simulate, pause = false;
 	private float timeDilation = 1, timeSinceSave = 0, timeSinceSnapshot = 0;
-	private double updateDelay = Application.refreshDelay / 1000.0, lastUpdateTime = 0;
+	private double lastUpdateTime = 0;
 	
 	public static Random RANDOM;
 	private boolean debug = false, delayUpdate = true;
@@ -79,9 +79,9 @@ public class Simulation
 	}
 
 	private void loadSettings() {
-		tank.cellCapacities.put(Protozoan.class, Settings.maxProtozoa);
-		tank.cellCapacities.put(PlantCell.class, Settings.maxPlants);
-		tank.cellCapacities.put(MeatCell.class, Settings.maxMeat);
+//		tank.cellCapacities.put(Protozoan.class, Settings.maxProtozoa);
+//		tank.cellCapacities.put(PlantCell.class, Settings.maxPlants);
+//		tank.cellCapacities.put(MeatCell.class, Settings.maxMeat);
 	}
 
 	private void newSaveDir() {
@@ -171,15 +171,20 @@ public class Simulation
 	public void simulate() {
 		setupTank();
 		makeHistorySnapshot();
+		float refreshDelay = 1f / Settings.targetFPS;
 		while (simulate) {
 			if (pause)
 				continue;
 
-			if (delayUpdate && updateDelay > 0) {
+			if (delayUpdate && Settings.targetFPS > 0) {
 				double currTime = Utils.getTimeSeconds();
-				if ((currTime - lastUpdateTime) > updateDelay) {
-					update();
-					lastUpdateTime = currTime;
+				update();
+				float updateTime = (float) (Utils.getTimeSeconds() - currTime);
+				try {
+					if (refreshDelay - updateTime > 0)
+						Thread.sleep((long) (1000 * (refreshDelay - updateTime)));
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
 				}
 			} else {
 				update();
@@ -270,10 +275,6 @@ public class Simulation
 	public float getTimeDilation() { return timeDilation; }
 
 	public void setTimeDilation(float td) { timeDilation = td; }
-
-	public void setUpdateDelay(float updateDelay) {
-		this.updateDelay = updateDelay;
-	}
 
 	public void toggleUpdateDelay() {
 		delayUpdate = !delayUpdate;

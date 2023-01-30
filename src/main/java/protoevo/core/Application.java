@@ -1,14 +1,10 @@
 package protoevo.core;
 
-import javax.swing.SwingUtilities;
-
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 import protoevo.utils.REPL;
 import protoevo.utils.TextStyle;
 import protoevo.utils.Window;
 
-import java.io.InputStream;
+import javax.swing.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,8 +12,6 @@ public class Application
 {
 	public static Simulation simulation;
 	public static Window window;
-	
-	public static final float refreshDelay = 1000 / 120f;
 
 	public static Map<String, String> parseArgs(String[] args) {
 		Map<String, String> argsMap = new HashMap<>();
@@ -44,9 +38,6 @@ public class Application
 				TextStyle.loadFonts();
 				window = new Window("Evolving Protozoa", simulation);
 				SwingUtilities.invokeLater(window);
-			}
-			else {
-				simulation.setUpdateDelay(0);
 			}
 			new Thread(new REPL(simulation, window)).start();
 			simulation.simulate();

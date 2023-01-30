@@ -19,10 +19,11 @@ public class Tank implements Iterable<Cell>, Serializable
 	private static final long serialVersionUID = 2804817237950199223L;
 	private final float radius = Settings.tankRadius;
 	private float elapsedTime;
-	public final ConcurrentHashMap<Class<? extends Cell>, Integer> cellCounts =
-			new ConcurrentHashMap<>(3, 1);
-	public final ConcurrentHashMap<Class<? extends Cell>, Integer> cellCapacities =
-			new ConcurrentHashMap<>(3, 1);
+//	public final HashMap<Class<? extends Cell>, Integer> cellCounts =
+//			new HashMap<>(3, 1);
+	private int nProtozoa, nPlants, nMeat;
+//	public final HashMap<Class<? extends Cell>, Integer> cellCapacities =
+//			new HashMap<>(3, 1)
 	private final ChunkManager chunkManager;
 	private final ChemicalSolution chemicalSolution;
 	private final List<Rock> rocks;
@@ -200,22 +201,21 @@ public class Tank implements Iterable<Cell>, Serializable
 		cells.parallelStream().forEach(cell -> cell.physicsUpdate(delta));
 		cells.parallelStream().forEach(this::handleDeadEntities);
 
-		updateCounts(cells);
 		if (chemicalSolution != null)
 			chemicalSolution.update(delta, cells);
 
-	}
-
-	private void updateCounts(Collection<Cell> entities) {
-		cellCounts.clear();
-		for (Cell e : entities)
-			cellCounts.put(e.getClass(), 1 + cellCounts.getOrDefault(e.getClass(), 0));
 	}
 
 	private void handleDeadEntities(Cell e) {
 		if (!e.isDead())
 			return;
 		e.handleDeath();
+		if (e instanceof Protozoan)
+			nProtozoa--;
+		else if (e instanceof PlantCell)
+			nPlants--;
+		else if (e instanceof MeatCell)
+			nMeat--;
 	}
 
 	private void handleNewProtozoa(Protozoan p) {
@@ -228,12 +228,40 @@ public class Tank implements Iterable<Cell>, Serializable
 		}
 	}
 
+	public int getCount(Class<? extends Cell> cellType) {
+		if (cellType == Protozoan.class)
+			return nProtozoa;
+		else if (cellType == PlantCell.class)
+			return nPlants;
+		else if (cellType == MeatCell.class)
+			return nMeat;
+		else
+			return 0;
+	}
+
+	public int getCapacity(Class<? extends Cell> cellType) {
+		if (cellType == Protozoan.class)
+			return Settings.maxProtozoa;
+		else if (cellType == PlantCell.class)
+			return Settings.maxPlants;
+		else if (cellType == MeatCell.class)
+			return Settings.maxMeat;
+		else
+			return 0;
+	}
+
 	public void add(Cell e) {
-		if (cellCounts.getOrDefault(e.getClass(), 0)
-				>= cellCapacities.getOrDefault(e.getClass(), 0))
+		if (getCount(e.getClass()) >= getCapacity(e.getClass()))
 			return;
 
 		totalCellsAdded++;
+		if (e instanceof Protozoan)
+			nProtozoa++;
+		else if (e instanceof PlantCell)
+			nPlants++;
+		else if (e instanceof MeatCell)
+			nMeat++;
+
 		entitiesToAdd.add(e);
 
 		if (e instanceof Protozoan)
@@ -247,8 +275,8 @@ public class Tank implements Iterable<Cell>, Serializable
 	public Map<String, Float> getStats(boolean includeProtozoaStats) {
 		Map<String, Float> stats = new TreeMap<>();
 		stats.put("Protozoa", (float) numberOfProtozoa());
-		stats.put("Plants", (float) cellCounts.getOrDefault(PlantCell.class, 0));
-		stats.put("Meat Pellets", (float) cellCounts.getOrDefault(MeatCell.class, 0));
+		stats.put("Plants", (float) nPlants);
+		stats.put("Meat Pellets", (float) nMeat);
 		stats.put("Max Generation", (float) generation);
 		stats.put("Time Elapsed", elapsedTime);
 		stats.put("Protozoa Born", (float) protozoaBorn);
@@ -294,13 +322,14 @@ public class Tank implements Iterable<Cell>, Serializable
 	}
 	
 	public int numberOfProtozoa() {
-		return cellCounts.getOrDefault(Protozoan.class, 0);
+		return nProtozoa;
 	}
 	
 	public int numberOfPellets() {
-		int nPellets = cellCounts.getOrDefault(PlantCell.class, 0);
-		nPellets += cellCounts.getOrDefault(MeatCell.class, 0);
-		return nPellets;
+//		int nPellets = cellCounts.getOrDefault(PlantCell.class, 0);
+//		nPellets += cellCounts.getOrDefault(MeatCell.class, 0);
+//		return nPellets;
+		return nPlants + nMeat;
 	}
 
 	public ChunkManager getChunkManager() {

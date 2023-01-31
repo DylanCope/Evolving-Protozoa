@@ -75,11 +75,11 @@ public class REPL implements Runnable
             try
             {
                 System.out.print("> ");
-                try {
-                    line = interruptibleReadLine(bufferRead);
-                } catch (InterruptedException e) {
-                    System.out.println("\nClosing REPL...");
-                    return;
+                line = bufferRead.readLine();
+
+                if (line.equals("\n")) {
+                    System.out.println();
+                    continue;
                 }
 
                 String[] args = line.split(" ");
@@ -87,7 +87,7 @@ public class REPL implements Runnable
                 switch (cmd)
                 {
                     case "help":
-                        System.out.println("commands - help, quit, stats, settime, gettime");
+                        System.out.println("commands - help, toggleui, quit, stats, settime, gettime");
                         break;
                     case "quit":
                         simulation.close();

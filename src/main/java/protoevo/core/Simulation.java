@@ -105,7 +105,7 @@ public class Simulation
 
 				File original = new File(defaultSettingsPath);
 				File copied = new File(settingsPath);
-				com.google.common.io.Files.copy(original, copied);
+				Files.copy(original.toPath(), copied.toPath());
 			}
 
 			Path genomePath = Paths.get(genomeFile);
@@ -240,7 +240,6 @@ public class Simulation
 
 	public void close() {
 		simulate = false;
-		repl.close();
 		System.out.println();
 		System.out.println("Closing simulation.");
 		saveTank();

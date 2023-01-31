@@ -43,14 +43,14 @@ public class Application
 			if (!(Boolean.parseBoolean(args.getOrDefault("noui", "false")))) {
 				TextStyle.loadFonts();
 				window = new Window("Evolving Protozoa");
-
+				simulation.getREPL().setWindow(window);
 				SimulationRenderer renderer = new SimulationRenderer(simulation, window);
 				SimulationController controller = new SimulationController(window, simulation, renderer);
 				window.set(renderer, controller);
 
 				SwingUtilities.invokeLater(window);
 			}
-			new Thread(new REPL(simulation, window)).start();
+
 			simulation.simulate();
 		}
 		catch (Exception e) {

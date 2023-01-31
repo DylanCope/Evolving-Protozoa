@@ -7,7 +7,6 @@ import protoevo.ui.components.TextObject;
 import protoevo.ui.components.TextStyle;
 import protoevo.ui.simulation.SimulationController;
 import protoevo.ui.simulation.SimulationRenderer;
-import protoevo.utils.REPL;
 import protoevo.utils.Vector2;
 
 import javax.imageio.ImageIO;
@@ -69,12 +68,12 @@ public class MainScreenRenderer extends Canvas {
                 () -> {
                     window.reset();
                     Simulation simulation = new Simulation();
+                    simulation.getREPL().setWindow(window);
                     SimulationRenderer renderer = new SimulationRenderer(simulation, window);
                     SimulationController controller = new SimulationController(window, simulation, renderer);
                     window.set(renderer, controller);
 
                     new Thread(simulation::simulate).start();
-                    new Thread(new REPL(simulation, window)).start();
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
@@ -125,12 +124,13 @@ public class MainScreenRenderer extends Canvas {
                             () -> {
                                 window.reset();
                                 Simulation simulation = new Simulation(save.getName());
+                                simulation.getREPL().setWindow(window);
                                 SimulationRenderer renderer = new SimulationRenderer(simulation, window);
                                 SimulationController controller = new SimulationController(window, simulation, renderer);
                                 window.set(renderer, controller);
 
                                 new Thread(simulation::simulate).start();
-                                new Thread(new REPL(simulation, window)).start();
+
                                 try {
                                     Thread.sleep(1000);
                                 } catch (InterruptedException e) {

@@ -1,7 +1,10 @@
 package protoevo.utils;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import protoevo.core.Application;
 import protoevo.core.Simulation;
@@ -9,13 +12,18 @@ import protoevo.ui.Window;
 
 public class REPL implements Runnable
 {
-    private final Simulation simulation;
-    private final Window window;
+    private Simulation simulation;
+    private Window window;
     private boolean running = true;
+    private BufferedReader bufferRead;
+    private InputStreamReader input;
 
-    public REPL(Simulation simulation, Window window)
+    public REPL(Simulation simulation)
     {
         this.simulation = simulation;
+    }
+
+    public void setWindow(Window window) {
         this.window = window;
     }
 
@@ -28,17 +36,52 @@ public class REPL implements Runnable
         simulation.setTimeDilation(d);
     }
 
+    public void close() {
+        running = false;
+        try {
+            input.close();
+            bufferRead.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String interruptibleReadLine(BufferedReader reader)
+            throws InterruptedException, IOException {
+        Pattern line = Pattern.compile("^(.*)\\R");
+        Matcher matcher;
+        boolean interrupted = false;
+
+        StringBuilder result = new StringBuilder();
+        int chr = -1;
+        do {
+            if (reader.ready()) chr = reader.read();
+            if (chr > -1) result.append((char) chr);
+            matcher = line.matcher(result.toString());
+            interrupted = Thread.interrupted(); // resets flag, call only once
+        } while (!interrupted && !matcher.matches());
+        if (interrupted) throw new InterruptedException();
+        return (matcher.matches() ? matcher.group(1) : "");
+    }
+
     @Override
     public void run() {
-        System.out.println("Starting REPL...");
-        BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("Starting REPL...\nType 'help' for a list of commands.");
+        input = new InputStreamReader(System.in);
+        bufferRead = new BufferedReader(input);
         while (running)
         {
             String line;
             try
             {
                 System.out.print("> ");
-                line = bufferRead.readLine();
+                try {
+                    line = interruptibleReadLine(bufferRead);
+                } catch (InterruptedException e) {
+                    System.out.println("\nClosing REPL...");
+                    return;
+                }
+
                 String[] args = line.split(" ");
                 String cmd = args[0];
                 switch (cmd)
@@ -64,9 +107,13 @@ public class REPL implements Runnable
                         simulation.toggleDebug();
                         break;
                     case "toggleui":
-                        System.out.println("Toggling UI.");
-                        window.getFrame().setVisible(!window.getFrame().isVisible());
-                        simulation.toggleUpdateDelay();
+                        if (window != null) {
+                            System.out.println("Toggling UI.");
+                            window.getFrame().setVisible(!window.getFrame().isVisible());
+                            simulation.toggleUpdateDelay();
+                        } else {
+                            System.out.println("No UI to toggle.");
+                        }
                         break;
                     case "pause":
                         simulation.togglePause();

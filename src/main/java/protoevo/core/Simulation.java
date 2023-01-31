@@ -8,6 +8,7 @@ import protoevo.biology.Protozoan;
 import com.github.javafaker.Faker;
 import protoevo.env.Tank;
 import protoevo.utils.FileIO;
+import protoevo.utils.REPL;
 import protoevo.utils.Utils;
 
 import java.io.*;
@@ -36,6 +37,7 @@ public class Simulation
 	private final String name;
 	private final String genomeFile, historyFile;
 	private List<String> statsNames;
+	private final REPL repl;
 
 	public Simulation()
 	{
@@ -49,6 +51,8 @@ public class Simulation
 		newDefaultTank();
 		loadSettings();
 		RANDOM = new Random(Settings.simulationSeed);
+		repl = new REPL(this);
+		new Thread(repl).start();
 	}
 
 	public Simulation(String name)
@@ -63,6 +67,8 @@ public class Simulation
 		loadMostRecentTank();
 		loadSettings();
 		RANDOM = new Random(Settings.simulationSeed);
+		repl = new REPL(this);
+		new Thread(repl).start();
 	}
 
 	public Simulation(String name, String save)
@@ -76,6 +82,12 @@ public class Simulation
 		loadTank("saves/" + name + "/tank/" + save);
 		loadSettings();
 		RANDOM = new Random(Settings.simulationSeed);
+		repl = new REPL(this);
+		new Thread(repl).start();
+	}
+
+	public REPL getREPL() {
+		return repl;
 	}
 
 	private void loadSettings() {
@@ -173,12 +185,11 @@ public class Simulation
 		makeHistorySnapshot();
 		float refreshDelay = 1f / Settings.targetFPS;
 		while (simulate) {
-			if (pause)
-				continue;
 
 			if (delayUpdate && Settings.targetFPS > 0) {
 				double currTime = Utils.getTimeSeconds();
-				update();
+				if (!pause)
+					update();
 				float updateTime = (float) (Utils.getTimeSeconds() - currTime);
 				try {
 					if (refreshDelay - updateTime > 0)
@@ -187,7 +198,8 @@ public class Simulation
 					throw new RuntimeException(e);
 				}
 			} else {
-				update();
+				if (!pause)
+					update();
 			}
 
 			if (tank.numberOfProtozoa() <= 0 && Settings.finishOnProtozoaExtinction) {
@@ -197,6 +209,7 @@ public class Simulation
 				printStats();
 			}
 		}
+		System.out.println("Simulation loop ended.");
 	}
 
 	public void printStats() {
@@ -227,6 +240,7 @@ public class Simulation
 
 	public void close() {
 		simulate = false;
+		repl.close();
 		System.out.println();
 		System.out.println("Closing simulation.");
 		saveTank();
@@ -278,5 +292,13 @@ public class Simulation
 
 	public void toggleUpdateDelay() {
 		delayUpdate = !delayUpdate;
+	}
+
+	public boolean isPaused() {
+		return pause;
+	}
+
+	public boolean isFinished() {
+		return !simulate;
 	}
 }

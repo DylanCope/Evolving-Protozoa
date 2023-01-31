@@ -2,16 +2,22 @@ package protoevo.ui.simulation;
 
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 import protoevo.biology.NNBrain;
+import protoevo.core.Application;
 import protoevo.core.Settings;
 import protoevo.core.Simulation;
 import protoevo.neat.NeuralNetwork;
 import protoevo.neat.Neuron;
 import protoevo.biology.Cell;
 import protoevo.ui.Window;
+import protoevo.ui.components.TextButton;
 import protoevo.ui.components.TextObject;
 import protoevo.ui.components.TextStyle;
+import protoevo.ui.components.UIComponent;
+import protoevo.ui.main.MainScreenController;
+import protoevo.ui.main.MainScreenRenderer;
 import protoevo.utils.*;
 import protoevo.biology.Protozoan;
 
@@ -28,6 +34,8 @@ public class SimulationUI implements ChangeListener {
 	private final ArrayList<TextObject> debugInfo;
 	private final int infoTextSize, textAwayFromEdge;
 	private boolean showFPS = Settings.showFPS;
+	private final List<UIComponent> uiComponents = new ArrayList<>();
+	private final TextButton pauseButton;
 
 	public SimulationUI(Window window, Simulation simulation, SimulationRenderer renderer)
 	{
@@ -66,6 +74,33 @@ public class SimulationUI implements ChangeListener {
 		debugInfo.add(fpsText);
 		textAwayFromEdge = window.getWidth() / 60;
 
+		pauseButton = new TextButton(
+				new TextObject("Pause", infoTextSize, Color.WHITE.darker()),
+				this::togglePause
+		);
+//		pauseButton.setBackgroundColour(new Color(80, 80, 15, 150));
+
+		pauseButton.setPosition(new Vector2(
+				.5f * pauseButton.getHeight(),
+				window.getHeight() - 1.3f * pauseButton.getHeight()
+		));
+		window.getInput().registerUIClickable(pauseButton);
+		uiComponents.add(pauseButton);
+
+		TextButton quitButton = new TextButton(
+				new TextObject("Save and Quit", infoTextSize, Color.WHITE.darker()),
+				() -> {
+					simulation.close();
+					Application.exit();
+				}
+		);
+		quitButton.setPosition(new Vector2(
+				window.getWidth() - quitButton.getWidth() - quitButton.getHeight() * .5f,
+				window.getHeight() - 1.3f * quitButton.getHeight()
+		));
+		window.getInput().registerUIClickable(quitButton);
+		uiComponents.add(quitButton);
+
 		creatingTank = new TextObject("Generating Initial Tank...", infoTextSize,
 				new Vector2(textAwayFromEdge, getYPosLHS(1)));
 		creatingTank.setColor(Color.WHITE.darker());
@@ -85,6 +120,16 @@ public class SimulationUI implements ChangeListener {
 		framesPerSecond.setLabelTable( labelTable );
 
 		framesPerSecond.setPaintLabels(true);
+	}
+
+	private void togglePause() {
+		synchronized (simulation) {
+			simulation.togglePause();
+			if (simulation.isPaused())
+				pauseButton.getText().setText("Unpause");
+			else
+				pauseButton.getText().setText("Pause");
+		}
 	}
 
 	public float getYPosLHS(int i) {
@@ -120,6 +165,8 @@ public class SimulationUI implements ChangeListener {
 			creatingTank.render(g);
 			return;
 		}
+
+		uiComponents.forEach(uiComponent -> uiComponent.render(g));
 
 		Cell tracked = renderer.getTracked();
 		if (tracked == null) {

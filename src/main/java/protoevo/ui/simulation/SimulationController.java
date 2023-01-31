@@ -52,10 +52,10 @@ public class SimulationController implements Controller
 
 	public void update()
 	{
-		if (input.getKey(KeyEvent.VK_ESCAPE)) {
-			simulation.close();
-			Application.exit();
-		}
+//		if (input.getKey(KeyEvent.VK_ESCAPE)) {
+//			simulation.close();
+//			Application.exit();
+//		}
 
 		renderer.setZoom(1 - input.getMouseWheelRotation() / 7.0f);
 

@@ -23,7 +23,7 @@ around and behind plant cells.
 
 ## Running the Simulation
 
-**Prerequisites:** Make sure you have the latest version of [Java](https://www.java.com/download/ie_manual.jsp) installed.
+**Prerequisites:** Make sure you have [Java version 9 or greater](https://www.techspot.com/downloads/6463-java-se.html) installed.
 
 Start by downloading the latest version from the [Releases page on GitHub](https://github.com/DylanCope/Evolving-Protozoa/releases).
 The program will be downloaded as a ZIP file, so unzip it and locate the `Evolving-Protozoa.jar` file. You should

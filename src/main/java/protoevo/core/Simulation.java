@@ -26,7 +26,7 @@ public class Simulation
 	public static String defaultSettingsPath = "config/default_settings.yaml";
 	public static String settingsPath = defaultSettingsPath;
 
-	private Tank tank;
+	private final Tank tank;
 	private boolean simulate, pause = false;
 	private float timeDilation = 1, timeSinceSave = 0, timeSinceSnapshot = 0;
 	private double lastUpdateTime = 0;
@@ -48,7 +48,8 @@ public class Simulation
 		historyFile = "saves/" + name + "/history.csv";
 		settingsPath = "saves/" + name + "/settings.yaml";
 		newSaveDir();
-		newDefaultTank();
+		tank = new Tank();
+		tank.setGenomeFile(genomeFile);
 		loadSettings();
 		RANDOM = new Random(Settings.simulationSeed);
 		repl = new REPL(this);
@@ -64,7 +65,7 @@ public class Simulation
 		settingsPath = "saves/" + name + "/settings.yaml";
 
 		newSaveDir();
-		loadMostRecentTank();
+		tank = loadMostRecentTank();
 		loadSettings();
 		RANDOM = new Random(Settings.simulationSeed);
 		repl = new REPL(this);
@@ -79,7 +80,7 @@ public class Simulation
 		historyFile = "saves/" + name + "/history.csv";
 
 		newSaveDir();
-		loadTank("saves/" + name + "/tank/" + save);
+		tank = loadTank("saves/" + name + "/tank/" + save);
 		loadSettings();
 		RANDOM = new Random(Settings.simulationSeed);
 		repl = new REPL(this);
@@ -139,45 +140,38 @@ public class Simulation
 				faker.pokemon().name().toLowerCase().replaceAll(" ", "-"),
 				faker.lorem().word().toLowerCase().replaceAll(" ", "-"));
 	}
-	
-	public void newDefaultTank()
-	{
-		tank = new Tank();
-		loadSettings();
-		tank.setGenomeFile(genomeFile);
-	}
 
 	public void setupTank() {
 		tank.initialise();
 	}
 
-	public void loadTank(String filename)
+	public Tank loadTank(String filename)
 	{
 		try {
-			tank = (Tank) FileIO.load(filename);
+			Tank tank = (Tank) FileIO.load(filename);
 			System.out.println("Loaded tank at: " + filename);
+			return tank;
 		} catch (IOException | ClassNotFoundException e) {
 			System.out.println("Unable to load tank at " + filename + " because: " + e.getMessage());
-			newDefaultTank();
+			throw new RuntimeException(e);
 		}
 	}
 
-	public void loadMostRecentTank() {
+	public Tank loadMostRecentTank() {
 		Path dir = Paths.get("saves/" + name + "/tank");
-		if (Files.exists(dir))
+		if (Files.exists(dir)) {
 			try (Stream<Path> pathStream = Files.list(dir)) {
 				Optional<Path> lastFilePath = pathStream
 						.filter(f -> !Files.isDirectory(f))
 						.max(Comparator.comparingLong(f -> f.toFile().lastModified()));
 
-				lastFilePath.ifPresentOrElse(
-						path -> loadTank(path.toString().replace(".dat", "")),
-						this::newDefaultTank
-				);
+				if (lastFilePath.isPresent())
+					return loadTank(lastFilePath.get().toString().replace(".dat", ""));
+				else throw new RuntimeException("No tank files found.");
 			} catch (IOException e) {
-				newDefaultTank();
+				throw new RuntimeException(e);
 			}
-		else newDefaultTank();
+		} else throw new RuntimeException("No tank files found.");
 	}
 
 	public void simulate() {
@@ -299,5 +293,16 @@ public class Simulation
 
 	public boolean isFinished() {
 		return !simulate;
+	}
+
+	public void toggleSpeed() {
+		if (timeDilation <= 1f)
+			timeDilation = 2f;
+		else if (timeDilation <= 2f)
+			timeDilation = 5f;
+		else if (timeDilation <= 5f)
+			timeDilation = 10f;
+		else
+			timeDilation = 1f;
 	}
 }

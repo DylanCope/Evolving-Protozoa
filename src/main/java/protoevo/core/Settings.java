@@ -89,7 +89,7 @@ public final class Settings {
     public static final float simulationUpdateDelta = 5f / 1000f;
     public static final int targetFPS = getInstance().target_fps;
     public static final float maxProtozoaSpeed = .01f;
-    public static final float maxParticleSpeed = 1e-4f;
+    public static final float maxParticleSpeed = .05f;
     public static final float timeBetweenSaves = 2000.0f;
     public static final float historySnapshotTime = 2.0f;
     public static final boolean writeGenomes = true;

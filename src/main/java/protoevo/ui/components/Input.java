@@ -76,6 +76,8 @@ public class Input implements KeyListener, FocusListener,
 		return false;
 	}
 
+	// awful behaviour - can only be called once per click and return true
+	// needs to be fixed so that it can be called multiple times per click
 	public boolean isLeftMouseJustPressed()  { return mouseButtonJustDown(1); }
 	public boolean isRightMouseJustPressed() { return mouseButtonJustDown(3); }
 	public boolean isLeftMousePressed()  	 { return getMouse(1); 			  }
@@ -203,18 +205,18 @@ public class Input implements KeyListener, FocusListener,
 
 
 	public void update() {
-		if (isLeftMouseJustPressed()) {
-			for (Clickable clickable : uiClickHandlers) {
-				if (clickable.isActive() &&
-						clickable.isInClickRegion((int) mousePosition.getX(), (int) mousePosition.getY())) {
+		for (Clickable clickable : uiClickHandlers) {
+			if (clickable.isActive()
+					&& clickable.isInClickRegion((int) mousePosition.getX(), (int) mousePosition.getY())
+					&& isLeftMouseJustPressed()) {
 					clickable.onClick();
 					return; // UI clicks supersede simulation
-				}
 			}
-
-			for (Runnable callback : onLeftClickCallbacks)
-				callback.run();
 		}
+
+		for (Runnable callback : onLeftClickCallbacks)
+			callback.run();
+
 		if (isRightMousePressed())
 			for (Runnable callback : onRightClickCallbacks)
 				callback.run();

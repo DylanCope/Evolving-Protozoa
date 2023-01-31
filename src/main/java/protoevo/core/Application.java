@@ -1,10 +1,9 @@
 package protoevo.core;
 
+import protoevo.ui.Window;
+import protoevo.ui.components.TextStyle;
 import protoevo.ui.simulation.SimulationController;
 import protoevo.ui.simulation.SimulationRenderer;
-import protoevo.utils.REPL;
-import protoevo.ui.components.TextStyle;
-import protoevo.ui.Window;
 
 import javax.swing.*;
 import java.util.HashMap;

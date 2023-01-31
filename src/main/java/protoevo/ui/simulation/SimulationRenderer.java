@@ -36,9 +36,6 @@ public class SimulationRenderer extends Canvas {
 	private final HashMap<String, Integer> stats = new HashMap<>(5, 1);
 	private final Simulation simulation;
 	private final protoevo.ui.Window window;
-	private final int microscopePolygonNPoints = 500;
-	private int microscopePolygonXPoints[] = new int[microscopePolygonNPoints];
-	private int microscopePolygonYPoints[] = new int[microscopePolygonNPoints];
 
 	public SimulationRenderer(Simulation simulation, Window window)
 	{
@@ -520,42 +517,6 @@ public class SimulationRenderer extends Canvas {
 			drawCircle(g, pos, r, color, window.getHeight() / 500);
 	}
 	
-	public void maskTank(Graphics g, Vector2 coords, float r, int alpha)
-	{
-		
-		int n = microscopePolygonNPoints - 7;
-		for (int i = 0; i < n; i++) 
-		{
-			float t = (float) (2*Math.PI * i / (float) n);
-			microscopePolygonXPoints[i] = (int) (coords.getX() + r * Math.cos(t));
-			microscopePolygonYPoints[i] = (int) (coords.getY() + r * Math.sin(t));
-		}
-		
-		microscopePolygonXPoints[n] 	 = (int) (coords.getX()) + (int) r;
-		microscopePolygonYPoints[n]	 = (int) (coords.getY());
-		
-		microscopePolygonXPoints[n+1] = window.getWidth();
-		microscopePolygonYPoints[n+1] = (int) (coords.getY());
-		
-		microscopePolygonXPoints[n+2] = window.getWidth();
-		microscopePolygonYPoints[n+2] = 0;
-		
-		microscopePolygonXPoints[n+3] = 0;
-		microscopePolygonYPoints[n+3] = 0;
-		
-		microscopePolygonXPoints[n+4] = 0;
-		microscopePolygonYPoints[n+4] = window.getHeight();
-		
-		microscopePolygonXPoints[n+5] = window.getWidth();
-		microscopePolygonYPoints[n+5] = window.getHeight();
-		
-		microscopePolygonXPoints[n+6] = window.getWidth();
-		microscopePolygonYPoints[n+6] = (int) (coords.getY());
-		
-		g.setColor(new Color(0, 0, 0, alpha));
-		g.fillPolygon(microscopePolygonXPoints, microscopePolygonYPoints, microscopePolygonNPoints);
-	}
-	
 	public void background(Graphics2D graphics)
 	{
 		time += 0.1;
@@ -661,13 +622,10 @@ public class SimulationRenderer extends Canvas {
 				background(graphics);
 				entities(graphics, simulation.getTank());
 				rocks(graphics, simulation.getTank());
-				maskTank(graphics,
-						tankRenderCoords,
-						getTracked() != null ? getTrackingScopeRadius() : tankRenderRadius,
-						simulation.inDebugMode() ? 150 : 200);
-				maskTank(graphics,
+
+				ui.maskTank(graphics,
 						toRenderSpace(new Vector2(0, 0)),
-						tankRenderRadius * zoom,
+						getTankRenderRadius() * getZoom(),
 						simulation.inDebugMode() ? 100 : 255);
 
 				if (showUI)
@@ -683,6 +641,10 @@ public class SimulationRenderer extends Canvas {
 	public float getTankViewRadius() {
 		if (track != null)
 			return getTrackingScopeRadius();
+		return tankRenderRadius;
+	}
+
+	public float getTankRenderRadius() {
 		return tankRenderRadius;
 	}
 
@@ -784,5 +746,9 @@ public class SimulationRenderer extends Canvas {
 
 	public SimulationUI getUI() {
 		return ui;
+	}
+
+	public Vector2 getTankViewCoords() {
+		return tankRenderCoords;
 	}
 }

@@ -8,7 +8,7 @@ public class TextButton implements Clickable {
 
     private Vector2 pos;
     private TextObject text;
-    private final Runnable onClickRunnable;
+    private Runnable onClickRunnable;
     private boolean active = true, flipFlop = false, clicked = false;
     private long lastClickTime = 0;
     private int depressTime = 200; // milliseconds
@@ -24,6 +24,10 @@ public class TextButton implements Clickable {
 
     public TextButton(TextObject text, Runnable onClick) {
         this(text, onClick, 0.25f);
+    }
+
+    public TextButton(TextObject text) {
+        this(text, () -> {});
     }
 
     public int getPadAmount() {
@@ -108,5 +112,9 @@ public class TextButton implements Clickable {
 
     public TextObject getText() {
         return text;
+    }
+
+    public void setRunnable(Runnable runnable) {
+        this.onClickRunnable = runnable;
     }
 }

@@ -35,7 +35,10 @@ public class SimulationUI implements ChangeListener {
 	private final int infoTextSize, textAwayFromEdge;
 	private boolean showFPS = Settings.showFPS;
 	private final List<UIComponent> uiComponents = new ArrayList<>();
-	private final TextButton pauseButton;
+	private final List<TextButton> leftButtons = new ArrayList<>();
+	private final int microscopePolygonNPoints = 500;
+	private int microscopePolygonXPoints[] = new int[microscopePolygonNPoints];
+	private int microscopePolygonYPoints[] = new int[microscopePolygonNPoints];
 
 	public SimulationUI(Window window, Simulation simulation, SimulationRenderer renderer)
 	{
@@ -74,18 +77,46 @@ public class SimulationUI implements ChangeListener {
 		debugInfo.add(fpsText);
 		textAwayFromEdge = window.getWidth() / 60;
 
-		pauseButton = new TextButton(
-				new TextObject("Pause", infoTextSize, Color.WHITE.darker()),
-				this::togglePause
-		);
-//		pauseButton.setBackgroundColour(new Color(80, 80, 15, 150));
-
-		pauseButton.setPosition(new Vector2(
-				.5f * pauseButton.getHeight(),
-				window.getHeight() - 1.3f * pauseButton.getHeight()
-		));
+		TextButton pauseButton = new TextButton(new TextObject("Pause", infoTextSize, Color.WHITE.darker()));
+		pauseButton.setRunnable(
+				() -> {
+					synchronized (simulation) {
+						simulation.togglePause();
+						if (simulation.isPaused())
+							pauseButton.getText().setText("Unpause");
+						else
+							pauseButton.getText().setText("Pause");
+					}
+					updateLeftButtonPositions();
+				});
+		leftButtons.add(pauseButton);
 		window.getInput().registerUIClickable(pauseButton);
 		uiComponents.add(pauseButton);
+
+		TextButton speedButton = new TextButton(new TextObject("x1", infoTextSize, Color.WHITE.darker()));
+		speedButton.setRunnable(
+				() -> {
+					synchronized (simulation) {
+						simulation.toggleSpeed();
+						speedButton.getText().setText(
+								"x" + TextStyle.numberToString(simulation.getTimeDilation(), 1));
+					}
+					updateLeftButtonPositions();
+				});
+		window.getInput().registerUIClickable(speedButton);
+		uiComponents.add(speedButton);
+		leftButtons.add(speedButton);
+
+		TextButton toggleUIButton = new TextButton(
+				new TextObject("Toggle UI", infoTextSize, Color.WHITE.darker()));
+		toggleUIButton.setRunnable(
+				() -> {
+					window.getFrame().setVisible(!window.getFrame().isVisible());
+					simulation.toggleUpdateDelay();
+				});
+		window.getInput().registerUIClickable(toggleUIButton);
+		uiComponents.add(toggleUIButton);
+		leftButtons.add(toggleUIButton);
 
 		TextButton quitButton = new TextButton(
 				new TextObject("Save and Quit", infoTextSize, Color.WHITE.darker()),
@@ -120,15 +151,17 @@ public class SimulationUI implements ChangeListener {
 		framesPerSecond.setLabelTable( labelTable );
 
 		framesPerSecond.setPaintLabels(true);
+
+		updateLeftButtonPositions();
 	}
 
-	private void togglePause() {
-		synchronized (simulation) {
-			simulation.togglePause();
-			if (simulation.isPaused())
-				pauseButton.getText().setText("Unpause");
-			else
-				pauseButton.getText().setText("Pause");
+	public void updateLeftButtonPositions() {
+		float x = leftButtons.get(0).getHeight() * .5f;
+		float y = window.getHeight() - 1.3f * leftButtons.get(0).getHeight();
+
+		for (TextButton button : leftButtons) {
+			button.setPosition(new Vector2(x, y));
+			x += button.getWidth() + button.getHeight() * .5f;
 		}
 	}
 
@@ -155,8 +188,49 @@ public class SimulationUI implements ChangeListener {
 		return lineNumber;
 	}
 
+	public void maskTank(Graphics g, Vector2 coords, float r, int alpha)
+	{
+
+		int n = microscopePolygonNPoints - 7;
+		for (int i = 0; i < n; i++)
+		{
+			float t = (float) (2*Math.PI * i / (float) n);
+			microscopePolygonXPoints[i] = (int) (coords.getX() + r * Math.cos(t));
+			microscopePolygonYPoints[i] = (int) (coords.getY() + r * Math.sin(t));
+		}
+
+		microscopePolygonXPoints[n] 	 = (int) (coords.getX()) + (int) r;
+		microscopePolygonYPoints[n]	 = (int) (coords.getY());
+
+		microscopePolygonXPoints[n+1] = window.getWidth();
+		microscopePolygonYPoints[n+1] = (int) (coords.getY());
+
+		microscopePolygonXPoints[n+2] = window.getWidth();
+		microscopePolygonYPoints[n+2] = 0;
+
+		microscopePolygonXPoints[n+3] = 0;
+		microscopePolygonYPoints[n+3] = 0;
+
+		microscopePolygonXPoints[n+4] = 0;
+		microscopePolygonYPoints[n+4] = window.getHeight();
+
+		microscopePolygonXPoints[n+5] = window.getWidth();
+		microscopePolygonYPoints[n+5] = window.getHeight();
+
+		microscopePolygonXPoints[n+6] = window.getWidth();
+		microscopePolygonYPoints[n+6] = (int) (coords.getY());
+
+		g.setColor(new Color(0, 0, 0, alpha));
+		g.fillPolygon(microscopePolygonXPoints, microscopePolygonYPoints, microscopePolygonNPoints);
+	}
+
 	public void render(Graphics2D g)
 	{
+		maskTank(g,
+				renderer.getTankViewCoords(),
+				renderer.getTankViewRadius(),
+				simulation.inDebugMode() ? 150 : 200);
+
 		title.render(g);
 
 		int lineNumber = 0;

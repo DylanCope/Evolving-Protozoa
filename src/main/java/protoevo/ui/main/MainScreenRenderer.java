@@ -1,10 +1,12 @@
 package protoevo.ui.main;
 
+import protoevo.core.Application;
 import protoevo.core.Simulation;
 import protoevo.ui.Window;
 import protoevo.ui.components.TextButton;
 import protoevo.ui.components.TextObject;
 import protoevo.ui.components.TextStyle;
+import protoevo.ui.components.UIComponent;
 import protoevo.ui.simulation.SimulationController;
 import protoevo.ui.simulation.SimulationRenderer;
 import protoevo.utils.Vector2;
@@ -25,8 +27,9 @@ public class MainScreenRenderer extends Canvas {
     private final Window window;
     private float time = 0;
     private final BufferedImage thumbnailImage;
-    private final TextButton newSimulationButton;
-    private final List<TextButton> loadSaveButtons = new ArrayList<>();
+//    private final TextButton newSimulationButton;
+//    private final List<TextButton> loadSaveButtons = new ArrayList<>();
+    private final List<UIComponent> uiComponents = new ArrayList<>();
 
     public static void main(String[] args)
     {
@@ -63,7 +66,7 @@ public class MainScreenRenderer extends Canvas {
         TextObject newSimulationButtonText = new TextObject(
                 "Create New Simulation", buttonTextSize, Color.WHITE.darker());
 
-        newSimulationButton = new TextButton(
+        TextButton newSimulationButton = new TextButton(
                 newSimulationButtonText,
                 () -> {
                     window.reset();
@@ -81,6 +84,7 @@ public class MainScreenRenderer extends Canvas {
                     }
                 });
         window.getInput().registerUIClickable(newSimulationButton);
+        uiComponents.add(newSimulationButton);
 
         float buttonsX = window.getWidth() * 0.45f;
         newSimulationButton.setPosition(new Vector2(
@@ -143,10 +147,21 @@ public class MainScreenRenderer extends Canvas {
                             buttonsX,
                             newSimY + (i + 1) * offset));
 
-                    loadSaveButtons.add(loadSaveButton);
+                    uiComponents.add(loadSaveButton);
                 }
             }
         }
+
+        TextButton quitButton = new TextButton(
+                new TextObject("Exit Application", window.getHeight() / 50, Color.WHITE.darker()),
+                Application::exit
+        );
+        quitButton.setPosition(new Vector2(
+                window.getWidth() - quitButton.getWidth() - quitButton.getHeight() * .5f,
+                window.getHeight() - 1.3f * quitButton.getHeight()
+        ));
+        window.getInput().registerUIClickable(quitButton);
+        uiComponents.add(quitButton);
     }
 
     @Override
@@ -172,7 +187,8 @@ public class MainScreenRenderer extends Canvas {
         int imgY = (int) (window.getHeight() / 2f - thumbnailImage.getHeight() / 2f);
         graphics.drawImage(thumbnailImage, imgX, imgY, null);
 
-        newSimulationButton.render(graphics);
-        loadSaveButtons.forEach(button -> button.render(graphics));
+//        newSimulationButton.render(graphics);
+//        loadSaveButtons.forEach(button -> button.render(graphics));
+        uiComponents.forEach(component -> component.render(graphics));
     }
 }

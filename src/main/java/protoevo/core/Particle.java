@@ -52,8 +52,9 @@ public class Particle extends Collidable implements Serializable {
     {
         Vector2 verletVel = pos.sub(prevPos).scale(1f - Settings.tankFluidResistance);
         Vector2 dx = verletVel.translate(acc.mul(delta * delta));
-        if (dx.len2() > Settings.maxParticleSpeed * Settings.maxParticleSpeed)
-            dx.setLength(Settings.maxParticleSpeed);
+        float maxTravel = Settings.maxParticleSpeed * delta;
+        if (dx.len2() > maxTravel * maxTravel)
+            dx.setLength(maxTravel);
         prevPos.set(pos);
         pos.translate(dx);
     }

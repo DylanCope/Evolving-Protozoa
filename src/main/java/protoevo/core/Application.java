@@ -1,8 +1,10 @@
 package protoevo.core;
 
+import protoevo.ui.simulation.SimulationController;
+import protoevo.ui.simulation.SimulationRenderer;
 import protoevo.utils.REPL;
-import protoevo.utils.TextStyle;
-import protoevo.utils.Window;
+import protoevo.ui.components.TextStyle;
+import protoevo.ui.Window;
 
 import javax.swing.*;
 import java.util.HashMap;
@@ -28,15 +30,24 @@ public class Application
 	public static void main(String[] args)
 	{
 		Map<String, String> argsMap = parseArgs(args);
-		if (argsMap.containsKey("-save"))
-			simulation = new Simulation(argsMap.get("-save"));
+		run(argsMap);
+	}
+
+	public static void run(Map<String, String> args) {
+		if (args.containsKey("-save"))
+			simulation = new Simulation(args.get("-save"));
 		else
 			simulation = new Simulation();
 
 		try {
-			if (!(args.length > 0 && args[0].equals("noui"))) {
+			if (!(Boolean.parseBoolean(args.getOrDefault("noui", "false")))) {
 				TextStyle.loadFonts();
-				window = new Window("Evolving Protozoa", simulation);
+				window = new Window("Evolving Protozoa");
+
+				SimulationRenderer renderer = new SimulationRenderer(simulation, window);
+				SimulationController controller = new SimulationController(window, simulation, renderer);
+				window.set(renderer, controller);
+
 				SwingUtilities.invokeLater(window);
 			}
 			new Thread(new REPL(simulation, window)).start();

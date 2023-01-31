@@ -1,23 +1,29 @@
-package protoevo.core;
+package protoevo.ui.simulation;
 
 import java.awt.event.KeyEvent;
 
 import protoevo.biology.Cell;
+import protoevo.core.Application;
+import protoevo.core.Chunk;
+import protoevo.core.Settings;
+import protoevo.core.Simulation;
 import protoevo.env.Tank;
-import protoevo.utils.Input;
+import protoevo.ui.Controller;
+import protoevo.ui.Window;
+import protoevo.ui.components.Input;
 import protoevo.utils.Vector2;
 
-public class Controller
+public class SimulationController implements Controller
 {
 	private final Input input;
 	private final Simulation simulation;
-	private final Renderer renderer;
+	private final SimulationRenderer renderer;
 	
-	public Controller(Input input, Simulation simulation, Renderer renderer)
+	public SimulationController(Window window, Simulation simulation, SimulationRenderer renderer)
 	{
-		this.input = input;
 		this.simulation = simulation;
 		this.renderer = renderer;
+		this.input = window.getInput();
 
 		input.registerOnPressHandler(KeyEvent.VK_F1, simulation::togglePause);
 		input.registerOnPressHandler(KeyEvent.VK_F2, renderer.getUI()::toggleShowFPS);

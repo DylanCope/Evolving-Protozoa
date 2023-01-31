@@ -1,22 +1,21 @@
-package protoevo.core;
+package protoevo.ui.simulation;
 
 import java.awt.*;
-import java.awt.image.BufferStrategy;
 import java.util.*;
 
 import protoevo.biology.*;
+import protoevo.core.*;
 import protoevo.env.ChemicalSolution;
 import protoevo.env.Rock;
 import protoevo.env.Tank;
+import protoevo.ui.Window;
 import protoevo.utils.Utils;
 import protoevo.utils.Vector2;
-import protoevo.utils.Window;
 
-public class Renderer extends Canvas
-{	
+public class SimulationRenderer extends Canvas {
 	private static final long serialVersionUID = 1L;
 	
-	float time = 0;
+	private float time = 0;
 	private final Vector2 tankRenderCoords;
 	private final float tankRenderRadius;
 	private Vector2 pan, panPosTemp;
@@ -30,18 +29,18 @@ public class Renderer extends Canvas
 	private double lastFPSTime = 0;
 	private int framesRendered = 0;
 	private Cell track;
-	private final UI ui;
+	private final SimulationUI ui;
 	private boolean showUI = true;
 	public boolean antiAliasing = Settings.antiAliasing;
 
 	private final HashMap<String, Integer> stats = new HashMap<>(5, 1);
 	private final Simulation simulation;
-	private final Window window;
+	private final protoevo.ui.Window window;
 	private final int microscopePolygonNPoints = 500;
 	private int microscopePolygonXPoints[] = new int[microscopePolygonNPoints];
 	private int microscopePolygonYPoints[] = new int[microscopePolygonNPoints];
 
-	public Renderer(Simulation simulation, Window window)
+	public SimulationRenderer(Simulation simulation, Window window)
 	{
 		this.simulation = simulation;
 		this.window = window;
@@ -64,8 +63,7 @@ public class Renderer extends Canvas
 		targetZoom = zoom;
 		zoomRange *= simulation.getTank().getRadius();
 
-		
-		ui = new UI(window, simulation, this);
+		ui = new SimulationUI(window, simulation, this);
 		
 		requestFocus();
 		setFocusable(true);
@@ -629,9 +627,12 @@ public class Renderer extends Canvas
 				graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 		}
 	}
-	
-	public void render()
+
+	@Override
+	public void paint(Graphics g)
 	{
+		Graphics2D graphics = (Graphics2D) g;
+
 		int fps = stats.get("FPS");
 		stats.replaceAll((s, v) -> 0);
 		stats.put("FPS", fps);
@@ -642,15 +643,6 @@ public class Renderer extends Canvas
 			lastFPSTime = Utils.getTimeSeconds();
 		}
 		superSimpleRender = stats.get("FPS") <= 10;
-
-		BufferStrategy bs = this.getBufferStrategy();
-		
-		if (bs == null) {
-			this.createBufferStrategy(3);
-			return;
-		}
-		
-		Graphics2D graphics = (Graphics2D) bs.getDrawGraphics();
 
 		if (antiAliasing)
 			graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -682,7 +674,6 @@ public class Renderer extends Canvas
 					ui.render(graphics);
 
 				graphics.dispose();
-				bs.show();
 				framesRendered++;
 
 			} catch (ConcurrentModificationException ignored) {}
@@ -791,7 +782,7 @@ public class Renderer extends Canvas
 		return advancedDebugInfo;
 	}
 
-	public UI getUI() {
+	public SimulationUI getUI() {
 		return ui;
 	}
 }

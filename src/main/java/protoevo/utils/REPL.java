@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 
 import protoevo.core.Application;
 import protoevo.core.Simulation;
+import protoevo.ui.Window;
 
 public class REPL implements Runnable
 {

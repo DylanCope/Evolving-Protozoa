@@ -1,4 +1,4 @@
-package protoevo.utils;
+package protoevo.ui.components;
 
 import java.awt.Color;
 import java.awt.Font;

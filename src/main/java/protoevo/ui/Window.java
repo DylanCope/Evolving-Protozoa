@@ -1,38 +1,33 @@
-package protoevo.utils;
+package protoevo.ui;
 
-import protoevo.core.*;
-import protoevo.core.Renderer;
+import protoevo.ui.components.Input;
+import protoevo.utils.Vector2;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferStrategy;
 
 public class Window extends Canvas implements Runnable, ActionListener
 {
 
 	private static final long serialVersionUID = -2111860594941368902L;
 
-	private JFrame frame;
+	private final JFrame frame;
 	private Input input;
-	private Renderer renderer;
-	private Simulation simulation;
+	private Canvas renderer;
 	private Controller controller;
 	private int width, height;
 
-	private final Timer timer = new Timer(1000 / Settings.targetFPS, this);
+	private final Timer timer = new Timer(1000 / 60, this);
 	
-	public Window(String title, Simulation simulation)
+	public Window(String title)
 	{
 		Dimension d = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 		width = (int) d.getWidth();
 		height = (int) d.getHeight();
-//		width = 1920;
-//		height = 1080;
-		this.simulation = simulation;
 		input = new Input();
-
-		renderer = new Renderer(simulation, this);
 
 		frame = new JFrame(title);
 		frame.setPreferredSize(new Dimension(width, height));
@@ -44,11 +39,45 @@ public class Window extends Canvas implements Runnable, ActionListener
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
-		frame.add(renderer);
 		frame.setVisible(true);
+	}
 
-		controller = new Controller(input, simulation, renderer);
-		
+	public void reset() {
+		input = new Input();
+	}
+
+	public void set(Canvas renderer, Controller controller)
+	{
+		if (this.renderer != null)
+			frame.remove(this.renderer);
+
+		this.renderer = renderer;
+		this.controller = controller;
+
+		renderer.addKeyListener(input);
+		renderer.addMouseListener(input);
+		renderer.addMouseMotionListener(input);
+		renderer.addMouseWheelListener(input);
+		renderer.addFocusListener(input);
+		frame.add(renderer);
+		frame.pack();
+	}
+
+	public Window(JFrame frame, Canvas renderer, Controller controller)
+	{
+		Dimension d = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+		width = (int) d.getWidth();
+		height = (int) d.getHeight();
+		this.frame = frame;
+
+		input = new Input();
+
+//		renderer = new SimulationRenderer(simulation, this);
+//
+//		controller = new SimulationController(input, simulation, renderer);
+		this.renderer = renderer;
+		this.controller = controller;
+
 		renderer.addKeyListener(input);
 		renderer.addMouseListener(input);
 		renderer.addMouseMotionListener(input);
@@ -66,12 +95,29 @@ public class Window extends Canvas implements Runnable, ActionListener
 	public void actionPerformed(ActionEvent event)
 	{
 		if (frame.isVisible()) {
+			input.update();
 			controller.update();
-			renderer.render();
+
+			BufferStrategy bs = this.getBufferStrategy();
+			renderer.paint(bs.getDrawGraphics());
+			bs.show();
+
 			timer.restart();
 		}
 	}
-	
+
+	@Override
+	public BufferStrategy getBufferStrategy() {
+		BufferStrategy bs = renderer.getBufferStrategy();
+
+		if (bs == null) {
+			renderer.createBufferStrategy(3);
+			bs = renderer.getBufferStrategy();
+		}
+
+		return bs;
+	}
+
 	public Input getInput() {
 		return input;
 	}
@@ -92,11 +138,7 @@ public class Window extends Canvas implements Runnable, ActionListener
 		return frame;
 	}
 
-	public Controller getController() {
-		return controller;
-	}
-
 	public Vector2 getCurrentMousePosition() {
-		return controller.getCurrentMousePosition();
+		return input.getMousePosition();
 	}
 }

@@ -1,12 +1,16 @@
-package protoevo.utils;
+package protoevo.ui.components;
+
+import protoevo.utils.Vector2;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 public class Input implements KeyListener, FocusListener,
-				MouseListener, MouseMotionListener, MouseWheelListener 
+		MouseListener, MouseMotionListener, MouseWheelListener
 {
 	private Vector2 mousePosition = new Vector2(0, 0);
 	private Vector2 positionOnLeftClickDown = new Vector2(0, 0);
@@ -16,16 +20,31 @@ public class Input implements KeyListener, FocusListener,
 	private boolean[] mouseJustDown = new boolean[4];
 
 	private final HashMap<Integer, Runnable> onPressHandlers = new HashMap<>();
+	private final List<Clickable> uiClickHandlers = new ArrayList<>();
+	private final List<Runnable> onLeftClickCallbacks = new ArrayList<>();
+	private final List<Runnable> onRightClickCallbacks = new ArrayList<>();
 	public Runnable onLeftMouseRelease;
 
 	public void registerOnPressHandler(int key, Runnable handler) {
 		onPressHandlers.put(key, handler);
 	}
 
+	public void registerUIClickable(Clickable clickable) {
+		uiClickHandlers.add(clickable);
+	}
+
+	public void registerLeftClickCallback(Runnable callback) {
+		onLeftClickCallbacks.add(callback);
+	}
+
+	public void registerRightClickCallback(Runnable callback) {
+		onRightClickCallbacks.add(callback);
+	}
+
 	public void unregisterOnPressHandler(int key) {
 		onPressHandlers.remove(key);
 	}
-	
+
 	private int mouseWheelRotation = 0;
 
 	public void reset() {
@@ -34,7 +53,7 @@ public class Input implements KeyListener, FocusListener,
 		mouseLeftClickDelta = new Vector2(0, 0);
 		positionOnLeftClickDown = new Vector2(0, 0);
 	}
-	
+
 	public boolean getKey(int key) {
 		return keys[key];
 	}
@@ -42,7 +61,7 @@ public class Input implements KeyListener, FocusListener,
 	public boolean getMouse(int button) {
 		return mouseButtons[button];
 	}
-	
+
 	private boolean mouseButtonJustDown(int button)
 	{
 		if (getMouse(button) && !mouseJustDown[button])
@@ -56,16 +75,16 @@ public class Input implements KeyListener, FocusListener,
 		}
 		return false;
 	}
-	
+
 	public boolean isLeftMouseJustPressed()  { return mouseButtonJustDown(1); }
 	public boolean isRightMouseJustPressed() { return mouseButtonJustDown(3); }
 	public boolean isLeftMousePressed()  	 { return getMouse(1); 			  }
 	public boolean isRightMousePressed() 	 { return getMouse(3); 			  }
-	
+
 	public Vector2 getMousePosition() {
 		return mousePosition;
 	}
-	
+
 	public Vector2 getMouseLeftClickDelta() {
 		return mouseLeftClickDelta;
 	}
@@ -115,7 +134,7 @@ public class Input implements KeyListener, FocusListener,
 
 	@Override
 	public void mouseReleased(MouseEvent event) {
-		
+
 		int button = event.getButton();
 
 		if (SwingUtilities.isLeftMouseButton(event)) {
@@ -123,15 +142,15 @@ public class Input implements KeyListener, FocusListener,
 			if (onLeftMouseRelease != null)
 				onLeftMouseRelease.run();
 		}
-		
+
 		if (0 < button && button < mouseButtons.length)
 			mouseButtons[button] = false;
-		
+
 	}
 
 	@Override
 	public void focusGained(FocusEvent event) {
-		
+
 	}
 
 	@Override
@@ -142,10 +161,10 @@ public class Input implements KeyListener, FocusListener,
 	}
 
 	@Override
-	public void keyPressed(KeyEvent event) 
+	public void keyPressed(KeyEvent event)
 	{
 		int key = event.getKeyCode();
-		
+
 		if (0 < key && key < keys.length) {
 			if (!keys[key] & onPressHandlers.containsKey(key)) {
 				try {
@@ -159,13 +178,13 @@ public class Input implements KeyListener, FocusListener,
 	}
 
 	@Override
-	public void keyReleased(KeyEvent event) 
-	{	
+	public void keyReleased(KeyEvent event)
+	{
 		int key = event.getKeyCode();
-		
+
 		if (0 < key && key < keys.length)
 			keys[key] = false;
-		
+
 	}
 
 	@Override
@@ -177,11 +196,28 @@ public class Input implements KeyListener, FocusListener,
 	public void mouseWheelMoved(MouseWheelEvent arg0) {
 		mouseWheelRotation += arg0.getWheelRotation();
 	}
-	
+
 	public int getMouseWheelRotation() {
 		return mouseWheelRotation;
 	}
-	
-	
-	
+
+
+	public void update() {
+		if (isLeftMouseJustPressed()) {
+			for (Clickable clickable : uiClickHandlers) {
+				if (clickable.isActive() &&
+						clickable.isInClickRegion((int) mousePosition.getX(), (int) mousePosition.getY())) {
+					clickable.onClick();
+					return; // UI clicks supersede simulation
+				}
+			}
+
+			for (Runnable callback : onLeftClickCallbacks)
+				callback.run();
+		}
+		if (isRightMousePressed())
+			for (Runnable callback : onRightClickCallbacks)
+				callback.run();
+
+	}
 }

@@ -1,31 +1,35 @@
-package protoevo.core;
+package protoevo.ui.simulation;
 
 import java.awt.*;
 import java.util.*;
 
 import protoevo.biology.NNBrain;
+import protoevo.core.Settings;
+import protoevo.core.Simulation;
 import protoevo.neat.NeuralNetwork;
 import protoevo.neat.Neuron;
 import protoevo.biology.Cell;
+import protoevo.ui.Window;
+import protoevo.ui.components.TextObject;
+import protoevo.ui.components.TextStyle;
 import protoevo.utils.*;
 import protoevo.biology.Protozoan;
-import protoevo.utils.Window;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class UI implements ChangeListener {
-	private final Window window;
+public class SimulationUI implements ChangeListener {
+	private final protoevo.ui.Window window;
 	private final Simulation simulation;
-	private final protoevo.core.Renderer renderer;
+	private final SimulationRenderer renderer;
 	private final TextObject title, creatingTank;
 	private final ArrayList<TextObject> info;
 	private final ArrayList<TextObject> debugInfo;
 	private final int infoTextSize, textAwayFromEdge;
 	private boolean showFPS = Settings.showFPS;
 
-	public UI(Window window, Simulation simulation, Renderer renderer)
+	public SimulationUI(Window window, Simulation simulation, SimulationRenderer renderer)
 	{
 		this.window = window;
 		this.simulation = simulation;
@@ -318,8 +322,7 @@ public class UI implements ChangeListener {
 			g.setStroke(s);
 		}
 
-
-		Vector2 mousePos = window.getCurrentMousePosition();
+		Vector2 mousePos = window.getInput().getMousePosition();
 		int mouseX = (int) mousePos.getX();
 		int mouseY = (int) mousePos.getY();
 		if (boxXStart - 2*r < mouseX && mouseX < boxXStart + boxWidth + 2*r &&

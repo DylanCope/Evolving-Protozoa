@@ -1,14 +1,8 @@
 package protoevo.core;
 
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-import protoevo.biology.MeatCell;
-import protoevo.biology.PlantCell;
-import protoevo.biology.Protozoan;
 import com.github.javafaker.Faker;
 import protoevo.env.Tank;
 import protoevo.utils.FileIO;
-import protoevo.utils.REPL;
 import protoevo.utils.Utils;
 
 import java.io.*;
@@ -300,8 +294,8 @@ public class Simulation
 			timeDilation = 2f;
 		else if (timeDilation <= 2f)
 			timeDilation = 5f;
-		else if (timeDilation <= 5f)
-			timeDilation = 10f;
+//		else if (timeDilation <= 5f)
+//			timeDilation = 10f;
 		else
 			timeDilation = 1f;
 	}

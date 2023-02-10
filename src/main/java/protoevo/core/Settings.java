@@ -6,6 +6,9 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 public final class Settings {
 
@@ -107,9 +110,9 @@ public final class Settings {
     public static final boolean enableChannelFormingBinding = true;
     public static final boolean enableSignalRelayBinding = false;
 
-    public static final int maxPlants = getInstance().max_plants;
-    public static final int maxProtozoa = getInstance().max_protozoa;
-    public static final int maxMeat = getInstance().max_meat;
+    public static int maxPlants = getInstance().max_plants;
+    public static int maxProtozoa = getInstance().max_protozoa;
+    public static int maxMeat = getInstance().max_meat;
 
     public static final float plantEnergyDensity = getInstance().plant_energy_density;
     public static final float meatEnergyDensity = getInstance().meat_energy_density;
@@ -194,4 +197,27 @@ public final class Settings {
 
     public static final boolean showFPS = false;
     public static final boolean antiAliasing = true;
+
+
+    public static Boolean setMaxPlants(Float maxPlants) {
+        Settings.maxPlants = maxPlants.intValue();
+        return true;
+    }
+
+    public static Boolean setMaxProtozoa(Float maxProtozoa) {
+        Settings.maxProtozoa = maxProtozoa.intValue();
+        return true;
+    }
+
+    public static Boolean setMaxMeat(Float maxMeat) {
+        Settings.maxMeat = maxMeat.intValue();
+        return true;
+    }
+
+    public static final Map<String, Function<Float, Boolean>> paramsMap = new HashMap<>();
+    static {
+        paramsMap.put("max_plants", Settings::setMaxPlants);
+        paramsMap.put("max_protozoa", Settings::setMaxProtozoa);
+        paramsMap.put("max_meat", Settings::setMaxMeat);
+    }
 }

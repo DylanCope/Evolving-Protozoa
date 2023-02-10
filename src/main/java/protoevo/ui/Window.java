@@ -1,5 +1,9 @@
 package protoevo.ui;
 
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
+import protoevo.core.Settings;
+import protoevo.core.Simulation;
 import protoevo.ui.components.Input;
 import protoevo.utils.Vector2;
 
@@ -8,6 +12,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferStrategy;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 public class Window extends Canvas implements Runnable, ActionListener
 {
@@ -18,24 +25,62 @@ public class Window extends Canvas implements Runnable, ActionListener
 	private Input input;
 	private Canvas renderer;
 	private Controller controller;
-	private int width, height;
+	private final int width, height;
 
 	private final Timer timer = new Timer(1000 / 60, this);
+
+	public static class WindowConfig {
+
+		public int window_width;
+		public int window_height;
+		public boolean fullscreen;
+
+		public static String configPath = "config/window_config.yaml";
+
+		public static WindowConfig loadConfigYAML() {
+			InputStream inputStream;
+			try {
+				inputStream = new FileInputStream(configPath);
+			} catch (FileNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+			Yaml yaml = new Yaml(new Constructor(WindowConfig.class));
+			return yaml.load(inputStream);
+		}
+
+		public static WindowConfig instance = null;
+
+		public static WindowConfig getConfig() {
+			if (instance == null) {
+				instance = loadConfigYAML();
+			}
+			return instance;
+		}
+	}
 	
 	public Window(String title)
 	{
-		Dimension d = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-		width = (int) d.getWidth();
-		height = (int) d.getHeight();
+		WindowConfig config = WindowConfig.getConfig();
+
+		if (config.fullscreen) {
+			Dimension d = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+			width = (int) d.getWidth();
+			height = (int) d.getHeight();
+		} else {
+			width = config.window_width;
+			height = config.window_height;
+		}
 		input = new Input();
 
 		frame = new JFrame(title);
 		frame.setPreferredSize(new Dimension(width, height));
 		frame.setMaximumSize(new Dimension(width, height));
 		frame.setMinimumSize(new Dimension(width, height));
-		
-		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		frame.setUndecorated(true);
+
+		if (config.fullscreen) {
+			frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+			frame.setUndecorated(true);
+		}
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
@@ -72,9 +117,6 @@ public class Window extends Canvas implements Runnable, ActionListener
 
 		input = new Input();
 
-//		renderer = new SimulationRenderer(simulation, this);
-//
-//		controller = new SimulationController(input, simulation, renderer);
 		this.renderer = renderer;
 		this.controller = controller;
 

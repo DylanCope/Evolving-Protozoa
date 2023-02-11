@@ -29,14 +29,14 @@ If you don't know how to install it, then hopefully [this tutorial](https://java
 Start by downloading the latest version from the [Releases page on GitHub](https://github.com/DylanCope/Evolving-Protozoa/releases).
 The program will be downloaded as a ZIP file, so unzip it and locate the `Evolving-Protozoa.jar` file. You should
 also see a `run.bat`, a `saves` folder, and a `config` folder. If you are on Windows, you can launch the simulation by
-double-clicking the `run.bat`, otherwise, you can manually run the jar file from the terminal using the command in the `run.bat`.
-
-If you wish to reload a simulation, open the commandline in the folder with the `run.bat` and run `.\run.bat simulation-name`, where
-"simulation-name" corresponds to the name of a save folder in the `saves` directory.
+double-clicking the `run.bat`, otherwise, you can manually run the jar file from the terminal using the command in the `run.bat`. 
+You should be met with a launch screen where you can reload a previous save or start a new one. 
 
 **Accessing Simulation Data:** The simulation records a lot of data as it runs, and makes back-ups of the tank at various stages. 
 In the save's folder you can find CSV files containing the genomes of each protozoan, and overall statistics from the simulation polled
 at different moments in time.
+
+**Configuring the Simulation:** There are various parameters that can be changed by editing the `config/default_settings.yaml` file before creating a new simulation. For an existing save, you can change the parameters by editing the `settings.yaml` file in the folder corresponding to the save. These changes will not take effect until you close and reload the simulation.  
 
 #### Controls
 

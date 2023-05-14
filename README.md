@@ -38,6 +38,8 @@ at different moments in time.
 
 **Configuring the Simulation:** There are various parameters that can be changed by editing the `config/default_settings.yaml` file before creating a new simulation. For an existing save, you can change the parameters by editing the `settings.yaml` file in the folder corresponding to the save. These changes will not take effect until you close and reload the simulation.  
 
+**Linux:** The project is developed and tested on Windows, but a user has created a [build of the software on the Arch Linux Repository](https://aur.archlinux.org/packages/evolving-protozoa). _Note:_ This is not maintained by the original developer. It may be out-of-date or untested.
+
 #### Controls
 
 Once you have the simulation running, there are a few controls that you might want to
